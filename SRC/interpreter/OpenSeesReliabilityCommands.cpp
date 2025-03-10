@@ -250,8 +250,8 @@ int OPS_performanceFunction() {
     }
 
     // Get tag
-    int numData = 1;
-    if (OPS_GetIntInput(&numData, &tag) < 0) {
+    int numdata = 1;
+    if (OPS_GetIntInput(&numdata, &tag) < 0) {
         opserr << "ERROR: invalid tag for performanceFunction: tag \n";
         return -1;
     }
@@ -270,7 +270,7 @@ int OPS_performanceFunction() {
         }
         theReliabilityDomain->setTagOfActiveLimitStateFunction(tag);
         double g = theEvaluator->evaluateExpression();
-        if (OPS_SetDoubleOutput(&numData, &g, true) < 0) {
+        if (OPS_SetDoubleOutput(&numdata, &g, true) < 0) {
             opserr << "ERROR: performanceFunction - failed to set double "
                       "output\n";
             return -1;
@@ -312,9 +312,9 @@ int OPS_gradPerformanceFunction() {
     }
 
     // Get tags
-    int numData = 2;
+    int numdata = 2;
     int tags[2];
-    if (OPS_GetIntInput(&numData, &tags[0]) < 0) {
+    if (OPS_GetIntInput(&numdata, &tags[0]) < 0) {
         opserr << "ERROR: invalid tag for gradPerformanceFunction: lsfTag "
                   "rvTag \n";
         return -1;
@@ -367,8 +367,8 @@ int OPS_filter() {
     return -1;
   }
 
-  int numData = 1;
-  if (OPS_GetIntInput(&numData, &tag) < 0) {
+  int numdata = 1;
+  if (OPS_GetIntInput(&numdata, &tag) < 0) {
     opserr << "ERROR: invalid tag for filter command" << endln;
     return -1;
   }
@@ -379,11 +379,11 @@ int OPS_filter() {
       strcmp(type,"standardVelocity") == 0 ||
       strcmp(type,"standardAcceleration") == 0) {
 
-    if (OPS_GetDoubleInput(&numData, &period_Tn) < 0) {
+    if (OPS_GetDoubleInput(&numdata, &period_Tn) < 0) {
       opserr << "ERROR: invalid period for filter" << endln;
       return -1;
     }
-    if (OPS_GetDoubleInput(&numData, &damping) < 0) {
+    if (OPS_GetDoubleInput(&numdata, &damping) < 0) {
       opserr << "ERROR: invalid damping for filter" << endln;
       return -1;
     }
@@ -430,8 +430,8 @@ int OPS_spectrum() {
     return -1;
   }
 
-  int numData = 1;
-  if (OPS_GetIntInput(&numData, &tag) < 0) {
+  int numdata = 1;
+  if (OPS_GetIntInput(&numdata, &tag) < 0) {
     opserr << "ERROR: invalid tag for spectrum command" << endln;
     return -1;
   }
@@ -443,8 +443,8 @@ int OPS_spectrum() {
       return -1;
     }
     double data[5];
-    numData = 5;
-    if (OPS_GetDoubleInput(&numData,data) < 0) {
+    numdata = 5;
+    if (OPS_GetDoubleInput(&numdata,data) < 0) {
       opserr << "ERROR: invalid double data for spectrum with tag " << tag << endln;
       return -1;
     }
@@ -457,8 +457,8 @@ int OPS_spectrum() {
       return -1;
     }
     double data[3];
-    numData = 3;
-    if (OPS_GetDoubleInput(&numData,data) < 0) {
+    numdata = 3;
+    if (OPS_GetDoubleInput(&numdata,data) < 0) {
       opserr << "ERROR: invalid double data for spectrum with tag " << tag << endln;
       return -1;
     }
@@ -478,15 +478,15 @@ int OPS_spectrum() {
     int numPoints = numArgs / 2;
     Vector frequencies(numPoints);
     Vector amplitudes(numPoints);
-    numData = 1;
+    numdata = 1;
     for (int i = 0; i < numPoints; i++) {
       double data;
-      if (OPS_GetDoubleInput(&numData,&data) < 0) {
+      if (OPS_GetDoubleInput(&numdata,&data) < 0) {
 	opserr << "ERROR: invalid double data for spectrum with tag " << tag << endln;
 	return -1;
       }
       frequencies(i) = data;
-      if (OPS_GetDoubleInput(&numData,&data) < 0) {
+      if (OPS_GetDoubleInput(&numdata,&data) < 0) {
 	opserr << "ERROR: invalid double data for spectrum with tag " << tag << endln;
 	return -1;
       }
@@ -528,8 +528,8 @@ int OPS_modulatingFunction() {
     return -1;
   }
 
-  int numData = 1;
-  if (OPS_GetIntInput(&numData, &tag) < 0) {
+  int numdata = 1;
+  if (OPS_GetIntInput(&numdata, &tag) < 0) {
     opserr << "ERROR: invalid tag for modulatingFunction command" << endln;
     return -1;
   }
@@ -546,7 +546,7 @@ int OPS_modulatingFunction() {
     
     int filterTag;
     double abc[3];
-    if (OPS_GetIntInput(&numData, &filterTag) < 0) {
+    if (OPS_GetIntInput(&numdata, &filterTag) < 0) {
       opserr << "ERROR: invalid filter tag for modulating function" << endln;
       return -1;
     }
@@ -558,8 +558,8 @@ int OPS_modulatingFunction() {
       return -1;
     }
     
-    numData = 3;
-    if (OPS_GetDoubleInput(&numData, abc) < 0) {
+    numdata = 3;
+    if (OPS_GetDoubleInput(&numdata, abc) < 0) {
       opserr << "ERROR: invalid double data for modulating function" << endln;
       return -1;
     }    
@@ -576,7 +576,7 @@ int OPS_modulatingFunction() {
     
     int filterTag;
     double amplitude;
-    if (OPS_GetIntInput(&numData, &filterTag) < 0) {
+    if (OPS_GetIntInput(&numdata, &filterTag) < 0) {
       opserr << "ERROR: invalid filter tag for modulating function" << endln;
       return -1;
     }
@@ -588,8 +588,8 @@ int OPS_modulatingFunction() {
       return -1;
     }
     
-    numData = 1;
-    if (OPS_GetDoubleInput(&numData, &amplitude) < 0) {
+    numdata = 1;
+    if (OPS_GetDoubleInput(&numdata, &amplitude) < 0) {
       opserr << "ERROR: invalid amplitude for modulating function" << endln;
       return -1;
     }    
@@ -605,7 +605,7 @@ int OPS_modulatingFunction() {
     
     int filterTag;
     double ddata[5];
-    if (OPS_GetIntInput(&numData, &filterTag) < 0) {
+    if (OPS_GetIntInput(&numdata, &filterTag) < 0) {
       opserr << "ERROR: invalid filter tag for modulating function" << endln;
       return -1;
     }
@@ -617,8 +617,8 @@ int OPS_modulatingFunction() {
       return -1;
     }
     
-    numData = 5;
-    if (OPS_GetDoubleInput(&numData, ddata) < 0) {
+    numdata = 5;
+    if (OPS_GetDoubleInput(&numdata, ddata) < 0) {
       opserr << "ERROR: invalid double data for modulating function" << endln;
       return -1;
     }    
@@ -636,7 +636,7 @@ int OPS_modulatingFunction() {
     
     int filterTag;
     double ddata[2];
-    if (OPS_GetIntInput(&numData, &filterTag) < 0) {
+    if (OPS_GetIntInput(&numdata, &filterTag) < 0) {
       opserr << "ERROR: invalid filter tag for modulating function" << endln;
       return -1;
     }
@@ -648,8 +648,8 @@ int OPS_modulatingFunction() {
       return -1;
     }
     
-    numData = 2;
-    if (OPS_GetDoubleInput(&numData, ddata) < 0) {
+    numdata = 2;
+    if (OPS_GetDoubleInput(&numdata, ddata) < 0) {
       opserr << "ERROR: invalid double data for modulating function" << endln;
       return -1;
     }    
@@ -699,8 +699,8 @@ int OPS_randomVariable() {
     }
 
     // GET TAG NUMBER
-    int numData = 1;
-    if (OPS_GetIntInput(&numData, &tag) < 0) {
+    int numdata = 1;
+    if (OPS_GetIntInput(&numdata, &tag) < 0) {
         opserr << "ERROR: invalid input: tag \n";
         return -1;
     }
@@ -741,7 +741,7 @@ int OPS_randomVariable() {
                 opserr << "for random variable: " << tag << "\n";
                 return -1;
             }
-            if (OPS_GetDoubleInput(&numData, &mean) < 0) {
+            if (OPS_GetDoubleInput(&numdata, &mean) < 0) {
                 opserr << "WARNING invalid mean\n";
                 opserr << " for random variable: " << tag << "\n";
                 return -1;
@@ -755,7 +755,7 @@ int OPS_randomVariable() {
                 opserr << " for random variable: " << tag << "\n";
                 return -1;
             }
-            if (OPS_GetDoubleInput(&numData, &stdv) < 0) {
+            if (OPS_GetDoubleInput(&numdata, &stdv) < 0) {
                 opserr << "WARNING invalid standard deviation\n";
                 opserr << " for random variable: " << tag << "\n";
                 return -1;
@@ -770,7 +770,7 @@ int OPS_randomVariable() {
                 opserr << " for random variable: " << tag << "\n";
                 return -1;
             }
-            if (OPS_GetDoubleInput(&numData, &startPt) < 0) {
+            if (OPS_GetDoubleInput(&numdata, &startPt) < 0) {
                 opserr << "WARNING invalid starting point\n";
                 opserr << " for random variable: " << tag << "\n";
                 return -1;
@@ -788,7 +788,7 @@ int OPS_randomVariable() {
             }
 
             while (true) {
-                if (OPS_GetDoubleInput(&numData, &param) < 0) {
+                if (OPS_GetDoubleInput(&numdata, &param) < 0) {
                     OPS_ResetCurrentInputArg(-1);
                     break;
                 }
@@ -1775,10 +1775,10 @@ int OPS_reliabilityConvergenceCheck() {
     // optional arguments
     while (OPS_GetNumRemainingInputArgs() > 0) {
         const char *arg = OPS_GetString();
-        int numData = 1;
+        int numdata = 1;
         if (strcmp(arg, "-e1") == 0 &&
             OPS_GetNumRemainingInputArgs() > 0) {
-            if (OPS_GetDoubleInput(&numData, &e1) < 0) {
+            if (OPS_GetDoubleInput(&numdata, &e1) < 0) {
                 opserr << "ERROR: unable to read -e1 value for "
                           "reliability convergence check"
                        << endln;
@@ -1787,7 +1787,7 @@ int OPS_reliabilityConvergenceCheck() {
         }
         if (strcmp(arg, "-e2") == 0 &&
             OPS_GetNumRemainingInputArgs() > 0) {
-            if (OPS_GetDoubleInput(&numData, &e2) < 0) {
+            if (OPS_GetDoubleInput(&numdata, &e2) < 0) {
                 opserr << "ERROR: unable to read -e2 value for "
                           "reliability convergence check"
                        << endln;
@@ -1796,7 +1796,7 @@ int OPS_reliabilityConvergenceCheck() {
         }
         if (strcmp(arg, "-scaleValue") == 0 &&
             OPS_GetNumRemainingInputArgs() > 0) {
-            if (OPS_GetDoubleInput(&numData, &scaleValue) < 0) {
+            if (OPS_GetDoubleInput(&numdata, &scaleValue) < 0) {
                 opserr << "ERROR: unable to read -scaleValue value for "
                           "reliability convergence check"
                        << endln;
@@ -1805,7 +1805,7 @@ int OPS_reliabilityConvergenceCheck() {
         }
         if (strcmp(arg, "-print") == 0 &&
             OPS_GetNumRemainingInputArgs() > 0) {
-            if (OPS_GetIntInput(&numData, &print) < 0) {
+            if (OPS_GetIntInput(&numdata, &print) < 0) {
                 opserr << "ERROR: unable to read -print value for "
                           "reliability convergence check"
                        << endln;
@@ -1858,10 +1858,10 @@ int OPS_searchDirection() {
         double delta = 1.0;
         while (OPS_GetNumRemainingInputArgs() > 0) {
             const char *arg = OPS_GetString();
-            int numData = 1;
+            int numdata = 1;
             if (strcmp(arg, "-gamma") == 0 &&
                 OPS_GetNumRemainingInputArgs() > 0) {
-                if (OPS_GetDoubleInput(&numData, &gamma) < 0) {
+                if (OPS_GetDoubleInput(&numdata, &gamma) < 0) {
                     opserr << "ERROR: unable to read -gamma value for "
                               "PolakHe search direction"
                            << endln;
@@ -1869,7 +1869,7 @@ int OPS_searchDirection() {
                 }
             } else if (strcmp(arg, "-delta") == 0 &&
                        OPS_GetNumRemainingInputArgs() > 0) {
-                if (OPS_GetDoubleInput(&numData, &delta) < 0) {
+                if (OPS_GetDoubleInput(&numdata, &delta) < 0) {
                     opserr << "ERROR: unable to read -delta value for "
                               "PolakHe search direction"
                            << endln;
@@ -1935,11 +1935,11 @@ int OPS_searchDirection() {
 
         while (OPS_GetNumRemainingInputArgs() > 0) {
             const char *arg = OPS_GetString();
-            int numData = 1;
+            int numdata = 1;
 
             if (strcmp(arg, "-c_bar") == 0 &&
                 OPS_GetNumRemainingInputArgs() > 0) {
-                if (OPS_GetDoubleInput(&numData, &c_bar) < 0) {
+                if (OPS_GetDoubleInput(&numdata, &c_bar) < 0) {
                     opserr << "ERROR: invalid input: c_bar for SQP "
                               "algorithm\n";
                     return -1;
@@ -1947,7 +1947,7 @@ int OPS_searchDirection() {
 
             } else if (strcmp(arg, "-e_bar") == 0 &&
                        OPS_GetNumRemainingInputArgs() > 0) {
-                if (OPS_GetDoubleInput(&numData, &e_bar) < 0) {
+                if (OPS_GetDoubleInput(&numdata, &e_bar) < 0) {
                     opserr << "ERROR: invalid input: e_bar for SQP "
                               "algorithm\n";
                     return -1;
@@ -1998,10 +1998,10 @@ int OPS_meritFunctionCheck() {
 
         while (OPS_GetNumRemainingInputArgs() > 0) {
             const char *arg = OPS_GetString();
-            int numData = 1;
+            int numdata = 1;
             if (strcmp(arg, "-multi") == 0 &&
                 OPS_GetNumRemainingInputArgs() > 0) {
-                if (OPS_GetDoubleInput(&numData, &multi) < 0) {
+                if (OPS_GetDoubleInput(&numdata, &multi) < 0) {
                     opserr << "ERROR: unable to read -multi value for "
                               "AdkZhang merit function check"
                            << endln;
@@ -2009,7 +2009,7 @@ int OPS_meritFunctionCheck() {
                 }
             } else if (strcmp(arg, "-add") == 0 &&
                        OPS_GetNumRemainingInputArgs() > 0) {
-                if (OPS_GetDoubleInput(&numData, &add) < 0) {
+                if (OPS_GetDoubleInput(&numdata, &add) < 0) {
                     opserr << "ERROR: unable to read -add value for "
                               "AdkZhang merit function check"
                            << endln;
@@ -2017,7 +2017,7 @@ int OPS_meritFunctionCheck() {
                 }
             } else if (strcmp(arg, "-factor") == 0 &&
                        OPS_GetNumRemainingInputArgs() > 0) {
-                if (OPS_GetDoubleInput(&numData, &factor) < 0) {
+                if (OPS_GetDoubleInput(&numdata, &factor) < 0) {
                     opserr << "ERROR: unable to read -factor value for "
                               "AdkZhang merit function check"
                            << endln;
@@ -2052,10 +2052,10 @@ int OPS_meritFunctionCheck() {
         double factor = 0.5;
         while (OPS_GetNumRemainingInputArgs() > 0) {
             const char *arg = OPS_GetString();
-            int numData = 1;
+            int numdata = 1;
             if (strcmp(arg, "-factor") == 0 &&
                 OPS_GetNumRemainingInputArgs() > 0) {
-                if (OPS_GetDoubleInput(&numData, &factor) < 0) {
+                if (OPS_GetDoubleInput(&numdata, &factor) < 0) {
                     opserr << "ERROR: invalid input: factor \n";
                     return -1;
                 }
@@ -2082,10 +2082,10 @@ int OPS_meritFunctionCheck() {
         double factor = 0.5;
         while (OPS_GetNumRemainingInputArgs() > 0) {
             const char *arg = OPS_GetString();
-            int numData = 1;
+            int numdata = 1;
             if (strcmp(arg, "-factor") == 0 &&
                 OPS_GetNumRemainingInputArgs() > 0) {
-                if (OPS_GetDoubleInput(&numData, &factor) < 0) {
+                if (OPS_GetDoubleInput(&numdata, &factor) < 0) {
                     opserr << "ERROR: invalid input: factor \n";
                     return -1;
                 }
@@ -2137,10 +2137,10 @@ int OPS_stepSizeRule() {
         int printFlag = 0;
         while (OPS_GetNumRemainingInputArgs() > 0) {
             const char *arg = OPS_GetString();
-            int numData = 1;
+            int numdata = 1;
             if (strcmp(arg, "-print") == 0 &&
                 OPS_GetNumRemainingInputArgs() > 0) {
-                if (OPS_GetIntInput(&numData, &printFlag) < 0) {
+                if (OPS_GetIntInput(&numdata, &printFlag) < 0) {
                     opserr << "ERROR: unable to read -print value for "
                               "Armijo step size rule"
                            << endln;
@@ -2149,7 +2149,7 @@ int OPS_stepSizeRule() {
             }
             if (strcmp(arg, "-maxNum") == 0 &&
                 OPS_GetNumRemainingInputArgs() > 0) {
-                if (OPS_GetIntInput(&numData, &maxNumReductions) < 0) {
+                if (OPS_GetIntInput(&numdata, &maxNumReductions) < 0) {
                     opserr << "ERROR: unable to read -maxNum value for "
                               "Armijo step size rule"
                            << endln;
@@ -2158,7 +2158,7 @@ int OPS_stepSizeRule() {
             }
             if (strcmp(arg, "-base") == 0 &&
                 OPS_GetNumRemainingInputArgs() > 0) {
-                if (OPS_GetDoubleInput(&numData, &base) < 0) {
+                if (OPS_GetDoubleInput(&numdata, &base) < 0) {
                     opserr << "ERROR: unable to read -base value for "
                               "Armijo step size rule"
                            << endln;
@@ -2167,13 +2167,13 @@ int OPS_stepSizeRule() {
             }
             if (strcmp(arg, "-initial") == 0 &&
                 OPS_GetNumRemainingInputArgs() > 1) {
-                if (OPS_GetDoubleInput(&numData, &b0) < 0) {
+                if (OPS_GetDoubleInput(&numdata, &b0) < 0) {
                     opserr << "ERROR: unable to read -initial b0 value "
                               "for Armijo step size rule"
                            << endln;
                     return -1;
                 }
-                if (OPS_GetIntInput(&numData, &numberOfShortSteps) < 0) {
+                if (OPS_GetIntInput(&numdata, &numberOfShortSteps) < 0) {
                     opserr << "ERROR: unable to read -initial "
                               "numberOfShortSteps value for Armijo step "
                               "size rule"
@@ -2183,20 +2183,20 @@ int OPS_stepSizeRule() {
             }
             if (strcmp(arg, "-sphere") == 0 &&
                 OPS_GetNumRemainingInputArgs() > 2) {
-                if (OPS_GetDoubleInput(&numData, &radius) < 0) {
+                if (OPS_GetDoubleInput(&numdata, &radius) < 0) {
                     opserr << "ERROR: unable to read -sphere radius value "
                               "for Armijo step size rule"
                            << endln;
                     return -1;
                 }
-                if (OPS_GetDoubleInput(&numData, &surfaceDistance) < 0) {
+                if (OPS_GetDoubleInput(&numdata, &surfaceDistance) < 0) {
                     opserr
                         << "ERROR: unable to read -sphere surfaceDistance "
                            "value for Armijo step size rule"
                         << endln;
                     return -1;
                 }
-                if (OPS_GetDoubleInput(&numData, &evolution) < 0) {
+                if (OPS_GetDoubleInput(&numdata, &evolution) < 0) {
                     opserr << "ERROR: unable to read -sphere evolution "
                               "value for Armijo step size rule"
                            << endln;
@@ -2240,10 +2240,10 @@ int OPS_stepSizeRule() {
         double stepSize = 1.0;
         while (OPS_GetNumRemainingInputArgs() > 0) {
             const char *arg = OPS_GetString();
-            int numData = 1;
+            int numdata = 1;
             if (strcmp(arg, "-stepSize") == 0 &&
                 OPS_GetNumRemainingInputArgs() > 0) {
-                if (OPS_GetDoubleInput(&numData, &stepSize) < 0) {
+                if (OPS_GetDoubleInput(&numdata, &stepSize) < 0) {
                     opserr << "ERROR: unable to read -stepSize value for "
                               "Fixed step size rule"
                            << endln;
@@ -2284,10 +2284,10 @@ int OPS_rootFinding() {
     RootFinding *theFinding = 0;
     while (OPS_GetNumRemainingInputArgs() > 0) {
         const char *arg = OPS_GetString();
-        int numData = 1;
+        int numdata = 1;
         if (strcmp(arg, "-maxIter") == 0 &&
             OPS_GetNumRemainingInputArgs() > 0) {
-            if (OPS_GetIntInput(&numData, &maxIter) < 0) {
+            if (OPS_GetIntInput(&numdata, &maxIter) < 0) {
                 opserr << "ERROR: unable to read -maxIter value for "
                        << type << " root finding" << endln;
                 return -1;
@@ -2295,7 +2295,7 @@ int OPS_rootFinding() {
         }
         if (strcmp(arg, "-tol") == 0 &&
             OPS_GetNumRemainingInputArgs() > 0) {
-            if (OPS_GetDoubleInput(&numData, &tol) < 0) {
+            if (OPS_GetDoubleInput(&numdata, &tol) < 0) {
                 opserr << "ERROR: unable to read -tol value for " << type
                        << " root finding" << endln;
                 return -1;
@@ -2303,7 +2303,7 @@ int OPS_rootFinding() {
         }
         if (strcmp(arg, "-maxStepLength") == 0 &&
             OPS_GetNumRemainingInputArgs() > 0) {
-            if (OPS_GetDoubleInput(&numData, &maxStepLength) < 0) {
+            if (OPS_GetDoubleInput(&numdata, &maxStepLength) < 0) {
                 opserr << "ERROR: unable to read -maxStepLength value for "
                        << type << " root finding" << endln;
                 return -1;
@@ -2498,13 +2498,13 @@ int OPS_findDesignPoint() {
     }
 
     // GET INPUT PARAMETER (string) AND CREATE THE OBJECT
-    int numData = 1;
+    int numdata = 1;
     while (OPS_GetNumRemainingInputArgs() > 0) {
         const char *subtype = OPS_GetString();
 
         if (strcmp(subtype, "-maxNumIter") == 0 &&
             OPS_GetNumRemainingInputArgs() > 0) {
-            if (OPS_GetIntInput(&numData, &maxNumIter) < 0) {
+            if (OPS_GetIntInput(&numdata, &maxNumIter) < 0) {
                 opserr << "ERROR: invalid input: maxNumIter \n";
                 return -1;
             }
@@ -2658,10 +2658,10 @@ int OPS_gradientEvaluator() {
         // bool doGradientCheck = false;
         while (OPS_GetNumRemainingInputArgs() > 0) {
             const char *arg = OPS_GetString();
-            int numData = 1;
+            int numdata = 1;
             if (strcmp(arg, "-pert") == 0 &&
                 OPS_GetNumRemainingInputArgs() > 0) {
-                if (OPS_GetDoubleInput(&numData, &perturbationFactor) <
+                if (OPS_GetDoubleInput(&numdata, &perturbationFactor) <
                     0) {
                     opserr << "ERROR: unable to read -pert value for "
                            << type << " gradient evaluator" << endln;
@@ -2747,10 +2747,10 @@ int OPS_probabilityTransformation() {
     int print = 0;
     while (OPS_GetNumRemainingInputArgs() > 0) {
         const char *arg = OPS_GetString();
-        int numData = 1;
+        int numdata = 1;
         if (strcmp(arg, "-print") == 0 &&
             OPS_GetNumRemainingInputArgs() > 0) {
-            if (OPS_GetIntInput(&numData, &print) < 0) {
+            if (OPS_GetIntInput(&numdata, &print) < 0) {
                 opserr << "ERROR: unable to read -print value for "
                           "probability transformation"
                        << endln;
@@ -2969,8 +2969,8 @@ int OPS_runFORMAnalysis() {
     if (OPS_GetNumRemainingInputArgs() > 1) {
         const char *type = OPS_GetString();
         if (strcmp(type, "-relSens") == 0) {
-            int numData = 1;
-            if (OPS_GetIntInput(&numData, &relSensTag) < 0) {
+            int numdata = 1;
+            if (OPS_GetIntInput(&numdata, &relSensTag) < 0) {
                 opserr << "ERROR: invalid input: relSensTag \n";
                 return -1;
             }
@@ -3178,8 +3178,8 @@ int OPS_runImportanceSamplingAnalysis() {
             }
         } else if (strcmp(type, "-variance") == 0) {
             // GET INPUT PARAMETER (double)
-            int numData = 1;
-            if (OPS_GetDoubleInput(&numData, &samplingVariance) < 0) {
+            int numdata = 1;
+            if (OPS_GetDoubleInput(&numdata, &samplingVariance) < 0) {
                 opserr << "ERROR: invalid input: samplingVariance \n";
                 return -1;
             }
@@ -3189,24 +3189,24 @@ int OPS_runImportanceSamplingAnalysis() {
                 return -1;
             }
         } else if (strcmp(type, "-maxNum") == 0) {
-            int numData = 1;
+            int numdata = 1;
             double data = 0.0;
-            if (OPS_GetDoubleInput(&numData, &data) < 0) {
+            if (OPS_GetDoubleInput(&numdata, &data) < 0) {
                 opserr << "ERROR: invalid input: maxNum \n";
                 return -1;
             }
             numberOfSimulations = long(data);
 
         } else if (strcmp(type, "-targetCOV") == 0) {
-            int numData = 1;
-            if (OPS_GetDoubleInput(&numData, &targetCOV) < 0) {
+            int numdata = 1;
+            if (OPS_GetDoubleInput(&numdata, &targetCOV) < 0) {
                 opserr << "ERROR: invalid input: targetCOV \n";
                 return -1;
             }
 
         } else if (strcmp(type, "-print") == 0) {
-            int numData = 1;
-            if (OPS_GetIntInput(&numData, &printFlag) < 0) {
+            int numdata = 1;
+            if (OPS_GetIntInput(&numdata, &printFlag) < 0) {
                 opserr << "ERROR: invalid input: printFlag \n";
                 return -1;
             }
@@ -3306,24 +3306,24 @@ int OPS_runMonteCarloAnalysis() {
         const char *type = OPS_GetString();
 
         if (strcmp(type, "-maxNum") == 0 || strcmp(type,"maxNum") == 0) {
-            int numData = 1;
+            int numdata = 1;
 	    double data = 0.0;
-            if (OPS_GetDoubleInput(&numData, &data) < 0) {
+            if (OPS_GetDoubleInput(&numdata, &data) < 0) {
                 opserr << "ERROR: invalid input: numberOfSimulations \n";
                 return -1;
             }
             numberOfSimulations = long(data);
 
         } else if (strcmp(type, "-seed") == 0) {
-            int numData = 1;
-            if (OPS_GetIntInput(&numData, &seed) < 0) {
+            int numdata = 1;
+            if (OPS_GetIntInput(&numdata, &seed) < 0) {
                 opserr << "ERROR: invalid input: seed \n";
                 return -1;
             }
 
         } else if (strcmp(type, "-print") == 0 || strcmp(type, "-printFlag") == 0) {
-            int numData = 1;
-            if (OPS_GetIntInput(&numData, &printFlag) < 0) {
+            int numdata = 1;
+            if (OPS_GetIntInput(&numdata, &printFlag) < 0) {
                 opserr << "ERROR: invalid input: printFlag \n";
                 return -1;
             }

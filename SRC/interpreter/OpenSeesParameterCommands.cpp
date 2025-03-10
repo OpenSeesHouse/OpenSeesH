@@ -26,6 +26,7 @@
 #include <Element.h>
 #include <ElementParameter.h>
 #include <ElementStateParameter.h>
+#include <MeshRegion.h>
 #include <LoadFactorParameter.h>
 #include <NodeResponseParameter.h>
 #include <OPS_Stream.h>
@@ -121,6 +122,7 @@ int OPS_Parameter() {
   // loop through all other parameters
   Node *node = 0;
   Element *element = 0;
+  MeshRegion *region = 0;
   LoadPattern *pattern = 0;
   RandomVariable *theRV = 0;
   DomainComponent *theObject = 0;
@@ -196,6 +198,29 @@ int OPS_Parameter() {
         return -1;
       }
       theObject = (DomainComponent *)element;
+
+    } else if (strcmp(type, "region") == 0) {
+      // region object
+      if (OPS_GetNumRemainingInputArgs() == 0) {
+        opserr << "WARNING: need region tag\n";
+        return -1;
+      }
+      if (theObject != 0) {
+        opserr << "WARNING: another object is already set\n";
+        return -1;
+      }
+      int tag;
+      if (OPS_GetIntInput(&num, &tag) < 0) {
+        opserr << "WARNING parameter -- invalid region tag\n";
+        return -1;
+      }
+
+      region = theDomain->getRegion(tag);
+      if (region == 0) {
+        opserr << "WARNING: region " << tag << " not exists\n";
+        return -1;
+      }
+      theObject = (DomainComponent *)region;
 
     } else if (strcmp(type, "randomVariable") == 0) {
 #ifdef _RELIABILITY
@@ -523,9 +548,9 @@ int OPS_getParamValue() {
   }
 
   int paramTag;
-  int numData = 1;
+  int numdata = 1;
 
-  if (OPS_GetIntInput(&numData, &paramTag) < 0) {
+  if (OPS_GetIntInput(&numdata, &paramTag) < 0) {
     opserr << "WARNING getParamValue -- could not read paramTag \n";
     return -1;
   }
@@ -538,7 +563,7 @@ int OPS_getParamValue() {
 
   double value = theParam->getValue();
 
-  if (OPS_SetDoubleOutput(&numData, &value, true) < 0) {
+  if (OPS_SetDoubleOutput(&numdata, &value, true) < 0) {
     opserr << "WARNING failed to set output\n";
     return -1;
   }
@@ -554,9 +579,9 @@ int OPS_setParameter() {
 
   const char *opt = OPS_GetString();
 
-  int numData = 1;
+  int numdata = 1;
   if (strcmp(opt, "-val") == 0) {
-    if (OPS_GetDoubleInput(&numData, &newValue) < 0) {
+    if (OPS_GetDoubleInput(&numdata, &newValue) < 0) {
       opserr << "WARNING: failed to get paramber value\n";
       return -1;
     }
@@ -577,7 +602,7 @@ int OPS_setParameter() {
 
     int eleTag;
     while (OPS_GetNumRemainingInputArgs() > 0) {
-      if (OPS_GetIntInput(&numData, &eleTag) < 0) {
+      if (OPS_GetIntInput(&numdata, &eleTag) < 0) {
         // back on arg
         OPS_ResetCurrentInputArg(-1);
         break;
@@ -604,12 +629,12 @@ int OPS_setParameter() {
     //
 
     int start, end;
-    if (OPS_GetIntInput(&numData, &start) < 0) {
+    if (OPS_GetIntInput(&numdata, &start) < 0) {
       opserr << "WARNING recorder Element -eleRange start? end? - invalid "
                 "start\n";
       return -1;
     }
-    if (OPS_GetIntInput(&numData, &end) < 0) {
+    if (OPS_GetIntInput(&numdata, &end) < 0) {
       opserr << "WARNING recorder Element -eleRange start? end? - invalid "
                 "end\n ";
       return -1;

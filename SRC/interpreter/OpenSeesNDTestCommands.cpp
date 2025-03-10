@@ -73,16 +73,16 @@ void* OPS_NDSetStrain()
     int tag = 0;
     double strains[6];
 
-    int numData = 1;
-    if (OPS_GetIntInput(&numData, &tag) < 0)
+    int numdata = 1;
+    if (OPS_GetIntInput(&numdata, &tag) < 0)
     {
         opserr << "OPS_NDSetStrain - got incorrect integer tag for material" << endln;
         return 0;
     }
 
 
-    numData = 6;
-    if (OPS_GetDoubleInput(&numData, strains) < 0) {
+    numdata = 6;
+    if (OPS_GetDoubleInput(&numdata, strains) < 0) {
         opserr << "OPS_NDSetStrain - need 6 components of floating-point strains" << endln;
         return 0;
     }
@@ -114,8 +114,8 @@ void* OPS_NDPrintStrain()
 {
     int tag = 0;
 
-    int numData = 1;
-    if (OPS_GetIntInput(&numData, &tag) < 0) return 0;
+    int numdata = 1;
+    if (OPS_GetIntInput(&numdata, &tag) < 0) return 0;
 
     NDMaterial* mat = OPS_getNDMaterial(tag);
 
@@ -134,8 +134,8 @@ void* OPS_NDPrintStress()
 {
     int tag = 0;
 
-    int numData = 1;
-    if (OPS_GetIntInput(&numData, &tag) < 0) return 0;
+    int numdata = 1;
+    if (OPS_GetIntInput(&numdata, &tag) < 0) return 0;
 
     NDMaterial* mat = OPS_getNDMaterial(tag);
 
@@ -156,8 +156,8 @@ void* OPS_NDGetStrain()
     int tag = 0;
     int size = 6;
 
-    int numData = 1;
-    if (OPS_GetIntInput(&numData, &tag) < 0) return 0;
+    int numdata = 1;
+    if (OPS_GetIntInput(&numdata, &tag) < 0) return 0;
 
     NDMaterial* mat = OPS_getNDMaterial(tag);
 
@@ -189,8 +189,8 @@ void* OPS_NDGetStress()
     int tag = 0;
     int size = 6;
 
-    int numData = 1;
-    if (OPS_GetIntInput(&numData, &tag) < 0)
+    int numdata = 1;
+    if (OPS_GetIntInput(&numdata, &tag) < 0)
     {
         return 0;
     }
@@ -221,8 +221,8 @@ void* OPS_NDGetResponse()
 {
     int tag = 0;
 
-    int numData = 1;
-    if (OPS_GetIntInput(&numData, &tag) < 0)
+    int numdata = 1;
+    if (OPS_GetIntInput(&numdata, &tag) < 0)
     {
         return 0;
     }
@@ -264,8 +264,8 @@ void* OPS_NDGetTangentStiffness()
     int tag = 0;
     int size = 36;
 
-    int numData = 1;
-    if (OPS_GetIntInput(&numData, &tag) < 0) return 0;
+    int numdata = 1;
+    if (OPS_GetIntInput(&numdata, &tag) < 0) return 0;
 
     NDMaterial* mat = OPS_getNDMaterial(tag);
 
@@ -303,8 +303,8 @@ void* OPS_NDCommitState()
     int size = 6;
     double stressdata[6] = {1 , 2 , 3, 4, 5, 6};
 
-    int numData = 1;
-    if (OPS_GetIntInput(&numData, &tag) < 0) return 0;
+    int numdata = 1;
+    if (OPS_GetIntInput(&numdata, &tag) < 0) return 0;
 
 
     NDMaterial* mat = OPS_getNDMaterial(tag);
@@ -331,12 +331,12 @@ void* OPS_NDUpdateIntegerParameter()
     int responseID = 0;
     int theNewIntegerParameterValue = 0;
 
-    int numData = 1;
-    if (OPS_GetIntInput(&numData, &tag) < 0) return 0;
+    int numdata = 1;
+    if (OPS_GetIntInput(&numdata, &tag) < 0) return 0;
     opserr << "tag = " << tag  << endln;
-    if (OPS_GetIntInput(&numData, &responseID) < 0) return 0;
+    if (OPS_GetIntInput(&numdata, &responseID) < 0) return 0;
     opserr << "responseID = " << responseID  << endln;
-    if (OPS_GetIntInput(&numData, &theNewIntegerParameterValue) < 0) return 0;
+    if (OPS_GetIntInput(&numdata, &theNewIntegerParameterValue) < 0) return 0;
     opserr << "theNewIntegerParameterValue = " << theNewIntegerParameterValue  << endln;
 
 
@@ -364,10 +364,10 @@ void* OPS_NDUpdateDoubleParameter()
     int responseID = 0;
     double theNewDoubleParameterValue = 0;
 
-    int numData = 1;
-    if (OPS_GetIntInput(&numData, &tag) < 0) return 0;
-    if (OPS_GetIntInput(&numData, &responseID) < 0) return 0;
-    if (OPS_GetDoubleInput(&numData, &theNewDoubleParameterValue) < 0) return 0;
+    int numdata = 1;
+    if (OPS_GetIntInput(&numdata, &tag) < 0) return 0;
+    if (OPS_GetIntInput(&numdata, &responseID) < 0) return 0;
+    if (OPS_GetDoubleInput(&numdata, &theNewDoubleParameterValue) < 0) return 0;
 
 
     NDMaterial* mat = OPS_getNDMaterial(tag);

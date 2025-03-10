@@ -264,7 +264,7 @@
 #define MAT_TAG_QbSandCPT 234
 #ifdef _CSS
 #define MAT_TAG_Steel05          228	//SAJalali
-#define MAT_TAG_IMKJ			229	//SAJalali
+#define MAT_TAG_SmoothIMK			229	//SAJalali
 #endif
 
 #define MAT_TAG_FedeasMaterial    1000

@@ -54,9 +54,8 @@
 #include <vector>
 #include <TriMesh.h>
 #include <TetMesh.h>
-#include <BackgroundMesh.h>
 #include <Damping.h>
-
+#include <BackgroundMesh.h>
 #ifdef _PARALLEL_INTERPRETERS
 #include <mpi.h>
 #include <metis.h>
@@ -77,8 +76,8 @@ int OPS_loadConst()
 	const char* opt = OPS_GetString();
 	if (strcmp(opt, "-time") == 0) {
 	    double newTime;
-	    int numData = 1;
-	    if (OPS_GetDoubleInput(&numData, &newTime) < 0) {
+	    int numdata = 1;
+	    if (OPS_GetDoubleInput(&numdata, &newTime) < 0) {
 		opserr<<"WARNING readingvalue - loadConst -time value\n";
 		return -1;
 	    }
@@ -126,8 +125,8 @@ int OPS_rayleighDamping() {
 
     // double alphaM, betaK, betaK0, betaKc;
     double data[4];
-    int numData = 4;
-    if (OPS_GetDoubleInput(&numData, data) < 0) {
+    int numdata = 4;
+    if (OPS_GetDoubleInput(&numdata, data) < 0) {
         opserr << "WARNING rayleigh alphaM? betaK? betaK0? betaKc? - "
                   "could not read ? \n";
         return -1;
@@ -147,9 +146,9 @@ int OPS_rayleighDamping() {
             opserr << "WARNING: valid options are -ele or -node\n";
             return -1;
         }
-        numData = OPS_GetNumRemainingInputArgs();
-        std::vector<int> tags(numData);
-        if (OPS_GetIntInput(&numData, &tags[0]) < 0) {
+        numdata = OPS_GetNumRemainingInputArgs();
+        std::vector<int> tags(numdata);
+        if (OPS_GetIntInput(&numdata, &tags[0]) < 0) {
             opserr << "WARNING: failed to get element tags\n";
             return -1;
         }
@@ -194,8 +193,8 @@ int OPS_setCreep()
     if (theDomain == 0) return -1;
 
     int newFlag;
-    int numData = 1;
-    if (OPS_GetIntInput(&numData, &newFlag) < 0) {
+    int numdata = 1;
+    if (OPS_GetIntInput(&numdata, &newFlag) < 0) {
 	opserr << "WARNING reading creep value - setCreep value? \n";
 	return -1;
     } else {
@@ -215,8 +214,8 @@ int OPS_setTime()
     if (theDomain == 0) return -1;
 
     double newTime;
-    int numData = 1;
-    if (OPS_GetDoubleInput(&numData, &newTime) < 0) {
+    int numdata = 1;
+    if (OPS_GetDoubleInput(&numdata, &newTime) < 0) {
 	opserr << "WARNING reading time value - time pseudoTime? \n";
 	return -1;
     } else {
@@ -245,8 +244,8 @@ int OPS_removeObject()
 	    return -1;
 	}
 
-	int numData = 1;
-	if (OPS_GetIntInput(&numData, &tag) < 0) {
+	int numdata = 1;
+	if (OPS_GetIntInput(&numdata, &tag) < 0) {
 	    opserr << "WARNING remove element tag? failed to read tag\n ";
 	    return -1;
 	}
@@ -288,8 +287,8 @@ int OPS_removeObject()
 	    return -1;
 	}
 
-	int numData = 1;
-	if (OPS_GetIntInput(&numData, &tag) < 0) {
+	int numdata = 1;
+	if (OPS_GetIntInput(&numdata, &tag) < 0) {
 	    opserr << "WARNING remove loadPattern tag? failed to read tag\n ";
 	    return -1;
 	}
@@ -306,8 +305,8 @@ int OPS_removeObject()
 	    return -1;
 	}
 
-	int numData = 1;
-	if (OPS_GetIntInput(&numData, &tag) < 0) {
+	int numdata = 1;
+	if (OPS_GetIntInput(&numdata, &tag) < 0) {
 	    opserr << "WARNING remove parameter tag? failed to read tag\n ";
 	    return -1;
 	}
@@ -322,8 +321,8 @@ int OPS_removeObject()
 	    opserr << "WARNING want - remove node nodeTag?\n";
 	    return -1;
 	}
-	int numData = 1;
-	if (OPS_GetIntInput(&numData, &tag) < 0) {
+	int numdata = 1;
+	if (OPS_GetIntInput(&numdata, &tag) < 0) {
 	    opserr << "WARNING remove node tag? failed to read tag\n";
 	    return -1;
 	}
@@ -347,8 +346,8 @@ int OPS_removeObject()
 	    opserr << "WARNING want - remove recorder recorderTag?\n";
 	    return -1;
 	}
-	int numData = 1;
-	if (OPS_GetIntInput(&numData, &tag) < 0) {
+	int numdata = 1;
+	if (OPS_GetIntInput(&numdata, &tag) < 0) {
 	    opserr << "WARNING remove recorder tag? failed to read tag\n";
 	    return -1;
 	}
@@ -360,8 +359,8 @@ int OPS_removeObject()
 	    opserr << "WARNING want - remove timeSeries $tag\n";
 	    return -1;
 	}
-	int numData = 1;
-	if (OPS_GetIntInput(&numData, &tag) < 0) {
+	int numdata = 1;
+	if (OPS_GetIntInput(&numdata, &tag) < 0) {
 	    opserr << "WARNING remove timeSeries tag? failed to read tag\n";
 	    return -1;
 	}
@@ -375,8 +374,8 @@ int OPS_removeObject()
 	    return -1;
 	}
 	if (OPS_GetNumRemainingInputArgs() == 1) {
-	    int numData = 1;
-	    if (OPS_GetIntInput(&numData, &tag) < 0) {
+	    int numdata = 1;
+	    if (OPS_GetIntInput(&numdata, &tag) < 0) {
 		opserr << "WARNING remove sp tag? failed to read tag\n";
 		return -1;
 	    }
@@ -389,9 +388,9 @@ int OPS_removeObject()
 
 	    // nodeTag, dofTag patternTag
 	    int tags[3] = {0,0,-1};
-	    int numData = OPS_GetNumRemainingInputArgs();
-	    if (numData > 3) numData = 3;
-	    if (OPS_GetIntInput(&numData, tags) < 0) {
+	    int numdata = OPS_GetNumRemainingInputArgs();
+	    if (numdata > 3) numdata = 3;
+	    if (OPS_GetIntInput(&numdata, tags) < 0) {
 		opserr << "WARNING remove sp tag? failed to read tags\n";
 		return -1;
 	    }
@@ -411,8 +410,8 @@ int OPS_removeObject()
 	}
 	int nodTag = 0;
 	if (OPS_GetNumRemainingInputArgs() == 1) {
-	    int numData = 1;
-	    if (OPS_GetIntInput(&numData, &nodTag) < 0) {
+	    int numdata = 1;
+	    if (OPS_GetIntInput(&numdata, &nodTag) < 0) {
 		opserr << "WARNING remove mp tag? failed to read tag\n";
 		return -1;
 	    }
@@ -423,8 +422,8 @@ int OPS_removeObject()
 	if (OPS_GetNumRemainingInputArgs() > 1) {
 	    const char* type = OPS_GetString();
 	    if (strcmp(type,"-tag") == 0) {
-		int numData = 1;
-		if (OPS_GetIntInput(&numData, &nodTag) < 0) {
+		int numdata = 1;
+		if (OPS_GetIntInput(&numdata, &nodTag) < 0) {
 		    opserr << "WARNING remove mp -tag mpTag? failed to read mpTag\n";
 		    return -1;
 		}
@@ -450,8 +449,8 @@ int OPS_addNodalMass()
     }
 
     int nodeTag;
-    int numData = 1;
-    if (OPS_GetIntInput(&numData, &nodeTag) < 0) {
+    int numdata = 1;
+    if (OPS_GetIntInput(&numdata, &nodeTag) < 0) {
 	opserr << "WARNING invalid nodeTag\n";
 	return -1;
     }
@@ -465,7 +464,7 @@ int OPS_addNodalMass()
 	    break;
 	}
 
-	if (OPS_GetDoubleInput(&numData, &theMass) < 0) {
+	if (OPS_GetDoubleInput(&numdata, &theMass) < 0) {
 	    opserr << "WARNING invalid mass value\n";
 	    return -1;
 	}
@@ -501,9 +500,9 @@ int OPS_setNodeDisp()
     int dof = -1;
     double value = 0.0;
     bool commit = false;
-    int numData = 1;
+    int numdata = 1;
 
-    if (OPS_GetIntInput(&numData, &tag) < 0) {
+    if (OPS_GetIntInput(&numdata, &tag) < 0) {
         opserr << "WARNING setNodeDisp nodeTag? dof? - could not read nodeTag? \n";
         return -1;
     }
@@ -517,12 +516,12 @@ int OPS_setNodeDisp()
         return -1;
     }
 
-    if (OPS_GetIntInput(&numData, &dof) < 0) {
+    if (OPS_GetIntInput(&numdata, &dof) < 0) {
         opserr << "WARNING setNodeDisp nodeTag? dof? value?- could not read dof? \n";
         return -1;
     }
 
-    if (OPS_GetDoubleInput(&numData, &value) < 0) {
+    if (OPS_GetDoubleInput(&numdata, &value) < 0) {
         opserr << "WARNING setNodeDisp nodeTag? dof? value?- could not read dof? \n";
         return -1;
     }
@@ -560,9 +559,9 @@ int OPS_setNodeTemperature()
 
     int tag;
     double value = 0.0;
-    int numData = 1;
+    int numdata = 1;
 
-    if (OPS_GetIntInput(&numData, &tag) < 0) {
+    if (OPS_GetIntInput(&numdata, &tag) < 0) {
         opserr << "WARNING setNodeTemperature could not read tag? \n";
         return -1;
     }
@@ -580,7 +579,7 @@ int OPS_setNodeTemperature()
         return -1;
     }
 
-    if (OPS_GetDoubleInput(&numData, &value) < 0) {
+    if (OPS_GetDoubleInput(&numdata, &value) < 0) {
         opserr << "WARNING setNodeTemperature could not read "
                   "temperature? \n";
         return -1;
@@ -599,9 +598,9 @@ int OPS_getNodeTemperature() {
     }
 
     int tag;
-    int numData = 1;
+    int numdata = 1;
 
-    if (OPS_GetIntInput(&numData, &tag) < 0) {
+    if (OPS_GetIntInput(&numdata, &tag) < 0) {
         opserr << "WARNING getNodeTemperature could not read tag? \n";
         return -1;
     }
@@ -620,7 +619,7 @@ int OPS_getNodeTemperature() {
     }
 
     double value = theNode->getTemp();
-    if (OPS_SetDoubleOutput(&numData, &value, true) < 0) {
+    if (OPS_SetDoubleOutput(&numdata, &value, true) < 0) {
         opserr << "WARNING: failed to set nodal temperature\n";
         return -1;
     }
@@ -640,9 +639,9 @@ int OPS_setNodeVel()
     int dof = -1;
     double value = 0.0;
     bool commit = false;
-    int numData = 1;
+    int numdata = 1;
 
-    if (OPS_GetIntInput(&numData, &tag) < 0) {
+    if (OPS_GetIntInput(&numdata, &tag) < 0) {
         opserr << "WARNING setNodeVel nodeTag? dof? - could not read nodeTag? \n";
         return -1;
     }
@@ -656,12 +655,12 @@ int OPS_setNodeVel()
         return -1;
     }
 
-    if (OPS_GetIntInput(&numData, &dof) < 0) {
+    if (OPS_GetIntInput(&numdata, &dof) < 0) {
         opserr << "WARNING setNodeVel nodeTag? dof? value?- could not read dof? \n";
         return -1;
     }
 
-    if (OPS_GetDoubleInput(&numData, &value) < 0) {
+    if (OPS_GetDoubleInput(&numdata, &value) < 0) {
         opserr << "WARNING setNodeVel nodeTag? dof? value?- could not read dof? \n";
         return -1;
     }
@@ -700,9 +699,9 @@ int OPS_setNodeAccel()
     int dof = -1;
     double value = 0.0;
     bool commit = false;
-    int numData = 1;
+    int numdata = 1;
 
-    if (OPS_GetIntInput(&numData, &tag) < 0) {
+    if (OPS_GetIntInput(&numdata, &tag) < 0) {
         opserr << "WARNING setNodeAccel nodeTag? dof? - could not read nodeTag? \n";
         return -1;
     }
@@ -716,12 +715,12 @@ int OPS_setNodeAccel()
         return -1;
     }
 
-    if (OPS_GetIntInput(&numData, &dof) < 0) {
+    if (OPS_GetIntInput(&numdata, &dof) < 0) {
         opserr << "WARNING setNodeAccel nodeTag? dof? value?- could not read dof? \n";
         return -1;
     }
 
-    if (OPS_GetDoubleInput(&numData, &value) < 0) {
+    if (OPS_GetDoubleInput(&numdata, &value) < 0) {
         opserr << "WARNING setNodeAccel nodeTag? dof? value?- could not read dof? \n";
         return -1;
     }
@@ -755,15 +754,15 @@ int OPS_setElementRayleighDampingFactors()
 	return -1;
     }
     int eleTag;
-    int numData = 1;
-    if (OPS_GetIntInput(&numData, &eleTag) < 0) {
+    int numdata = 1;
+    if (OPS_GetIntInput(&numdata, &eleTag) < 0) {
 	opserr << "WARNING rayleigh alphaM? betaK? betaK0? betaKc? - could not read eleTag? \n";
 	return -1;
     }
 
-    numData = 4;
+    numdata = 4;
     double data[4];
-    if (OPS_GetDoubleInput(&numData, data) < 0) {
+    if (OPS_GetDoubleInput(&numdata, data) < 0) {
 	opserr << "WARNING rayleigh alphaM? betaK? betaK0? betaKc? - could not read double inputs? \n";
 	return -1;
     }
@@ -805,8 +804,8 @@ int OPS_MeshRegion()
 	return -1;
     }
 
-    int numData = 1;
-    if (OPS_GetIntInput(&numData, &tag) < 0) {
+    int numdata = 1;
+    if (OPS_GetIntInput(&numdata, &tag) < 0) {
 	opserr << "WARNING region tag? .. - invalid tag " << endln;
 	return -1;
     }
@@ -833,7 +832,7 @@ int OPS_MeshRegion()
 	    }
 	    int eleTag;
 	    while (OPS_GetNumRemainingInputArgs() > 0) {
-		if (OPS_GetIntInput(&numData, &eleTag) < 0) {
+		if (OPS_GetIntInput(&numdata, &eleTag) < 0) {
 		    // back one arg
 		    OPS_ResetCurrentInputArg(-1);
 		    break;
@@ -859,11 +858,11 @@ int OPS_MeshRegion()
 	    //
 
 	    int start, end;
-	    if (OPS_GetIntInput(&numData, &start) < 0) {
+	    if (OPS_GetIntInput(&numdata, &start) < 0) {
 		opserr << "WARNING region tag? -eleRange start? end? - invalid start " << endln;
 		return -1;
 	    }
-	    if (OPS_GetIntInput(&numData, &end) < 0) {
+	    if (OPS_GetIntInput(&numdata, &end) < 0) {
 		opserr << "WARNING region tag? -eleRange start? end? - invalid end " << endln;
 		return -1;
 	    }
@@ -900,7 +899,7 @@ int OPS_MeshRegion()
 
 	    int nodTag;
 	    while (OPS_GetNumRemainingInputArgs() > 0) {
-		if (OPS_GetIntInput(&numData, &nodTag) < 0) {
+		if (OPS_GetIntInput(&numdata, &nodTag) < 0) {
 		    // back one arg
 		    OPS_ResetCurrentInputArg(-1);
 		    break;
@@ -923,11 +922,11 @@ int OPS_MeshRegion()
 
 	    // read in start and end ele tags
 	    int start, end;
-	    if (OPS_GetIntInput(&numData, &start) < 0) {
+	    if (OPS_GetIntInput(&numdata, &start) < 0) {
 		opserr << "WARNING region tag? -nodeRange start? end? - invalid start " << endln;
 		return -1;
 	    }
-	    if (OPS_GetIntInput(&numData, &end) < 0) {
+	    if (OPS_GetIntInput(&numdata, &end) < 0) {
 		opserr << "WARNING region tag? -nodeRange start? end? - invalid end " << endln;
 		return -1;
 	    }
@@ -958,19 +957,19 @@ int OPS_MeshRegion()
 	    }
 
 	    // read in rayleigh damping factors
-	    if (OPS_GetDoubleInput(&numData, &alphaM) < 0) {
+	    if (OPS_GetDoubleInput(&numdata, &alphaM) < 0) {
 		opserr << "WARNING region tag? .. -rayleigh aM bK bK0 - invalid aM " << endln;
 		return -1;
 	    }
-	    if (OPS_GetDoubleInput(&numData, &betaK) < 0) {
+	    if (OPS_GetDoubleInput(&numdata, &betaK) < 0) {
 		opserr << "WARNING region tag? .. -rayleigh aM bK bK0 - invalid bK " << endln;
 		return -1;
 	    }
-	    if (OPS_GetDoubleInput(&numData, &betaK0) < 0) {
+	    if (OPS_GetDoubleInput(&numdata, &betaK0) < 0) {
 		opserr << "WARNING region tag? .. -rayleigh aM bK bK0 - invalid bK0 " << endln;
 		return -1;
 	    }
-	    if (OPS_GetDoubleInput(&numData, &betaKc) < 0) {
+	    if (OPS_GetDoubleInput(&numdata, &betaKc) < 0) {
 		opserr << "WARNING region tag? .. -rayleigh aM bK bK0 - invalid bKc " << endln;
 		return -1;
 	    }
@@ -985,7 +984,7 @@ int OPS_MeshRegion()
 		int dampingTag = 0;
 
 	    // read in damping factors
-	    if (OPS_GetIntInput(&numData, &dampingTag) < 0) {
+	    if (OPS_GetIntInput(&numdata, &dampingTag) < 0) {
 		opserr << "WARNING region tag? .. -damp dampingTag?" << endln;
 		return -1;
 	    }
@@ -1342,8 +1341,8 @@ int OPS_maxOpenFiles()
 	opserr << "WARNING want maxNumFiles\n";
 	return -1;
     }
-    int numData = 1;
-    if (OPS_GetIntInput(&numData, &maxOpenFiles) < 0) {
+    int numdata = 1;
+    if (OPS_GetIntInput(&numdata, &maxOpenFiles) < 0) {
 	return -1;
     }
 
@@ -1377,12 +1376,12 @@ int OPS_RigidLink()
     const char* type = OPS_GetString();
 
     int rNode, cNode;
-    int numData = 1;
-    if (OPS_GetIntInput(&numData, &rNode) < 0) {
+    int numdata = 1;
+    if (OPS_GetIntInput(&numdata, &rNode) < 0) {
 	opserr << "WARNING rigidLink linkType? rNode? cNode? - could not read rNode \n";
 	return -1;
     }
-    if (OPS_GetIntInput(&numData, &cNode) < 0) {
+    if (OPS_GetIntInput(&numdata, &cNode) < 0) {
 	opserr << "WARNING rigidLink linkType? rNode? cNode? - could not read CNode \n";
 	return -1;
     }
@@ -1411,14 +1410,14 @@ int OPS_RigidDiaphragm()
     if (theDomain == 0) return -1;
 
     int rNode, perpDirn;
-    int numData = 1;
+    int numdata = 1;
 
-    if (OPS_GetIntInput(&numData, &perpDirn) < 0) {
+    if (OPS_GetIntInput(&numdata, &perpDirn) < 0) {
 	opserr << "WARNING rigidLink perpDirn rNode cNodes - could not read perpDirn? \n";
 	return -1;
     }
 
-    if (OPS_GetIntInput(&numData, &rNode) < 0) {
+    if (OPS_GetIntInput(&numdata, &rNode) < 0) {
 	opserr << "WARNING rigidLink perpDirn rNode cNodes - could not read rNode \n";
 	return -1;
     }
@@ -1428,7 +1427,7 @@ int OPS_RigidDiaphragm()
     ID constrainedNodes(numConstrainedNodes);
     for (int i=0; i<numConstrainedNodes; i++) {
 	int cNode;
-	if (OPS_GetIntInput(&numData, &cNode) < 0) {
+	if (OPS_GetIntInput(&numdata, &cNode) < 0) {
 	    opserr << "WARNING rigidLink perpDirn rNode cNodes - could not read a cNode\n";
 	    return -1;
 	}
@@ -1451,9 +1450,9 @@ int OPS_addElementRayleigh()
     }
 
     int eleTag =0;
-    int numData = 1;
+    int numdata = 1;
 
-    if (OPS_GetIntInput(&numData, &eleTag) < 0) {
+    if (OPS_GetIntInput(&numdata, &eleTag) < 0) {
 	opserr << "WARNING: setElementRayleighFactors invalid eleTag: ";
 	opserr << " \n";
 	return -1;
@@ -1461,25 +1460,25 @@ int OPS_addElementRayleigh()
 
     double alphaM,betaK,betaKinit,betaKcomm;
 
-    if (OPS_GetDoubleInput(&numData, &alphaM) < 0) {
+    if (OPS_GetDoubleInput(&numdata, &alphaM) < 0) {
 	opserr << "WARNING : setElementRayleighFactors invalid ";
 	opserr << "alphaM: " << endln;
 	return -1;
     }
 
-    if (OPS_GetDoubleInput(&numData, &betaK) < 0) {
+    if (OPS_GetDoubleInput(&numdata, &betaK) < 0) {
 	opserr << "WARNING : setElementRayleighFactors invalid ";
 	opserr << "betaK: " << endln;
 	return -1;
     }
 
-    if (OPS_GetDoubleInput(&numData, &betaKinit) < 0) {
+    if (OPS_GetDoubleInput(&numdata, &betaKinit) < 0) {
 	opserr << "WARNING : setElementRayleighFactors invalid ";
 	opserr << "betaKinit: " << endln;
 	return -1;
     }
 
-    if (OPS_GetDoubleInput(&numData, &betaKcomm) < 0) {
+    if (OPS_GetDoubleInput(&numdata, &betaKcomm) < 0) {
 	opserr << "WARNING : setElementRayleighFactors invalid ";
 	opserr << "betaKcomm: " << endln;
 	return -1;
@@ -1561,8 +1560,8 @@ int OPS_remesh()
 {
     if (OPS_GetNumRemainingInputArgs() > 0) {
 	double alpha = -1.0;
-	int numData = 1;
-	if (OPS_GetDoubleInput(&numData,&alpha) < 0) {
+	int numdata = 1;
+	if (OPS_GetDoubleInput(&numdata,&alpha) < 0) {
 	    opserr << "WARNING: invalid alpha\n";
 	    return -1;
 	}
@@ -1582,11 +1581,11 @@ int OPS_remesh()
 	}
 
     } else {
-	BackgroundMesh& bgmesh = OPS_getBgMesh();
-	if (bgmesh.remesh() < 0) {
-	    opserr << "WARNING: failed to remesh background\n";
-	    return -1;
-	}
+        BackgroundMesh& bgmesh = OPS_getBgMesh();
+        if (bgmesh.remesh() < 0) {
+            opserr << "WARNING: failed to remesh background\n";
+            return -1;
+        }
     }
 
     return 0;
@@ -1915,9 +1914,9 @@ int OPS_getNumThreads()
 {
 #ifdef _OPENMP
     int num = omp_get_max_threads();
-    int numData = 1;
+    int numdata = 1;
 
-    if (OPS_SetIntOutput(&numData,&num,true) < 0) {
+    if (OPS_SetIntOutput(&numdata,&num,true) < 0) {
 	opserr << "WARNING: failed to set output -- getNumThreads\n";
 	return -1;
     }
@@ -1935,8 +1934,8 @@ int OPS_setNumThreads()
     }
     
     int num;
-    int numData = 1;
-    if (OPS_GetIntInput(&numData,&num) < 0) {
+    int numdata = 1;
+    if (OPS_GetIntInput(&numdata,&num) < 0) {
 	opserr << "WARNING: failed to set output -- getNumThreads\n";
 	return -1;
     }

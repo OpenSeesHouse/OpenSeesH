@@ -1684,8 +1684,8 @@ FEM_ObjectBrokerAllClasses::getNewUniaxialMaterial(int classTag)
 #ifdef _CSS
 	case MAT_TAG_Steel05:
 		return new Steel05(); // SAJalali
-	case MAT_TAG_IMKJ:
-		return new IMKJ(); // SAJalali
+	case MAT_TAG_SmoothIMK:
+		//return new SmoothIMK(); // SAJalali
 #endif // _CSS
 	case MAT_TAG_ElasticBilin:
 		return new ElasticBilin();

@@ -1558,13 +1558,14 @@
     <ClCompile Include="..\..\..\SRC\material\uniaxial\BucklingMaterial.cpp" />
     <ClCompile Include="..\..\..\SRC\material\uniaxial\BucklingStrut.cpp" />
     <ClCompile Include="..\..\..\SRC\material\uniaxial\ConfinedConcrete.cpp" />
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\IMKJ.cpp" />
     <ClCompile Include="..\..\..\SRC\material\uniaxial\ModelBuilderUniaxialMaterialEventHandler.cpp" />
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\Steel05.cpp" />
     <ClCompile Include="..\..\..\SRC\material\uniaxial\TzSandCPT.cpp">
       <Filter>uniaxial</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\uniaxial\QbSandCPT.cpp">
+      <Filter>uniaxial</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\SRC\material\uniaxial\Steel05.cpp">
       <Filter>uniaxial</Filter>
     </ClCompile>
   </ItemGroup>
@@ -2846,13 +2847,14 @@
     <ClInclude Include="..\..\..\SRC\material\section\ModelBuilderSectionEventHandler.h" />
     <ClInclude Include="..\..\..\SRC\material\uniaxial\BucklingMaterial.h" />
     <ClInclude Include="..\..\..\SRC\material\uniaxial\BucklingStrut.h" />
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\IMKJ.h" />
     <ClInclude Include="..\..\..\SRC\material\uniaxial\ModelBuilderUniaxialMaterialEventHandler.h" />
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\Steel05.h" />
     <ClInclude Include="..\..\..\SRC\material\uniaxial\TzSandCPT.h">
       <Filter>uniaxial</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\uniaxial\QbSandCPT.h">
+      <Filter>uniaxial</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\SRC\material\uniaxial\Steel05.h">
       <Filter>uniaxial</Filter>
     </ClInclude>
   </ItemGroup>

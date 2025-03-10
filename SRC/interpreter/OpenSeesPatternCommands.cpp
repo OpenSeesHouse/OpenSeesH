@@ -250,8 +250,8 @@ int OPS_ElementalLoad()
 	OPS_ResetCurrentInputArg(locEle+1);
 	while(OPS_GetNumRemainingInputArgs() > 0) {
 	    int tag;
-	    int numData = 1;
-	    if (OPS_GetIntInput(&numData, &tag) < 0) {
+	    int numdata = 1;
+	    if (OPS_GetIntInput(&numdata, &tag) < 0) {
 		break;
 	    }
 	    theEleTags.insert(tag);
@@ -261,8 +261,8 @@ int OPS_ElementalLoad()
 	OPS_ResetCurrentInputArg(locRange+1);
 	if (OPS_GetNumRemainingInputArgs() > 1) {
 	    int tags[2];
-	    int numData = 2;
-	    if (OPS_GetIntInput(&numData, tags) < 0) {
+	    int numdata = 2;
+	    if (OPS_GetIntInput(&numdata, tags) < 0) {
 		opserr<<"WARNING failed to read tag range\n";
 		return -1;
 	    }
@@ -284,22 +284,22 @@ int OPS_ElementalLoad()
 	if (ndm == 2) {
 	    // wta, waa, aL, bL, wtb, wab
         double data[6] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0};
-	    int numData = OPS_GetNumRemainingInputArgs();
-	    if (numData < 1) {
+	    int numdata = OPS_GetNumRemainingInputArgs();
+	    if (numdata < 1) {
 		opserr<<"WARNING eleLoad - beamUniform want Wya <Wxa> <aL> <bL> <Wyb> <Wxb>\n";
 		return -1;
 	    }
-	    if (numData > 6) numData = 6;
-	    if (OPS_GetDoubleInput(&numData, data) < 0) {
+	    if (numdata > 6) numdata = 6;
+	    if (OPS_GetDoubleInput(&numdata, data) < 0) {
 		opserr<<"WARNING eleLoad - invalid value for beamUniform\n";
 		return -1;
 	    }
 	    for (int i=0; i<theEleTags.Size(); i++) {
-		if (numData == 3 || numData == 4) {
+		if (numdata == 3 || numdata == 4) {
 		  data[4] = data[0];
 		  data[5] = data[1];
 		}
-		if (data[2] > 0.0 || data[3] < 1.0 || numData > 4)
+		if (data[2] > 0.0 || data[3] < 1.0 || numdata > 4)
 		    theLoad = new Beam2dPartialUniformLoad(eleLoadTag, data[0],data[4], data[1], data[5], data[2], data[3], theEleTags(i));
 		else
 		    theLoad = new Beam2dUniformLoad(eleLoadTag, data[0], data[1], theEleTags(i));
@@ -324,23 +324,23 @@ int OPS_ElementalLoad()
 	else if (ndm == 3) {
 		// wy, wz, wx, aL, bL, wyb, wzb, wxb,
 		double data[8] = { 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0 };
-		int numData = OPS_GetNumRemainingInputArgs();
-		if (numData < 2) {
+		int numdata = OPS_GetNumRemainingInputArgs();
+		if (numdata < 2) {
 			opserr << "WARNING eleLoad - beamUniform want Wy Wz <Wx>\n";
 			return -1;
 		}
-		if (numData > 8) numData = 8;
-		if (OPS_GetDoubleInput(&numData, data) < 0) {
+		if (numdata > 8) numdata = 8;
+		if (OPS_GetDoubleInput(&numdata, data) < 0) {
 			opserr << "WARNING eleLoad - invalid value for beamUniform\n";
 			return -1;
 		}
 		for (int i = 0; i < theEleTags.Size(); i++) {
-			if (numData == 4 || numData == 5) {
+			if (numdata == 4 || numdata == 5) {
 				data[5] = data[0];
 				data[6] = data[1];
 				data[7] = data[2];
 			}
-			if (numData > 3)
+			if (numdata > 3)
 				theLoad = new Beam3dPartialUniformLoad(eleLoadTag, data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7], theEleTags(i));
 			else
 			    theLoad = new Beam3dUniformLoad(eleLoadTag, data[0], data[1], data[2], theEleTags(i));
@@ -372,13 +372,13 @@ int OPS_ElementalLoad()
 	if (ndm == 2) {
 	    // P, x, N
 	    double data[3] = {0.0, 0.0, 0.0};
-	    int numData = OPS_GetNumRemainingInputArgs();
-	    if (numData < 2) {
+	    int numdata = OPS_GetNumRemainingInputArgs();
+	    if (numdata < 2) {
 		opserr<<"WARNING eleLoad - beamPoint want Py xL <Px>\n";
 		return -1;
 	    }
-	    if (numData > 3) numData = 3;
-	    if (OPS_GetDoubleInput(&numData, data) < 0) {
+	    if (numdata > 3) numdata = 3;
+	    if (OPS_GetDoubleInput(&numdata, data) < 0) {
 		opserr<<"WARNING eleLoad - invalid value for beamPoint\n";
 		return -1;
 	    }
@@ -418,13 +418,13 @@ int OPS_ElementalLoad()
 	else if (ndm == 3) {
 	    // Py, Pz, x, N
 	    double data[4] = {0.0, 0.0, 0.0, 0.0};
-	    int numData = OPS_GetNumRemainingInputArgs();
-	    if (numData < 3) {
+	    int numdata = OPS_GetNumRemainingInputArgs();
+	    if (numdata < 3) {
 		opserr<<"WARNING eleLoad - beamPoint want Py Pz xL <Px>\n";
 		return -1;
 	    }
-	    if (numData > 4) numData = 4;
-	    if (OPS_GetDoubleInput(&numData, data) < 0) {
+	    if (numdata > 4) numdata = 4;
+	    if (OPS_GetDoubleInput(&numdata, data) < 0) {
 		opserr<<"WARNING eleLoad - invalid value for beamPoint\n";
 		return -1;
 	    }
@@ -515,13 +515,13 @@ int OPS_ElementalLoad()
     else if ((strcmp(type,"-selfWeight") == 0) || (strcmp(type,"-SelfWeight") == 0)) {
 	// xf, yf, zf
 	double data[3] = {0.0, 0.0, 0.0};
-	int numData = OPS_GetNumRemainingInputArgs();
-	if (numData < 2) {
+	int numdata = OPS_GetNumRemainingInputArgs();
+	if (numdata < 2) {
 	    opserr<<"WARNING eleLoad - selfWeight want xf, yf, <zf>\n";
 	    return -1;
 	}
-	if (numData > 3) numData = 3;
-	if (OPS_GetDoubleInput(&numData, data) < 0) {
+	if (numdata > 3) numdata = 3;
+	if (OPS_GetDoubleInput(&numdata, data) < 0) {
 	    opserr<<"WARNING eleLoad - invalid value for SelfWeight\n";
 	    return -1;
 	}
@@ -554,14 +554,14 @@ int OPS_ElementalLoad()
 
 	// xf, yf, zf
 	double data[5] = {0.0, 0.0, 0.0, 0.0, 0.0};
-	int numData = OPS_GetNumRemainingInputArgs();
-	if (numData < 5) {
+	int numdata = OPS_GetNumRemainingInputArgs();
+	if (numdata < 5) {
 	    opserr<<"WARNING eleLoad - IGAFollowerLoad want xi?, eta?, f1?, f2?, f3?\n";
 	    return -1;
 	}
-    	opserr << "Read numData =  " << numData << "" << endln;
-	if (numData > 5) numData = 5;
-	if (OPS_GetDoubleInput(&numData, data) < 0) {
+    	opserr << "Read numdata =  " << numdata << "" << endln;
+	if (numdata > 5) numdata = 5;
+	if (OPS_GetDoubleInput(&numdata, data) < 0) {
 	    opserr<<"WARNING eleLoad - invalid value for IGAFollowerLoad\n";
 	    return -1;
 	}
@@ -604,11 +604,11 @@ int OPS_ElementalLoad()
 	    // t6, locY6, t7, locY7, t8, locY8, t9, locY9;
 	    // 9 temperature points are given,i.e. 8 layers are defined; Also the 9 corresponding vertical coordinate is given.
 	    // the temperature at each fiber is obtained by interpolating of temperatures at the nearby temperature points.
-	    int numData = OPS_GetNumRemainingInputArgs();
+	    int numdata = OPS_GetNumRemainingInputArgs();
 	    double data[18];
         double Temp[9]; double Loc[9];
-	    if (numData == 18) {
-		if (OPS_GetDoubleInput(&numData, data) < 0) {
+	    if (numdata == 18) {
+		if (OPS_GetDoubleInput(&numdata, data) < 0) {
 		    opserr << "WARNING eleLoad - invalid input\n";
 		    return -1;
 		}
@@ -619,8 +619,8 @@ int OPS_ElementalLoad()
 	    }
 
 	    // 5 temperatures are given, i.e. 4 layers are defined.
-	    else if (numData == 10){
-		if (OPS_GetDoubleInput(&numData, data) < 0) {
+	    else if (numdata == 10){
+		if (OPS_GetDoubleInput(&numdata, data) < 0) {
 		    opserr << "WARNING eleLoad - invalid input\n";
 		    return -1;
 		}
@@ -636,8 +636,8 @@ int OPS_ElementalLoad()
 	    // two temperature is given,
 	    //if the two temperatures are equal,i.e. uniform Temperature change in element
 	    //if the two temperatures are different,i.e. linear Temperature change in element
-	    else if (numData == 4){
-		if (OPS_GetDoubleInput(&numData, data) < 0) {
+	    else if (numdata == 4){
+		if (OPS_GetDoubleInput(&numdata, data) < 0) {
 		    opserr << "WARNING eleLoad - invalid input\n";
 		    return -1;
 		}
@@ -683,10 +683,10 @@ int OPS_ElementalLoad()
 	  double t1, locY1, t2, locY2, t3, locY3, t4, locY4, t5, locY5,
 	    t6, t7, locZ1, t8, t9, locZ2, t10, t11, locZ3, t12, t13, locZ4, t14, t15, locZ5;
 	  bool useGrid = false;
-	  int numData = OPS_GetNumRemainingInputArgs();
+	  int numdata = OPS_GetNumRemainingInputArgs();
 	  double data[35];
-	  if (numData == 25) {
-	    if (OPS_GetDoubleInput(&numData, data) < 0) {
+	  if (numdata == 25) {
+	    if (OPS_GetDoubleInput(&numdata, data) < 0) {
 	      opserr << "WARNING eleLoad - invalid input\n";
 	      return -1;
 	    }
@@ -702,15 +702,15 @@ int OPS_ElementalLoad()
 	    t12 = data[19]; t13 = data[20]; locZ4 = data[21];
 	    t14 = data[22]; t15 = data[23]; locZ5 = data[24];
 	  }
-	  else if (numData == 35) {
-		  if (OPS_GetDoubleInput(&numData, data) < 0) {
+	  else if (numdata == 35) {
+		  if (OPS_GetDoubleInput(&numdata, data) < 0) {
 			  opserr << "WARNING eleLoad - invalid input\n";
 			  return -1;
 		  }
 		  useGrid = true;
 	  }
-	  else if (numData == 4) {
-	    if (OPS_GetDoubleInput(&numData, data) < 0) {
+	  else if (numdata == 4) {
+	    if (OPS_GetDoubleInput(&numdata, data) < 0) {
 	      opserr << "WARNING eleLoad - invalid input\n";
 	      return -1;
 	    }
@@ -730,8 +730,8 @@ int OPS_ElementalLoad()
 	    t6 = t7 = t8 = t9 = t10 = 0;
 	    t11 = t12 = t13 = t14 = t15 = 0;	    
 	  }
-	  else if (numData == 8) {
-	    if (OPS_GetDoubleInput(&numData, data) < 0) {
+	  else if (numdata == 8) {
+	    if (OPS_GetDoubleInput(&numdata, data) < 0) {
 	      opserr << "WARNING eleLoad - invalid input\n";
 	      return -1;
 	    }
@@ -800,18 +800,18 @@ int OPS_ElementalLoad()
       // 9 temperature points are given,i.e. 8 layers are defined; Also the 9 corresponding vertical coordinate is given.
       // the temperature at each fiber is obtained by interpolating of temperatures at the nearby temperature points.
       
-      int numData = OPS_GetNumRemainingInputArgs();
+      int numdata = OPS_GetNumRemainingInputArgs();
       double data[18];
-      if (numData == 18) {
+      if (numdata == 18) {
 	opserr << "eleLoad -shellThermal -- not yet implemented for 9 data points (see Tcl implementation)" << endln;
 	return -1;
       }
-      if (numData == 10) {
+      if (numdata == 10) {
 	opserr << "eleLoad -shellThermal -- not yet implemented for 5 data points (see Tcl implementation)" << endln;
 	return -1;
       }
-      if (numData == 4) {
-	if (OPS_GetDoubleInput(&numData, data) < 0) {
+      if (numdata == 4) {
+	if (OPS_GetDoubleInput(&numdata, data) < 0) {
 	  opserr << "WARNING eleLoad - invalid input\n";
 	  return -1;
 	}
@@ -844,13 +844,13 @@ int OPS_ElementalLoad()
     else if (strcmp(type,"-beamTemp") == 0) {
 
 	if (ndm == 2) {
-	    int numData = OPS_GetNumRemainingInputArgs();
+	    int numdata = OPS_GetNumRemainingInputArgs();
 	    double data[4];
 	    // double temp1, temp2, temp3, temp4;
 
 	    // Four temps given, Temp change at top node 1, bottom node 1, top node 2, bottom node 2.
-	    if (numData == 4){
-		if (OPS_GetDoubleInput(&numData, data) < 0) {
+	    if (numdata == 4){
+		if (OPS_GetDoubleInput(&numdata, data) < 0) {
 		    opserr << "WARNING eleLoad - invalid input\n";
 		    return -1;
 		}
@@ -882,8 +882,8 @@ int OPS_ElementalLoad()
 
 	    }
 	    // Two temps given, temp change at top, temp at bottom of element
-	    else if (numData == 2) {
-		if (OPS_GetDoubleInput(&numData, data) < 0) {
+	    else if (numdata == 2) {
+		if (OPS_GetDoubleInput(&numdata, data) < 0) {
 		    opserr << "WARNING eleLoad - invalid input\n";
 		    return -1;
 		}
@@ -909,8 +909,8 @@ int OPS_ElementalLoad()
 		}
 	    }
 	    // One twmp change give, uniform temp change in element
-	    else if (numData == 1) {
-		if (OPS_GetDoubleInput(&numData, data) < 0) {
+	    else if (numdata == 1) {
+		if (OPS_GetDoubleInput(&numdata, data) < 0) {
 		    opserr << "WARNING eleLoad - invalid input\n";
 		    return -1;
 		}
@@ -1065,22 +1065,22 @@ int OPS_ImposedMotionSP()
 
     // get the nodeID, dofId and value of the constraint
     int nodeId, dofId, gMotionID;
-    int numData = 1;
+    int numdata = 1;
 
-    if (OPS_GetIntInput(&numData, &nodeId) < 0) {
+    if (OPS_GetIntInput(&numdata, &nodeId) < 0) {
 	opserr << "WARNING invalid nodeId: ";
 	opserr << " - imposedMotion nodeId dofID gMotionID\n";
 	return -1;
     }
 
-    if (OPS_GetIntInput(&numData, &dofId) < 0) {
+    if (OPS_GetIntInput(&numdata, &dofId) < 0) {
 	opserr << "WARNING invalid dofId: imposedMotion ";
 	opserr << nodeId << " dofID gMotionID\n";
 	return -1;
     }
     dofId--; // DECREMENT THE DOF VALUE BY 1 TO GO TO OUR C++ INDEXING
 
-    if (OPS_GetIntInput(&numData, &gMotionID) < 0) {
+    if (OPS_GetIntInput(&numdata, &gMotionID) < 0) {
 	opserr << "WARNING invalid gMotionID:  -  imposedMotion ";
 	opserr << nodeId << " dofID gMotionID\n";
 	return -1;
@@ -1162,8 +1162,8 @@ int OPS_groundMotion()
 	return -1;
     }
 
-    int numData = 1;
-    if (OPS_GetIntInput(&numData, &gMotionTag) < 0) {
+    int numdata = 1;
+    if (OPS_GetIntInput(&numdata, &gMotionTag) < 0) {
 	opserr << "WARNING invalid tag: groundMotion tag  type <args>\n";
 	return -1;
     }
@@ -1185,7 +1185,7 @@ int OPS_groundMotion()
 		(strcmp(flag,"-acceleration") == 0)) {
 
 		int tsTag;
-		if (OPS_GetIntInput(&numData, &tsTag) < 0) {
+		if (OPS_GetIntInput(&numdata, &tsTag) < 0) {
 		    opserr << "WARNING failed to get accel time series tag\n";
 		    return -1;
 		}
@@ -1203,7 +1203,7 @@ int OPS_groundMotion()
 		       (strcmp(flag,"-velocity") == 0)) {
 
 		int tsTag;
-		if (OPS_GetIntInput(&numData, &tsTag) < 0) {
+		if (OPS_GetIntInput(&numdata, &tsTag) < 0) {
 		    opserr << "WARNING failed to get accel time series tag\n";
 		    return -1;
 		}
@@ -1221,7 +1221,7 @@ int OPS_groundMotion()
 		       (strcmp(flag,"-displacement") == 0)) {
 
 		int tsTag;
-		if (OPS_GetIntInput(&numData, &tsTag) < 0) {
+		if (OPS_GetIntInput(&numdata, &tsTag) < 0) {
 		    opserr << "WARNING failed to get accel time series tag\n";
 		    return -1;
 		}
@@ -1249,7 +1249,7 @@ int OPS_groundMotion()
 		       (strcmp(flag,"-dtIntegrator") == 0) ||
 		       (strcmp(flag,"-deltaT") == 0)) {
 
-		if (OPS_GetDoubleInput(&numData, &dtInt) < 0) {
+		if (OPS_GetDoubleInput(&numdata, &dtInt) < 0) {
 		    opserr << "WARNING invalid dtInt: ";
 		    opserr << " - groundMotion tag Series -dtInt dt\n";
 		    return -1;
@@ -1259,7 +1259,7 @@ int OPS_groundMotion()
 	    } else if ((strcmp(flag,"-fact") == 0) ||
 		       (strcmp(flag,"-factor") == 0)) {
 
-		if (OPS_GetDoubleInput(&numData, &fact) < 0) {
+		if (OPS_GetDoubleInput(&numdata, &fact) < 0) {
 		    opserr << "WARNING invalid factor: ";
 		    opserr << " - groundMotion tag Series -fact factor\n";
 		    return -1;
@@ -1293,7 +1293,7 @@ int OPS_groundMotion()
 
 	for (int i=0; i<numMotions; i++) {
 	    int motionID;
-	    if (OPS_GetIntInput(&numData, &motionID) < 0) {
+	    if (OPS_GetIntInput(&numdata, &motionID) < 0) {
 		opserr << "WARNING invalid motion id\n";
 		return -1;
 	    }
@@ -1316,7 +1316,7 @@ int OPS_groundMotion()
 	Vector facts(numMotions);
 	for (int i=0; i<numMotions; i++) {
 	    double fact;
-	    if (OPS_GetDoubleInput(&numData, &fact) < 0) {
+	    if (OPS_GetDoubleInput(&numdata, &fact) < 0) {
 		opserr << "WARNING invalid fact\n";
 		return -1;
 	    }

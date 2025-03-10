@@ -904,7 +904,7 @@ HystereticMaterial::posEnvlpTangent(double strain)
   else if (strain <= rot3p || E3p > 0.0)
     return E3p;
   else
-    return E1p*1.0e-9;
+    return E1p*1.0e-6;
 }
 
 double

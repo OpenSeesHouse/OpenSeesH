@@ -275,9 +275,9 @@ OPS_updateMaterialStage()
     }
 
     int materialTag;
-    int numData = 1;
+    int numdata = 1;
 
-    if (OPS_GetIntInput(&numData, &materialTag) < 0) {
+    if (OPS_GetIntInput(&numdata, &materialTag) < 0) {
 	opserr << "WARNING MYSstage: invalid material tag\n";
 	return -1;
     }
@@ -289,7 +289,7 @@ OPS_updateMaterialStage()
     }
 
     int value;
-    int res = OPS_GetIntInput(&numData, &value);
+    int res = OPS_GetIntInput(&numdata, &value);
     if (res < 0) {
 	opserr << "WARNING updateMaterialStage: value must be integer\n";
 	return -1;
@@ -324,7 +324,7 @@ OPS_updateMaterialStage()
     if (OPS_GetNumRemainingInputArgs() > 1) {
 	const char* opt3 = OPS_GetString();
 	if (strcmp(opt3,"-parameter") == 0) {
-	    if (OPS_GetIntInput(&numData, &parTag) < 0) {
+	    if (OPS_GetIntInput(&numdata, &parTag) < 0) {
 		opserr << "WARNING updateMaterialStage: invalid parameter tag\n";
 		return -1;
 	    }

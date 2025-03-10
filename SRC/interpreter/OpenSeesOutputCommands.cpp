@@ -41,7 +41,7 @@ UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 
 #include <elementAPI.h>
 #include <Domain.h>
-#include <Node.h>
+//#include <Node.h>
 #include <NodeIter.h>
 #include <DOF_Group.h>
 #include <Matrix.h>
