@@ -34,11 +34,11 @@
 #include <ElasticIsotropicMaterial.h>
 #include <ElasticIsotropicPlaneStress2D.h>
 #include <ElasticIsotropicPlaneStrain2D.h>
-#include <ElasticIsotropicAxiSymm.h>
-#include <ElasticIsotropicThreeDimensional.h>
+//#include <ElasticIsotropicAxiSymm.h>
+//#include <ElasticIsotropicThreeDimensional.h>
 #include <ElasticIsotropicPlateFiber.h>
-#include <ElasticIsotropicBeamFiber.h>
-#include <ElasticIsotropicBeamFiber2d.h>
+//#include <ElasticIsotropicBeamFiber.h>
+//#include <ElasticIsotropicBeamFiber2d.h>
 
 #include <Channel.h>
 #include <Information.h>
@@ -129,17 +129,17 @@ ElasticIsotropicMaterial::getCopy (const char *type)
     return theModel;
   }
 
-  else if (strcmp(type,"AxiSymmetric2D") == 0 || strcmp(type,"AxiSymmetric") == 0) {
-    ElasticIsotropicAxiSymm *theModel;
-    theModel = new ElasticIsotropicAxiSymm(this->getTag(), E, v, rho);
-    return theModel;
-  }
+  //else if (strcmp(type,"AxiSymmetric2D") == 0 || strcmp(type,"AxiSymmetric") == 0) {
+  //  ElasticIsotropicAxiSymm *theModel;
+  //  theModel = new ElasticIsotropicAxiSymm(this->getTag(), E, v, rho);
+  //  return theModel;
+  //}
   
-  else if (strcmp(type,"ThreeDimensional") == 0 || strcmp(type,"3D") == 0) {
-    ElasticIsotropicThreeDimensional *theModel;
-    theModel = new ElasticIsotropicThreeDimensional (this->getTag(), E, v, rho);
-    return theModel;
-  }
+  //else if (strcmp(type,"ThreeDimensional") == 0 || strcmp(type,"3D") == 0) {
+  //  ElasticIsotropicThreeDimensional *theModel;
+  //  theModel = new ElasticIsotropicThreeDimensional (this->getTag(), E, v, rho);
+  //  return theModel;
+  //}
 
   else if (strcmp(type,"PlateFiber") == 0) {
     ElasticIsotropicPlateFiber *theModel;
@@ -147,17 +147,17 @@ ElasticIsotropicMaterial::getCopy (const char *type)
     return theModel;
   }
 
-  else if (strcmp(type,"BeamFiber") == 0) {
-    ElasticIsotropicBeamFiber *theModel;
-    theModel = new ElasticIsotropicBeamFiber(this->getTag(), E, v, rho);
-    return theModel;
-  }
+  //else if (strcmp(type,"BeamFiber") == 0) {
+  //  ElasticIsotropicBeamFiber *theModel;
+  //  theModel = new ElasticIsotropicBeamFiber(this->getTag(), E, v, rho);
+  //  return theModel;
+  //}
 
-  else if (strcmp(type,"BeamFiber2d") == 0) {
-    ElasticIsotropicBeamFiber2d *theModel;
-    theModel = new ElasticIsotropicBeamFiber2d(this->getTag(), E, v, rho);
-    return theModel;
-  }
+  //else if (strcmp(type,"BeamFiber2d") == 0) {
+  //  ElasticIsotropicBeamFiber2d *theModel;
+  //  theModel = new ElasticIsotropicBeamFiber2d(this->getTag(), E, v, rho);
+  //  return theModel;
+  //}
 
   // Handle other cases
   else

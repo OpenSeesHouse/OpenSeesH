@@ -66,7 +66,7 @@ class ElementRecorder: public Recorder
 
     ~ElementRecorder();
 
-#if _DLL
+#if _NET
 	OPS_Stream* getOutputHandler() {
 		return theOutputHandler;
 	}

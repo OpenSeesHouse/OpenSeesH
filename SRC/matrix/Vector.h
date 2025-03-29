@@ -73,7 +73,7 @@ class Vector
     int addVector(double factThis, const Vector &other, double factOther);
     int addMatrixVector(double factThis, const Matrix &m, const Vector &v, double factOther); 
     int addMatrixTransposeVector(double factThis, const Matrix &m, const Vector &v, double factOther);
-#if _DLL
+#if _NET
 	inline double* GetData() { return this->theData; }
 	void Print() {
 		opserr << "[";

@@ -30,7 +30,7 @@
 #define _CSS
 #endif // !_CSS
 
-#define OPS_VERSION "3.7.1-H"
+#define OPS_VERSION "3.7.2-H"
 
 
 #ifdef _WIN32

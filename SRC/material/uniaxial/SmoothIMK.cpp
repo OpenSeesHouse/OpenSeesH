@@ -31,6 +31,7 @@
 #include <Channel.h>
 #include <Information.h>
 #include <Parameter.h>
+#include <MaterialResponse.h>
 
 #include <elementAPI.h>
 #include <OPS_Globals.h>
@@ -59,15 +60,17 @@ OPS_SmoothIMK()
 
 	numData = OPS_GetNumRemainingInputArgs();
 
-	if (numData != 8 && numData != 11 && numData != 15 && numData != 16) {
+	if (numData < 20) {
 		opserr << "Invalid SmoothIMK #args for: " << tag << " see the syntax" << endln;
 		return 0;
 	}
 	//default parameters:
 	numData = 1;
-	double pf1, pd1, pf2, pd2, pf3, pd3;
-	double nf1, nd1, nf2, nd2, nf3, nd3;
-	double gama, c, r0, r1, r2, sigInit;
+	double pf1, pd1, pf2, pd2, pf3, pd3, pdu;
+	double nf1, nd1, nf2, nd2, nf3, nd3, ndu;
+	double gama, c, r0, r1, r2, sigInit = 0;
+	double pinchXPos = 0, pinchXNeg = 0, pinchYPos = 0, pinchYNeg = 0;
+	int numPinchInput = 0;
 	int rule;
 
 	if (OPS_GetDoubleInput(&numData, &pd1) != 0) {
@@ -94,6 +97,10 @@ OPS_SmoothIMK()
 		opserr << "SmoothIMK:: invalid pf3 for material : " << tag << endln;
 		return 0;
 	}
+	if (OPS_GetDoubleInput(&numData, &pdu) != 0) {
+		opserr << "SmoothIMK:: invalid pdu for material : " << tag << endln;
+		return 0;
+	}
 	if (OPS_GetDoubleInput(&numData, &nd1) != 0) {
 		opserr << "SmoothIMK:: invalid nd1 for material : " << tag << endln;
 		return 0;
@@ -116,6 +123,10 @@ OPS_SmoothIMK()
 	}
 	if (OPS_GetDoubleInput(&numData, &nf3) != 0) {
 		opserr << "SmoothIMK:: invalid nf3 for material : " << tag << endln;
+		return 0;
+	}
+	if (OPS_GetDoubleInput(&numData, &ndu) != 0) {
+		opserr << "SmoothIMK:: invalid ndu for material : " << tag << endln;
 		return 0;
 	}
 	if (OPS_GetDoubleInput(&numData, &gama) != 0) {
@@ -142,13 +153,43 @@ OPS_SmoothIMK()
 		opserr << "SmoothIMK:: invalid cyclicRule for material : " << tag << endln;
 		return 0;
 	}
-	if (OPS_GetDoubleInput(&numData, &sigInit) != 0) {
-		opserr << "SmoothIMK:: invalid sigInit for material : " << tag << endln;
+	if (rule < 1 || rule > 3)
+	{
+		opserr << "SmoothIMK::invalid cyclicRule for material : " << tag
+			<< "; can be 1,2 or 3 for bilinear, peak-oriented or piched rules, respectively" << endln;
 		return 0;
+	}
+	if (rule == 3)
+	{
+		numPinchInput = 4;
+		if (OPS_GetDoubleInput(&numData, &pinchXPos) != 0) {
+			opserr << "SmoothIMK:: invalid pinchXPos for material : " << tag << endln;
+			return 0;
+		}
+		if (OPS_GetDoubleInput(&numData, &pinchYPos) != 0) {
+			opserr << "SmoothIMK:: invalid pinchYPos for material : " << tag << endln;
+			return 0;
+		}
+		if (OPS_GetDoubleInput(&numData, &pinchXNeg) != 0) {
+			opserr << "SmoothIMK:: invalid pinchXNeg for material : " << tag << endln;
+			return 0;
+		}
+		if (OPS_GetDoubleInput(&numData, &pinchYNeg) != 0) {
+			opserr << "SmoothIMK:: invalid pinchYNeg for material : " << tag << endln;
+			return 0;
+		}
+	}
+	if (OPS_GetNumRemainingInputArgs() > 20 + numPinchInput)
+	{
+		if (OPS_GetDoubleInput(&numData, &sigInit) != 0) {
+			opserr << "SmoothIMK:: invalid sigInit for material : " << tag << endln;
+			return 0;
+		}
 	}
 
 	// Parsing was successful, allocate the material
-	theMaterial = new SmoothIMK(tag, pd1, pf1, pd2, pf2, pd3, pf3, nd1, nd2, nf1, nf2, nd3, nf3, gama, c, r0, r1, r2, rule, sigInit);
+	theMaterial = new SmoothIMK(tag, pd1, pf1, pd2, pf2, pd3, pf3, pdu, nd1, nf1, nd2, nf2, nd3, nf3, ndu, gama, c, r0, r1, r2, rule, pinchXPos, pinchYPos,
+		pinchXNeg, pinchYNeg, sigInit);
 
 
 	if (theMaterial == 0) {
@@ -159,17 +200,20 @@ OPS_SmoothIMK()
 	return theMaterial;
 }
 
-
 SmoothIMK::SmoothIMK(int tag,
 	double _pd1, double _pf1,
 	double _pd2, double _pf2,
 	double _pd3, double _pf3,
+	double _pdu,
 	double _nd1, double _nf1,
 	double _nd2, double _nf2,
 	double _nd3, double _nf3,
+	double _ndu,
 	double _gama, double _c,
 	double _r0, double _r1, double _r2,
 	int _cyclicRule,
+	double _pinchXPos, double _pinchYPos,
+	double _pinchXNeg, double _pinchYNeg,
 	double sigInit) :
 	UniaxialMaterial(tag, MAT_TAG_SmoothIMK),
 	pd1(_pd1), pf1(_pf1),
@@ -178,30 +222,15 @@ SmoothIMK::SmoothIMK(int tag,
 	nd1(_nd1), nf1(_nf1),
 	nd2(_nd2), nf2(_nf2),
 	nd3(_nd3), nf3(_nf3),
+	pdu(_pdu), ndu(_ndu),
 	c(_c), FailEnerg(_gama* pf1* pd1),
 	r0(_r0), r1(_r1), r2(_r2),
 	cyclicRule(_cyclicRule),
+	pinchXPos(_pinchXPos), pinchYPos(_pinchYPos),
+	pinchXNeg(_pinchXNeg), pinchYNeg(_pinchYNeg),
 	sigini(sigInit)
 {
-	EnergyP = 0;
-	eP = pf1 / pd1;
-	epsP = sigini / (pf1 / pd1);
-	sigP = sigini;
-	sig = 0.0;
-	eps = 0.0;
-	e = pf1 / pd1;
-
-	statP = 0;
-	epsmaxP = pd1;
-	epsminP = nd1;
-	epsplP = 0.0;
-	epss0P = 0.0;
-	sigs0P = 0.0;
-	epssrP = 0.0;
-	sigsrP = 0.0;
-	ExcurEnergy = 0;
-	FydP = pf1;
-	FydN = nf1;
+	revertToStart();
 }
 
 SmoothIMK::SmoothIMK(void) :
@@ -212,30 +241,13 @@ SmoothIMK::SmoothIMK(void) :
 	nd1(0), nf1(0),
 	nd2(0), nf2(0),
 	nd3(0), nf3(0),
+	pdu(0), ndu(0),
 	c(0), FailEnerg(0),
 	r0(0), r1(0), r2(0),
 	cyclicRule(1),
 	sigini(0)
 {
-	EnergyP = 0;
-	eP = 0;
-	epsP = 0;
-	sigP = 0;
-	sig = 0.0;
-	eps = 0.0;
-	e = 0;
-
-	statP = 0;
-	epsmaxP = 0;
-	epsminP = 0;
-	epsplP = 0.0;
-	epss0P = 0.0;
-	sigs0P = 0.0;
-	epssrP = 0.0;
-	sigsrP = 0.0;
-
-	ExcurEnergy = 0;
-	FydP = FydN = 0;
+	revertToStart();
 }
 
 SmoothIMK::~SmoothIMK(void)
@@ -247,201 +259,43 @@ UniaxialMaterial*
 SmoothIMK::getCopy(void)
 {
 	SmoothIMK* theCopy = new SmoothIMK(this->getTag(), pd1, pf1, pd2, pf2, pd3,
-		pf3, nd1, nd2, nf1, nf2, nd3, nf3, FailEnerg / pf1 / pd1, c, r0, r1, r2, cyclicRule, sigini);
-
+		pf3, pdu, nd1, nf1, nd2, nf2, nd3, nf3, ndu, FailEnerg / pf1 / pd1, c, r0, r1, r2, cyclicRule,
+		pinchXPos, pinchYPos, pinchXNeg, pinchYNeg, sigini);
+	theCopy->revertToStart();
 	return theCopy;
 }
 
 double
 SmoothIMK::getInitialTangent(void)
 {
-	return pf1/pd1;
+	return E0p;
 }
 
-int
-SmoothIMK::setTrialStrain(double trialStrain, double strainRate)
-{
-	double EshP = (pf2-pf1)/(pd2-pd1);
-	double EshN = (nf2-nf1)/(nd2-nd1);
-	double E0p = pf1 / pd1;
-	double E0n = nf1 / nd1;
-	eps = trialStrain + sigini > 0 ? sigini/ E0p : sigini/E0n;
-	const double deps = eps - epsP;
-	if (fabs(deps) < 1.e-20)
-		return 0;
-	double b2p = EshP/E0p;
-	double b2n = EshN/E0n;
-
-	epsmax = epsmaxP;
-	epsmin = epsminP;
-	epspl = epsplP;
-	epss0 = epss0P;
-	sigs0 = sigs0P;
-	epsr = epssrP;
-	sigr = sigsrP;
-	stat = statP;
-
-	if (stat == 0) {
-		epsmax = pd1;
-		epsmin = nd1;
-		if (deps < 0.0) {
-			stat = 2;
-			epss0 = epsmin;
-			sigs0 = FydN;
-			epspl = epsmin;
-		}
-		else
-		{
-			stat = 1;
-			epss0 = epsmax;
-			sigs0 = FydP;
-			epspl = epsmax;
-		}
-	}
-
-	if (stat == 2) {
-		if (deps > 0.0)
-		{
-			// in case of load reversal from negative to positive strain increment, 
-			// update the minimum previous strain, store the last load reversal 
-			// point (epspl) and calculate the stress and strain (sigs0 and epss0) at the 
-			// new intersection between elastic and strain hardening asymptote 
-			stat = 1;
-			epsr = epsP;
-			sigr = sigP;
-			if (epsP < epsmin)
-				epsmin = epsP;
-			const double d1 = (epsmax - epsmin) / (2.0 * pd1);
-			epss0 = (FydP - EshP * pd1 - sigr + E0p * epsr) / (E0p - EshP);
-			sigs0 = FydP  + EshP * (epss0 - pd1);
-			epspl = epsmax;
-		}
-		else if (eps < (nd2 + nd1) / 2)
-		{
-			epss0 = nd2;
-			sigs0 = FydN + EshN * (nd2 - nd1);
-			epsr = epsP;
-			sigr = sigP;
-			stat = 4;
-		}
-	}
-	else if (stat == 1) {
-		if (deps < 0.0)
-		{
-			stat = 2;
-			epsr = epsP;
-			sigr = sigP;
-			if (epsP > epsmax)
-				epsmax = epsP;
-
-			const double d1 = (epsmax - epsmin) / (2.0 * nd1);
-			epss0 = (FydN + EshN * nd1 - sigr + E0n * epsr) / (E0n - EshN);
-			sigs0 = FydN + EshN * (epss0 + nd1);
-			epspl = epsmin;
-		}
-		else if (eps > (pd1 + pd2) / 2)
-		{
-			epss0 = pd2;
-			sigs0 = FydP + EshP * (pd2 - pd1);
-			epsr = epsP;
-			sigr = sigP;
-			stat = 3;
-		}
-	}
-	if (stat == 4)
-	{
-		if (deps > 0.0)
-		{
-			stat = 1;
-			epsr = epsP;
-			sigr = sigP;
-			if (epsP < epsmin)
-				epsmin = epsP;
-			const double d1 = (epsmax - epsmin) / (2.0 * (a4 * epsy));
-			const double shft = 1.0 + a3 * pow(d1, 0.8);
-			epss0 = (FydP * shft - Esh * epsy * shft - sigr + E0 * epsr) / (E0 - Esh);
-			sigs0 = FydP * shft + Esh * (epss0 - epsy * shft);
-			epspl = epsmax;
-		}
-		else
-			b2 = pstcpEFac / b;
-
-	}
-	if (stat == 3)
-	{
-		if (deps < 0.0)
-		{
-			stat = 2;
-			epsr = epsP;
-			sigr = sigP;
-			if (epsP > epsmax)
-				epsmax = epsP;
-
-			const double d1 = (epsmax - epsmin) / (2.0 * (a2 * epsy));
-			const double shft = 1.0 + a1 * pow(d1, 0.8);
-			epss0 = (-FydN * shft + Esh * epsy * shft - sigr + E0 * epsr) / (E0 - Esh);
-			sigs0 = -FydN * shft + Esh * (epss0 + epsy * shft);
-			epspl = epsmin;
-		}
-		else
-			b2 = pstcpEFac / b;
-
-	}
-	if (stat == 5)
-	{
-		sig = resFac * Fy;
-		e = 1e-15 * E0;
-	}
-	else {
-
-		double R = R0;
-		// calculate current stress sig and tangent modulus E 
-		if (cR1 != 0.0 && cR2 != 0.0)
-		{
-			const double xi = fabs((epspl - epss0) / epsy);
-			R *= (1.0 - (cR1 * xi) / (cR2 + xi));
-		}
-		const double epsrat = (eps - epsr) / (epss0 - epsr);
-		const double dum1 = 1.0 + pow(fabs(epsrat), R);
-		const double dum2 = pow(dum1, (1 / R));
-
-		sig = b2 * epsrat + (1.0 - b2) * epsrat / dum2;
-		sig = sig * (sigs0 - sigr) + sigr;
-
-		e = b2 + (1.0 - b2) / (dum1 * dum2);
-		e *= (sigs0 - sigr) / (epss0 - epsr);
-		if (stat == 3 && sig < resFac * Fy)
-		{
-			sig = resFac * Fy;
-			e = 1e-15 * E0;
-			stat = 5;
-		}
-		else if (stat == 4 && sig > -resFac * Fy)
-		{
-			sig = -resFac * Fy;
-			e = 1e-15 * E0;
-			stat = 5;
-		}
-	}
-	return 0;
-}
-
-double
-SmoothIMK::getStrain(void)
+double SmoothIMK::getStrain(void)
 {
 	return eps;
 }
 
-double
-SmoothIMK::getStress(void)
+double SmoothIMK::getStress(void)
 {
 	return sig;
 }
 
-double
-SmoothIMK::getTangent(void)
+double SmoothIMK::getTangent(void)
 {
 	return e;
+}
+
+int
+SmoothIMK::setParameter(const char** argv, int argc, Parameter& param)
+{
+	return -1;
+}
+
+int
+SmoothIMK::updateParameter(int parameterID, Information& info)
+{
+	return -1;
 }
 
 int
@@ -449,18 +303,21 @@ SmoothIMK::commitState(void)
 {
 	epsminP = epsmin;
 	epsmaxP = epsmax;
-	epsplP = epspl;
+	epsLimitP = epsLimit;
 	epss0P = epss0;
 	sigs0P = sigs0;
 	epssrP = epsr;
 	sigsrP = sigr;
-
+	slopeRatP = slopeRat;
+	onEnvelopeP = onEnvelope;
+	epsPlP = epsPl;
 	updateDamage();
-	statP = stat;
+	isPosDirP = isPosDir;
+	branchP = branch;
 	eP = e;
 	sigP = sig;
 	epsP = eps;
-
+	R0P = R0;
 	return 0;
 }
 
@@ -469,16 +326,20 @@ SmoothIMK::revertToLastCommit(void)
 {
 	epsmin = epsminP;
 	epsmax = epsmaxP;
-	epspl = epsplP;
+	epsLimit = epsLimitP;
 	epss0 = epss0P;
 	sigs0 = sigs0P;
 	epsr = epssrP;
 	sigr = sigsrP;
-	stat = statP;
-
+	branch = branchP;
+	isPosDir = isPosDirP;
+	slopeRat = slopeRatP;
+	R0 = R0P;
 	e = eP;
 	sig = sigP;
 	eps = epsP;
+	onEnvelope = onEnvelopeP;
+	epsPl = epsPlP;
 	return 0;
 }
 
@@ -486,65 +347,88 @@ int
 SmoothIMK::revertToStart(void)
 {
 	EnergyP = 0;	//by SAJalali
-	eP = E0;
-	epsP = sigini / E0;
+	E0p = pf1 / (pd1 != 0 ? pd1 : 1);
+	E0n = nf1 / (nd1 != 0 ? nd1 : 1);
+	FydP = pf1;
+	FydN = nf1;
+	FcP = pf2;
+	FcN = nf2;
+	EshP = (FcP - FydP) / (pd2 - pd1);
+	EshN = (FcN - FydN) / (nd2 - nd1);
+	FrP = pf3;
+	FrN = nf3;
+	eP = E0p;
+	epsP = sigini / E0p;
 	sigP = sigini;
 	sig = 0.0;
 	eps = 0.0;
-	e = E0;
+	e = E0p;
 
-	statP = 0;
-	epsmaxP = Fy / E0;
-	epsminP = -epsmaxP;
-	epsplP = 0.0;
+	isPosDirP = isPosDir = true;
+	branchP = branch = precap;
+	epsmaxP = pd1;
+	epsminP = nd1;
+	epsLimitP = pd1;
 	epss0P = 0.0;
 	sigs0P = 0.0;
 	epssrP = 0.0;
 	sigsrP = 0.0;
-
-
+	R0P = r0;
+	epsPl = epsPlP = 0;
 	ExcurEnergy = 0;
-	FydP = FydN = Fy;
+	slopeRat = slopeRatP = 0;
+	onEnvelope = onEnvelopeP = true;
+	updateAsymptote();
+	R0P = R0;
+	epss0P = epss0;
+	sigs0P = sigs0;
+	slopeRatP = slopeRat;
+	epsLimitP = epsLimit;
 	return 0;
 }
 
 int
 SmoothIMK::sendSelf(int commitTag, Channel& theChannel)
 {
-	static Vector data(33);
-	data(0) = Fy;
-	data(1) = E0;
-	data(2) = b;
-	data(3) = R0;
-	data(4) = cR1;
-	data(5) = cR2;
-	data(6) = a1;
-	data(7) = a2;
-	data(8) = a3;
-	data(9) = a4;
-	data(10) = epsminP;
-	data(11) = epsmaxP;
-	data(12) = epsplP;
-	data(13) = epss0P;
-	data(14) = sigs0P;
-	data(15) = epssrP;
-	data(16) = sigsrP;
-	data(17) = statP;
-	data(18) = epsP;
-	data(19) = sigP;
-	data(20) = eP;
-	data(21) = this->getTag();
-	data(22) = sigini;
-	data(23) = EnergyP;
-	data(24) = epsPCFac;
-	data(25) = pstcpEFac;
-	data(26) = gama;
-	data(27) = c;
-	data(28) = resFac;
-	data(29) = FydP;
-	data(30) = FydN;
-	data(31) = ExcurEnergy;
-	data(32) = gama;
+	static Vector data(37);
+	int n = -1;
+	data(n++) = this->getTag();	//0
+	data(n++) = pd1;
+	data(n++) = pd2;
+	data(n++) = pd3;
+	data(n++) = pdu;
+	data(n++) = nd1;
+	data(n++) = nd2;
+	data(n++) = nd3;
+	data(n++) = ndu;
+	data(n++) = pf1;
+	data(n++) = pf2;
+	data(n++) = pf3;
+	data(n++) = nf1;
+	data(n++) = nf2;
+	data(n++) = nf3;
+	data(n++) = FailEnerg;
+	data(n++) = c;
+	data(n++) = sigini;
+	data(n++) = epsP;
+	data(n++) = sigP;
+	data(n++) = eP;
+	data(n++) = EnergyP;
+	data(n++) = epsminP;
+	data(n++) = epsmaxP;
+	data(n++) = epsLimitP;
+	data(n++) = epss0P;
+	data(n++) = sigs0P;
+	data(n++) = epssrP;
+	data(n++) = sigsrP;
+	data(n++) = isPosDirP;
+	data(n++) = branchP;
+	data(n++) = FydP;
+	data(n++) = FydN;
+	data(n++) = ExcurEnergy;
+	data(n++) = slopeRatP;
+	data(n++) = onEnvelopeP;
+	data(n++) = R0P; // 36
 	if (theChannel.sendVector(this->getDbTag(), commitTag, data) < 0) {
 		opserr << "SmoothIMK::sendSelf() - failed to sendSelf\n";
 		return -1;
@@ -556,48 +440,50 @@ int
 SmoothIMK::recvSelf(int commitTag, Channel& theChannel,
 	FEM_ObjectBroker& theBroker)
 {
-	static Vector data(33);	//editted by SAJalali for energy
+	static Vector data(37);	//editted by SAJalali for energy
 
 	if (theChannel.recvVector(this->getDbTag(), commitTag, data) < 0) {
 		opserr << "SmoothIMK::recvSelf() - failed to recvSelf\n";
 		return -1;
 	}
-
-	Fy = data(0);
-	E0 = data(1);
-	b = data(2);
-	R0 = data(3);
-	cR1 = data(4);
-	cR2 = data(5);
-	a1 = data(6);
-	a2 = data(7);
-	a3 = data(8);
-	a4 = data(9);
-	epsminP = data(10);
-	epsmaxP = data(11);
-	epsplP = data(12);
-	epss0P = data(13);
-	sigs0P = data(14);
-	epssrP = data(15);
-	sigsrP = data(16);
-	statP = int(data(17));
-	epsP = data(18);
-	sigP = data(19);
-	eP = data(20);
-	this->setTag(int(data(21)));
-	sigini = data(22);
-	EnergyP = data(23);
-	epsPCFac = data(24);
-	pstcpEFac = data(25);
-	gama = data(26);
-	c = data(27);
-	resFac = data(28);
-	FydP = data(29);
-	FydN = data(30);
-	ExcurEnergy = data(31);
-	gama = data(32);
-	FailEnerg = gama * Fy * Fy / E0;
-
+	int n = -1;
+	this->setTag(data(n++));
+	pd1 = data(n++);
+	pd2 = data(n++);
+	pd3 = data(n++);
+	pdu = data(n++);
+	nd1 = data(n++);
+	nd2 = data(n++);
+	nd3 = data(n++);
+	ndu = data(n++);
+	pf1 = data(n++);
+	pf2 = data(n++);
+	pf3 = data(n++);
+	nf1 = data(n++);
+	nf2 = data(n++);
+	nf3 = data(n++);
+	FailEnerg = data(n++);
+	c = data(n++);
+	sigini = data(n++);
+	epsP = data(n++);
+	sigP = data(n++);
+	eP = data(n++);
+	EnergyP = data(n++);
+	epsminP = data(n++);
+	epsmaxP = data(n++);
+	epsLimitP = data(n++);
+	epss0P = data(n++);
+	sigs0P = data(n++);
+	epssrP = data(n++);
+	sigsrP = data(n++);
+	isPosDirP = data(n++);
+	branchP = (ebranch)data(n++);
+	FydP = data(n++);
+	FydN = data(n++);
+	ExcurEnergy = data(n++);
+	slopeRatP = data(n++);
+	onEnvelopeP = data(n++);
+	R0P = data(n++);
 	e = eP;
 	sig = sigP;
 	eps = epsP;
@@ -608,136 +494,141 @@ SmoothIMK::recvSelf(int commitTag, Channel& theChannel,
 void
 SmoothIMK::Print(OPS_Stream& s, int flag)
 {
-	if (flag == OPS_PRINT_PRINTMODEL_MATERIAL) {
-		//    s << "SmoothIMK:(strain, stress, tangent) " << eps << " " << sig << " " << e << endln;
-		s << "SmoothIMK tag: " << this->getTag() << endln;
-		s << "  fy: " << Fy << ", ";
-		s << "  E0: " << E0 << ", ";
-		s << "   b: " << b << ", ";
-		s << "  R0: " << R0 << ", ";
-		s << " cR1: " << cR1 << ", ";
-		s << " cR2: " << cR2 << ", ";
-		s << "  a1: " << a1 << ", ";
-		s << "  a2: " << a2 << ", ";
-		s << "  a3: " << a3 << ", ";
-		s << "  a4: " << a4;
-	}
-
-	if (flag == OPS_PRINT_PRINTMODEL_JSON) {
+	//    s << "SmoothIMK:(strain, stress, tangent) " << eps << " " << sig << " " << e << endln;
+	const char* endStr = endln;
+	if (flag == OPS_PRINT_PRINTMODEL_JSON)
+	{
+		endStr = "";
 		s << "\t\t\t{";
-		s << "\"name\": \"" << this->getTag() << "\", ";
-		s << "\"type\": \"SmoothIMK\", ";
-		s << "\"E\": " << E0 << ", ";
-		s << "\"fy\": " << Fy << ", ";
-		s << "\"b\": " << b << ", ";
-		s << "\"R0\": " << R0 << ", ";
-		s << "\"cR1\": " << cR1 << ", ";
-		s << "\"cR2\": " << cR2 << ", ";
-		s << "\"a1\": " << a1 << ", ";
-		s << "\"a2\": " << a2 << ", ";
-		s << "\"a3\": " << a3 << ", ";
-		s << "\"a4\": " << a4 << ", ";
-		s << "\"sigini\": " << sigini << "}";
 	}
-}
+	s << "\"name \": \"" << this->getTag() << "\", " << endStr;
+	s << "\"type\": \"SmoothIMK\", " << endStr;
+	s << "\"pd1 \": " << pd1 << ", " << endStr;
+	s << "\"pd2 \": " << pd2 << ", " << endStr;
+	s << "\"pd3 \": " << pd3 << ", " << endStr;
+	s << "\"nd1 \": " << nd1 << ", " << endStr;
+	s << "\"nd2 \": " << nd2 << ", " << endStr;
+	s << "\"nd3 \": " << nd3 << ", " << endStr;
+	s << "\"pf1 \": " << pf1 << ", " << endStr;
+	s << "\"pf2 \": " << pf2 << ", " << endStr;
+	s << "\"pf3 \": " << pf3 << ", " << endStr;
+	s << "\"nf1 \": " << nf1 << ", " << endStr;
+	s << "\"nf2 \": " << nf2 << ", " << endStr;
+	s << "\"nf3 \": " << nf3 << ", " << endStr;
+	s << "\"sigini \": " << sigini << endStr;
+	if (flag == OPS_PRINT_PRINTMODEL_JSON)
+		s << "}";
 
-// AddingSensitivity:BEGIN ///////////////////////////////////
-int
-SmoothIMK::setParameter(const char** argv, int argc, Parameter& param)
-{
-
-	if (strcmp(argv[0], "sigmaY") == 0 || strcmp(argv[0], "fy") == 0 || strcmp(argv[0], "Fy") == 0) {
-		param.setValue(Fy);
-		return param.addObject(1, this);
-	}
-	if (strcmp(argv[0], "E") == 0) {
-		param.setValue(E0);
-		return param.addObject(2, this);
-	}
-	if (strcmp(argv[0], "b") == 0) {
-		param.setValue(b);
-		return param.addObject(3, this);
-	}
-	if (strcmp(argv[0], "a1") == 0) {
-		param.setValue(a1);
-		return param.addObject(4, this);
-	}
-	if (strcmp(argv[0], "a2") == 0) {
-		param.setValue(a2);
-		return param.addObject(5, this);
-	}
-	if (strcmp(argv[0], "a3") == 0) {
-		param.setValue(a3);
-		return param.addObject(6, this);
-	}
-	if (strcmp(argv[0], "a4") == 0) {
-		param.setValue(a4);
-		return param.addObject(7, this);
-	}
-
-	return -1;
 }
 
 
-
-int
-SmoothIMK::updateParameter(int parameterID, Information& info)
+Response* SmoothIMK::setResponse(const char** argv, int argc, OPS_Stream& theOutput)
 {
-	switch (parameterID) {
-	case -1:
-		return -1;
-	case 1:
-		this->Fy = info.theDouble;
-		break;
-	case 2:
-		this->E0 = info.theDouble;
-		break;
-	case 3:
-		this->b = info.theDouble;
-		break;
-	case 4:
-		this->a1 = info.theDouble;
-		break;
-	case 5:
-		this->a2 = info.theDouble;
-		break;
-	case 6:
-		this->a3 = info.theDouble;
-		break;
-	case 7:
-		this->a4 = info.theDouble;
-		break;
+	Response* theResponse = UniaxialMaterial::setResponse(argv, argc, theOutput);
+	if (theResponse != 0)
+		return theResponse;
+	if (strcmp(*argv, "branch") == 0)
+	{
+		theResponse = new MaterialResponse(this, 11, 0);
+		return theResponse;
+	}
+	return 0;
+}
+
+int SmoothIMK::getResponse(int responseID, Information& matInformation)
+{
+	int res = 0;
+	res = UniaxialMaterial::getResponse(responseID, matInformation);
+	if (res == 0)
+		return 0;
+	switch (responseID)
+	{
+	case 11:
+		matInformation.setInt(branchP);
+		return 0;
 	default:
 		return -1;
 	}
-
-	return 0;
 }
 
 
 void SmoothIMK::updateDamage()
 {
-	if (((statP == 1 || statP == 3) && sig < 0) || ((statP == 2 || statP == 4) && sig > 0))
+	if (sigP > 0 && sig < 0)
 	{
-		//submit Pos damage and reset for new excursion
-		double zeroSigEps = epsP - sigP / E0;
+		double zeroSigEps = epsP - sigP / (pf1 / pd1);
 		double dE = 0.5 * sigP * (zeroSigEps - epsP);
 		EnergyP += dE;
 		if (EnergyP < 0) EnergyP = 0.;
-		if (gama > 9999)
-		{
-			return;
-		}
-		double& Fyd = (statP == 2 || statP == 4) ? FydP : FydN;
 		ExcurEnergy += dE;
 		if (ExcurEnergy < 0) ExcurEnergy = 0.;
-		double beta = pow(ExcurEnergy / (FailEnerg - EnergyP), c);
-		if (beta > 0.999 || beta < 0)
+		if (branch == failing)
 		{
-			opserr << "\nSmoothIMK:" << this->getTag() << " WARNING! Maximum Energy Absorbance Capacity Reached\n" << endln;
-			beta = 0.999;
+			FydP = FrP;
+			FcP = FrP;
+			EshP = (FcP - FydP) / (pd2 - pd1);
 		}
-		Fyd = (1. - beta) * Fyd + beta * resFac * Fyd;
+		else if (branch == failed)
+		{
+			FydP = 0;
+			FcP = FrP;
+			EshP = (FcP - FydP) / (pd2 - pd1);
+		}
+		else if (FailEnerg / pd1 / pf1 < 9999)
+		{
+
+			double beta = pow(ExcurEnergy / (FailEnerg - EnergyP), c);
+			if (beta < 0)
+				beta = 0;
+			if (beta > 0.9999)
+			{
+				opserr << "\nSmoothIMK:" << this->getTag() << " WARNING! Maximum Energy Absorbance Capacity Reached\n" << endln;
+				beta = 0.9999;
+			}
+			FydP = (1. - beta) * FydP + beta * pf3 / pf1 * FydP;
+			FcP = pf2 - pf1 + FydP;
+			EshP = (FcP - FydP) / (pd2 - pd1);
+			//FrP = FcP - pf2 + pf3;
+			//if (FrP < 0)
+			//	FrP = 0;
+		}
+		ExcurEnergy = 0.0;
+	}
+	else if (sigP < 0 && sig > 0)
+	{
+		double zeroSigEps = epsP - sigP / (nf1 / nd1);
+		double dE = 0.5 * sigP * (zeroSigEps - epsP);
+		EnergyP += dE;
+		if (EnergyP < 0) EnergyP = 0.;
+		ExcurEnergy += dE;
+		if (ExcurEnergy < 0) ExcurEnergy = 0.;
+		if (branch == failing)
+		{
+			FydN = FrN;
+			FcN = FrN;
+			EshN = (FcN - FydN) / (nd2 - nd1);
+		}
+		else if (branch == failed)
+		{
+			FydN = 0;
+			FcN = 0;
+			EshN = (FcN - FydN) / (nd2 - nd1);
+		}
+		else if (FailEnerg / nd1 / nf1 < 9999)
+		{
+			double beta = pow(ExcurEnergy / (FailEnerg - EnergyP), c);
+			if (beta > 0.999 || beta < 0)
+			{
+				opserr << "\nSmoothIMK:" << this->getTag() << " WARNING! Maximum Energy Absorbance Capacity Reached\n" << endln;
+				beta = 0.999;
+			}
+			FydN = (1. - beta) * FydN + beta * nf3 / nf1 * FydN;
+			FcN = nf2 - nf1 + FydN;
+			EshN = (FcN - FydN) / (nd2 - nd1);
+			//FrN = FcN - nf2 + nf3;
+			//if (FrN > 0)
+			//	FrN = 0;
+		}
 		ExcurEnergy = 0.0;
 	}
 	else
@@ -748,3 +639,342 @@ void SmoothIMK::updateDamage()
 	}
 }
 
+int SmoothIMK::setTrialStrain(double trialStrain, double strainRate)
+{
+	revertToLastCommit();
+	eps = trialStrain + (sigini > 0 ? sigini / E0p : sigini / E0n);
+	const double deps = eps - epsP;
+	if (fabs(deps) < 1.e-20)
+		return 0;
+	if (isPosDirP && deps < 0.0)
+	{
+		isPosDir = false;
+		epsPl = epsP - sigP / E0p;
+		if (epsPl > 0.01 * pd1)
+			onEnvelope = false;
+		branch = cyclicRule == 1 ? precap : (cyclicRule == 2 ? peakOriented : pinching);
+		if (epsP > epsmaxP)
+			epsmax = epsP;
+		updateAsymptote();
+	}
+	else if (deps > 0.0 && !isPosDirP) {
+		isPosDir = true;
+		epsPl = epsP - sigP / E0p;
+		if (epsPl < 0.01 * nd1)
+			onEnvelope = false;
+		branch = cyclicRule == 1 ? precap : (cyclicRule == 2 ? peakOriented : pinching);
+		if (epsP < epsminP)
+			epsmin = epsP;
+		updateAsymptote();
+	}
+	else if ((isPosDirP && eps > epsLimit) || (!isPosDirP && eps < epsLimit))
+	{
+		branch = nextBranch(branch);
+		updateAsymptote();
+	}
+	double epsrat = (eps - epsr) / (epss0 - epsr);
+	double dum1 = 1.0 + pow(fabs(epsrat), R0);
+	double dum2 = pow(dum1, (1 / R0));
+
+	sig = slopeRat * epsrat + (1.0 - slopeRat) * epsrat / dum2;
+	sig = sig * (sigs0 - sigr) + sigr;
+
+	e = slopeRat + (1.0 - slopeRat) / (dum1 * dum2);
+	e *= (sigs0 - sigr) / (epss0 - epsr);
+	return 0;
+}
+
+void SmoothIMK::updateAsymptote()
+{
+	switch (cyclicRule)
+	{
+	case 1:
+		bilinAsymptote();
+		return;
+	case 2:
+		peakOrientedAsymptote();
+		return;
+	case 3:
+		pinchedAsymptote();
+		return;
+	default:
+		opserr << "SmoothIMK::ERROR Unrecognized cyclic rule: " << cyclicRule << endln;
+		exit(-1);
+
+	}
+}
+
+void SmoothIMK::bilinAsymptote()
+{
+	//updates: epsr, sigr, epss0, sigs0, epsLimit, slopeRat, R0, stat
+	const double& Esh = isPosDir ? EshP : EshN;
+	const double& Fy = isPosDir ? FydP : FydN;
+	const double& Fc = isPosDir ? FcP : FcN;
+	const double& Fr = isPosDir ? FrP : FrN;
+	const double& dy = isPosDir ? pd1 : nd1;
+	const double& dc = isPosDir ? pd2 : nd2;
+	const double& dr = isPosDir ? pd3 : nd3;
+	const double& du = isPosDir ? pdu : ndu;
+	const double& E1 = isPosDir ? E0p : E0n;
+	const double& E2 = branchP == peakOriented ? eP : (isPosDir ? E0n : E0p);
+	epsr = epsP;
+	sigr = sigP;
+	double Ec = (Fr - Fc) / (dr - dc);
+	double k2 = 0;
+	switch (branch)
+	{
+	case precap:
+		epss0 = (Fy - Esh * dy - sigr * E1 / E2 + E1 * epsr) / (E1 - Esh);
+		if ((!isPosDir && epss0 > epsr) || (isPosDir && epss0 < epsr))
+		{
+			//we should skip this branch
+			branch = postcap;
+			//epss0 = dc;
+			//sigs0 = Fc;
+			//epsLimit = (dc + dr) / 2;
+			//k2 = Ec;
+		}
+		else
+		{
+			sigs0 = Fy + Esh * (epss0 - dy);
+			epsLimit = (dy + dc) / 2;
+			k2 = Esh;
+			break;
+		}
+	case postcap:
+		epss0 = dc;
+		sigs0 = Fc;
+		epsLimit = (dc + dr) / 2;
+		k2 = Ec;
+		break;
+	case residual:
+		epss0 = dr;
+		sigs0 = Fr;
+		epsLimit = (dr + du) / 2;
+		k2 = 0;
+		break;
+	case failing:
+		epss0 = du;
+		sigs0 = Fr;
+		epsLimit = (3 * du - dr) / 2;
+		k2 = Ec;
+		break;
+	case failed:
+		epss0 = (4 * du - 2 * dr) / 2;
+		sigs0 = 0;
+		epsLimit = 1000 * dy;
+		k2 = 0;
+	}
+	double k1 = (sigs0 - sigr) / (epss0 - epsr);
+	slopeRat = k2 / k1;
+	R0 = r0;
+	if (r1 != 0.0)
+	{
+		double xi_1 = (1 - slopeRat) * (sigs0 - sigr) / (epss0 - epsr) / E1;
+		double xi_2 = (epss0 - epsr) / dy;
+		R0 += r1 * xi_1 + r2 * xi_2;
+		R0 = R0 < 100 ? R0 : 100;
+		//if (print)
+		//	opserr << epsP << " " << xi_1 << " " << xi_2 << " " << R0 << endln;
+	}
+
+}
+
+void SmoothIMK::peakOrientedAsymptote()
+{
+	//updates: epsr, sigr, epss0, sigs0, epsLimit, slopeRat, R0, stat
+	if (onEnvelope)
+		return bilinAsymptote();
+	//const double& E2 = isPosDir ? E0n : E0p;
+	const double& epsPeak = isPosDir ? epsmax : epsmin;
+	const double& dy = isPosDir ? pd1 : nd1;
+	const double& E1 = isPosDir ? E0p : E0n;
+	//peakOriented branch
+	double tmp;
+	double k2;
+	epsr = epsP;
+	sigr = sigP;
+	if (branch == peakOriented)
+	{
+		epss0 = epsPl;
+		sigs0 = 0;
+		epsLimit = (epss0 + epsPeak) / 2;
+		double sigmax;
+		ebranch targBranch; // not used
+		double tmp;
+		getEnvelope(epsPeak, sigmax, targBranch, tmp, tmp);
+		k2 = sigmax / (epsPeak - epss0);
+	}
+	else
+	{
+		epss0 = epsPeak;
+		getEnvelope(epss0, sigs0, branch, k2, epsLimit);
+	}
+	double k1 = (sigs0 - sigr) / (epss0 - epsr);
+	slopeRat = k2 / k1;
+	R0 = r0;
+	if (r1 != 0.0)
+	{
+		double xi_1 = (1 - slopeRat) * (sigs0 - sigr) / (epss0 - epsr) / E1;
+		double xi_2 = (epss0 - epsr) / dy;
+		R0 += r1 * xi_1 + r2 * xi_2;
+		R0 = R0 < 100 ? R0 : 100;
+		//if (print)
+		//	opserr << epsP << " " << xi_1 << " " << xi_2 << " " << R0 << endln;
+	}
+
+}
+
+void SmoothIMK::pinchedAsymptote()
+{
+	if (onEnvelope)
+		return bilinAsymptote();
+	const double& E2 = isPosDir ? E0n : E0p;
+	const double& epsPeak = isPosDir ? epsmax : epsmin;
+	const double& dy = isPosDir ? pd1 : nd1;
+	const double& E1 = isPosDir ? E0p : E0n;
+	const double pinchX = isPosDir ? pinchXPos : pinchXNeg;
+	const double pinchY = isPosDir ? pinchYPos : pinchYNeg;
+	//peakOriented branch
+	double tmp;
+	double k2;
+	epsr = epsP;
+	sigr = sigP;
+	if (branch == pinching)
+	{
+		epss0 = epsPl;
+		sigs0 = 0;
+		double x = epsPl + pinchX * (epsPeak - epsPl);
+		epsLimit = (epss0 + x) / 2;
+		double sigmax;
+		ebranch targBranch; // not used
+		double tmp;
+		getEnvelope(epsPeak, sigmax, targBranch, tmp, tmp);
+		double y = pinchY * sigmax;
+		k2 = y / (x - epss0);
+	}
+	else if (branch == peakOriented)
+	{
+		epss0 = epsPl + pinchX * (epsPeak - epsPl);
+		epsLimit = (epss0 + epsPeak) / 2;
+		double sigmax;
+		ebranch targBranch; // not used
+		double tmp;
+		getEnvelope(epsPeak, sigmax, targBranch, tmp, tmp);
+		sigs0 = pinchY * sigmax;
+		k2 = (sigmax - sigs0) / (epsPeak - epss0);
+	}
+	else
+	{
+		epss0 = epsPeak;
+		getEnvelope(epss0, sigs0, branch, k2, epsLimit);
+	}
+	double k1 = (sigs0 - sigr) / (epss0 - epsr);
+	slopeRat = k2 / k1;
+	R0 = r0;
+	if (r1 != 0.0)
+	{
+		double xi_1 = fabs(k1 - k2) / E1;
+		double xi_2 = (epss0 - epsr) / dy;
+		R0 += r1 * xi_1 + r2 * xi_2;
+		R0 = R0 < 100 ? R0 : 100;
+		//if (print)
+		//	opserr << epsP << " " << xi_1 << " " << xi_2 << " " << R0 << endln;
+	}
+}
+
+SmoothIMK::ebranch SmoothIMK::nextBranch(ebranch branch)
+{
+	onEnvelope = true;
+	const double& epsPeak = isPosDir ? epsmax : epsmin;
+	switch (branch)
+	{
+	case precap:
+		return postcap;
+	case postcap:
+		return residual;
+	case residual:
+		if (isPosDir)
+		{
+			if (FrP == 0)
+				return failed;
+			else
+				return failed;
+		}
+		else
+		{
+			if (FrN == 0)
+				return failed;
+			else
+				return failed;
+		}
+	case failing:
+		return failed;
+	case failed:
+		return failed;
+	case peakOriented:
+		onEnvelope = false;
+		double tmp;
+		ebranch peakBranch;
+		getEnvelope(epsPeak, tmp, peakBranch, tmp, tmp);
+		return peakBranch;
+	case pinching:
+		onEnvelope = false;
+		return peakOriented;
+	}
+}
+
+void SmoothIMK::getEnvelope(double eps, double& targStress, SmoothIMK::ebranch& targBranch, double& k, double& limitEps)
+{
+	const double& Esh = eps > 0 ? EshP : EshN;
+	const double& Fy = eps > 0 ? FydP : -FydN;
+	const double& Fc = eps > 0 ? FcP : -FcN;
+	const double& Fr = eps > 0 ? FrP : -FrN;
+	const double& dy = eps > 0 ? pd1 : -nd1;
+	const double& dc = eps > 0 ? pd2 : -nd2;
+	const double& dr = eps > 0 ? pd3 : -nd3;
+	const double& du = eps > 0 ? pdu : -ndu;
+	const double& E = eps > 0 ? E0p : E0n;
+	int sgn = eps > 0 ? 1 : -1;
+	eps = fabs(eps);
+	if (eps < dy)
+	{
+		targStress = sgn * E * eps;
+		targBranch = precap;
+		k = E;
+		limitEps = sgn * (dy + dc) / 2.;
+		return;
+	}
+	else if (eps < dc)
+	{
+		targStress = sgn * (Fy + Esh * (eps - dy));
+		k = Esh;
+		targBranch = precap;
+		limitEps = sgn * (eps + dc) / 2;
+		return;
+	}
+	else if (eps < dr)
+	{
+		k = (Fr - Fc) / (dr - dc);
+		targStress = sgn * (Fc + k * (eps - dc));
+		targBranch = postcap;
+		limitEps = sgn * (eps + dr) / 2;
+		return;
+	}
+	else if (eps < du)
+	{
+		targStress = sgn * Fr;
+		k = 0;
+		targBranch = residual;
+		limitEps = sgn * (eps + du) / 2;
+		return;
+	}
+	else // >= du
+	{
+		targStress = 0;
+		targBranch = failed;
+		k = 0;
+		limitEps = sgn * 1000 * dy;
+	}
+
+}

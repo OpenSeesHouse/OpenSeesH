@@ -1,14 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{a829b32d-121f-4e47-be35-9e45730b0c2a}</UniqueIdentifier>
-      <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
-    </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{a5c0bc0f-5890-4a67-b652-63e9e9bff912}</UniqueIdentifier>
-      <Extensions>h;hpp;hxx;hm;inl</Extensions>
-    </Filter>
     <Filter Include="response">
       <UniqueIdentifier>{d6b7373a-d593-4403-b6ff-072c629fbc47}</UniqueIdentifier>
     </Filter>
@@ -23,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\SRC\recorder\FilePlotter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\SRC\recorder\response\CompositeResponse.cpp">
       <Filter>response</Filter>
     </ClCompile>
@@ -43,54 +32,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\recorder\response\CrdTransfResponse.cpp">
       <Filter>response</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\recorder\AlgorithmIncrements.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\recorder\DamageRecorder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\recorder\DatastoreRecorder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\recorder\ElementRecorderRMS.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\recorder\GmshRecorder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Src\recorder\GSA_Recorder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\recorder\MaxNodeDispRecorder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\recorder\MPCORecorder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\recorder\NodeRecorderRMS.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\recorder\NormElementRecorder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\recorder\NormEnvelopeElementRecorder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\recorder\PatternRecorder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\recorder\RemoveRecorder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\recorder\TclRecorderCommands.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\recorder\VTK_Recorder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\recorder\PVDRecorder.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\recorder\ConditionalDriftRecorder.cpp">
       <Filter>My Recorders\cpp</Filter>
@@ -119,9 +60,6 @@
     <ClCompile Include="..\..\..\SRC\recorder\NodeRecorder.cpp">
       <Filter>My Recorders\cpp</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\recorder\OpsRecorderCommands.cpp">
-      <Filter>My Recorders\cpp</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\SRC\recorder\Recorder.cpp">
       <Filter>My Recorders\cpp</Filter>
     </ClCompile>
@@ -134,11 +72,12 @@
     <ClCompile Include="..\..\..\SRC\recorder\ResidNodeRecorder.cpp">
       <Filter>My Recorders\cpp</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\SRC\recorder\FilePlotter.cpp" />
+    <ClCompile Include="..\..\..\SRC\tcl\FeViewer.cpp">
+      <Filter>My Recorders\cpp</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\SRC\recorder\FilePlotter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\SRC\recorder\response\CompositeResponse.h">
       <Filter>response</Filter>
     </ClInclude>
@@ -156,51 +95,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\recorder\response\CrdTransfResponse.h">
       <Filter>response</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\recorder\AlgorithmIncrements.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\recorder\DamageRecorder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\recorder\DatastoreRecorder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\recorder\ElementRecorderRMS.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\recorder\GmshRecorder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Src\recorder\GSA_Recorder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\recorder\MaxNodeDispRecorder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\recorder\MPCORecorder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\recorder\NormEnvelopeElementRecorder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\recorder\NormElementRecorder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\recorder\NodeRecorderRMS.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\recorder\PatternRecorder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\recorder\PVDRecorder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\recorder\RemoveRecorder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\recorder\VTK_Recorder.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\recorder\ConditionalDriftRecorder.h">
       <Filter>My Recorders\h</Filter>
@@ -239,6 +133,10 @@
       <Filter>My Recorders\h</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\recorder\ResidNodeRecorder.h">
+      <Filter>My Recorders\h</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\SRC\recorder\FilePlotter.h" />
+    <ClInclude Include="..\..\..\SRC\tcl\FeViewer.h">
       <Filter>My Recorders\h</Filter>
     </ClInclude>
   </ItemGroup>

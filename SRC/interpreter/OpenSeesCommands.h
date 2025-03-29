@@ -45,7 +45,8 @@ UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 #include "DL_Interpreter.h"
 #include <UniaxialMaterial.h>
 #include <Domain.h>
-#include <ReliabilityDomain.h>
+//#include <ReliabilityDomain.h>
+//#include "OpenSeesReliabilityCommands.h"
 #include <StaticAnalysis.h>
 #include <DirectIntegrationAnalysis.h>
 #include <LinearSOE.h>
@@ -63,7 +64,6 @@ UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 #include <SimulationInformation.h>
 #include <elementAPI.h>
 #include <MachineBroker.h>
-#include "OpenSeesReliabilityCommands.h"
 
 class OpenSeesCommands
 {
@@ -74,7 +74,7 @@ public:
 
     DL_Interpreter* getInterpreter();
     Domain* getDomain();
-    ReliabilityDomain* getReliabilityDomain();
+    //ReliabilityDomain* getReliabilityDomain();
     AnalysisModel** getAnalysisModel();
 
     int getNDF() const {return ndf;}
@@ -188,9 +188,7 @@ private:
     MachineBroker* theMachineBroker;
     Channel **theChannels;
     int numChannels;
-
-    OpenSeesReliabilityCommands* reliability;
-
+//    OpenSeesReliabilityCommands* reliability;
 };
 
 ///////////////////////////////////////////////////////////////////////////
@@ -321,19 +319,19 @@ int OPS_version();
 int OPS_maxOpenFiles();
 int OPS_logFile();
 // Sensitivity:BEGIN /////////////////////////////////////////////
-int OPS_sensNodeDisp();
-int OPS_sensNodeVel();
-int OPS_sensNodeAccel();
-int OPS_sensLambda();
-int OPS_sensSectionForce();
-int OPS_sensNodePressure();
-int OPS_getNumElements();
-int OPS_getEleClassTags();
-int OPS_getEleLoadClassTags();
-int OPS_getEleLoadTags();
-int OPS_getEleLoadData();
-int OPS_getNodeLoadTags();
-int OPS_getNodeLoadData();
+//int OPS_sensNodeDisp();
+//int OPS_sensNodeVel();
+//int OPS_sensNodeAccel();
+//int OPS_sensLambda();
+//int OPS_sensSectionForce();
+//int OPS_sensNodePressure();
+//int OPS_getNumElements();
+//int OPS_getEleClassTags();
+//int OPS_getEleLoadClassTags();
+//int OPS_getEleLoadTags();
+//int OPS_getEleLoadData();
+//int OPS_getNodeLoadTags();
+//int OPS_getNodeLoadData();
 // Sensitivity:END /////////////////////////////////////////////
 
 /* OpenSeesMiscCommands.cpp */
@@ -377,41 +375,41 @@ int OPS_setStartNodeTag();
 int OPS_partition();
 
 // OpenSeesReliabilityCommands.cpp
-int OPS_randomVariable();
-int OPS_filter();
-int OPS_spectrum();
-int OPS_modulatingFunction();
-int OPS_getRVTags();
-int OPS_getRVParamTag();
-int OPS_getRVValue();
-int OPS_getRVMean();
-int OPS_getRVStdv();
-int OPS_getRVPDF();
-int OPS_getRVCDF();
-int OPS_getRVInverseCDF();
-int OPS_getLSFTags();
-int OPS_addCorrelate();
-int OPS_performanceFunction(); // limit state function
-int OPS_gradPerformanceFunction(); // limit state function
-int OPS_probabilityTransformation();
-int OPS_transformUtoX();
-int OPS_startPoint();
-int OPS_randomNumberGenerator();
-int OPS_reliabilityConvergenceCheck();
-int OPS_searchDirection();
-int OPS_meritFunctionCheck();
-int OPS_stepSizeRule();
-int OPS_rootFinding();
-int OPS_findDesignPoint();
-int OPS_findCurvatures();
-int OPS_functionEvaluator();
-int OPS_gradientEvaluator();
-int OPS_wipeReliability();
-int OPS_runFOSMAnalysis();
-int OPS_runFORMAnalysis();
-int OPS_runSORMAnalysis();
-int OPS_runImportanceSamplingAnalysis();
-ReliabilityDomain* OPS_GetReliabilityDomain();
+//int OPS_randomVariable();
+//int OPS_filter();
+//int OPS_spectrum();
+//int OPS_modulatingFunction();
+//int OPS_getRVTags();
+//int OPS_getRVParamTag();
+//int OPS_getRVValue();
+//int OPS_getRVMean();
+//int OPS_getRVStdv();
+//int OPS_getRVPDF();
+//int OPS_getRVCDF();
+//int OPS_getRVInverseCDF();
+//int OPS_getLSFTags();
+//int OPS_addCorrelate();
+//int OPS_performanceFunction(); // limit state function
+//int OPS_gradPerformanceFunction(); // limit state function
+//int OPS_probabilityTransformation();
+//int OPS_transformUtoX();
+//int OPS_startPoint();
+//int OPS_randomNumberGenerator();
+//int OPS_reliabilityConvergenceCheck();
+//int OPS_searchDirection();
+//int OPS_meritFunctionCheck();
+//int OPS_stepSizeRule();
+//int OPS_rootFinding();
+//int OPS_findDesignPoint();
+//int OPS_findCurvatures();
+//int OPS_functionEvaluator();
+//int OPS_gradientEvaluator();
+//int OPS_wipeReliability();
+//int OPS_runFOSMAnalysis();
+//int OPS_runFORMAnalysis();
+//int OPS_runSORMAnalysis();
+//int OPS_runImportanceSamplingAnalysis();
+//ReliabilityDomain* OPS_GetReliabilityDomain();
 
 /* OpenSeesCommands.cpp */
 int OPS_wipe();
@@ -466,8 +464,8 @@ void* OPS_ParallelDisplacementControl();
 void* OPS_MumpsSolver();
 
 // Sensitivity:BEGIN /////////////////////////////////////////////
-int OPS_computeGradients();
-int OPS_sensitivityAlgorithm();
+//int OPS_computeGradients();
+//int OPS_sensitivityAlgorithm();
 // Sensitivity:END /////////////////////////////////////////////
 
 /* Defined in its own class.cpp*/
@@ -578,6 +576,18 @@ void* OPS_ModifiedNewton();
 void* OPS_Broyden();
 void* OPS_BFGS();
 
+int FeViewer_setVRP();
+int FeViewer_setVPN();
+int FeViewer_setVUP();
+int FeViewer_setViewWindow();
+int FeViewer_setPlaneDist();
+int FeViewer_setProjectionMode();
+int FeViewer_setFillMode();
+int FeViewer_setPRP();
+int FeViewer_setPortWindow();
+int FeViewer_displayModel();
+int FeViewer_clearImage();
+int FeViewer_saveImage();
 //////////////////////////////////////////////////////
 
 // commands that changed or added:

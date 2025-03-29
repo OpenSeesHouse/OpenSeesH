@@ -27,20 +27,24 @@
 #define SmoothIMK_h
 
 #include <UniaxialMaterial.h>
-
 class SmoothIMK : public UniaxialMaterial
 {
 public:
+	enum ebranch { precap, postcap, residual, failing, failed, peakOriented, pinching };
 	SmoothIMK(int tag,
 		double pd1, double pf1,
 		double pd2, double pf2,
 		double pd3, double pf3,
+		double pdu, 
 		double nd1, double nf1,
 		double nd2, double nf2,
 		double nd3, double nf3,
+		double ndu,
 		double gama, double _c,
 		double r0, double r1, double r2,
 		int cyclicRule,
+		double pinchXPos, double pinchYPos,
+		double pinchXNeg, double pinchYNeg,
 		double sigInit = 0.0);
 
 	SmoothIMK(void);
@@ -72,48 +76,65 @@ public:
 
 	virtual double getEnergy() { return EnergyP; };
 
-	double getInitYieldStrain() { return Fy / E0; }
+	double getInitYieldStrain() { return pd1; }
 	virtual void resetEnergy(void) { EnergyP = 0; }
+	virtual Response* setResponse(const char** argv, int argc,
+		OPS_Stream& theOutputStream);
+	virtual int getResponse(int responseID, Information& matInformation);
 
 protected:
 
 private:
-	double pf1, pd1, pf2, pd2, pf3, pd3;
-	double nf1, nd1, nf2, nd2, nf3, nd3;
+	double pf1, pd1, pf2, pd2, pf3, pd3, pdu;
+	double nf1, nd1, nf2, nd2, nf3, nd3, ndu;
 	double r0, r1, r2;
 	int cyclicRule;  // 1:bilinear, 2:pinched, 3:peak-oriented
 	double FailEnerg, c;			//damage parameters
+	double pinchXPos, pinchXNeg, pinchYPos, pinchYNeg;
 	double FydP, FydN;		//Pos and Neg Fy's affected by damage
 	double ExcurEnergy;
-	void updateDamage();
 	double EnergyP; //by SAJalali
 	double sigini; // initial 
 	
 	//HISTORY VARIABLES
 	double epsminP; //  = hstvP(1) : max eps in compression
 	double epsmaxP; //  = hstvP(2) : max eps in tension
-	double epsplP;  //  = hstvP(3) : plastic excursion
+	double epsLimitP;  //  = hstvP(3) : plastic excursion
 	double epss0P;  //  = hstvP(4) : eps at asymptotes intersection
 	double sigs0P;  //  = hstvP(5) : sig at asymptotes intersection
 	double epssrP;  //  = hstvP(6) : eps at last inversion point
 	double sigsrP;  //  = hstvP(7) : sig at last inversion point
-	int    statP;    //  = hstvP(8) : index for loading/unloading
+	//int    stat, statP;    //  = hstvP(8) : index for loading/unloading
+	bool isPosDir, isPosDirP;
+	ebranch branch, branchP;
 	// hstv : STEEL HISTORY VARIABLES   
 	double epsP;  //  = strain at previous converged step
 	double sigP;  //  = stress at previous converged step
 	double eP;    //   stiffness modulus at last converged step;
-
+	double slopeRat, slopeRatP;
 	double epsmin;
 	double epsmax;
-	double epspl;
+	double epsLimit;
 	double epss0;
 	double sigs0;
 	double epsr;
 	double sigr;
-	int    stat;
 	double sig;
 	double e;
 	double eps;   //  = strain at current step
+	double EshP, EshN, E0p, E0n;
+	double R0, R0P;
+	double FcP, FcN;
+	double FrP, FrN;
+	bool onEnvelope, onEnvelopeP;
+	double epsPl, epsPlP;
+	void updateDamage();
+	void updateAsymptote();
+	void bilinAsymptote();
+	void peakOrientedAsymptote();
+	void pinchedAsymptote();
+	ebranch nextBranch(ebranch branch);
+	void getEnvelope(double eps, double& targStress, SmoothIMK::ebranch& targBranch, double& k, double& limitEps);
 };
 
 

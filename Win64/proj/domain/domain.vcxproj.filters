@@ -25,23 +25,17 @@
     <Filter Include="pattern">
       <UniqueIdentifier>{0fa41bba-154e-4331-b3e1-5aeebf31646f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="pattern\drm">
-      <UniqueIdentifier>{e12a039c-8b2f-4558-8063-00be340d030e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="groundMotion">
       <UniqueIdentifier>{ac9cab52-85cd-4263-a08f-e46f657d3683}</UniqueIdentifier>
     </Filter>
     <Filter Include="timeSeries">
       <UniqueIdentifier>{8a954b04-a625-4b6d-8c6e-8f8827912b7c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="region">
-      <UniqueIdentifier>{2a3ebe70-1c27-4ec0-b136-1eced6a30558}</UniqueIdentifier>
-    </Filter>
     <Filter Include="load\shell">
       <UniqueIdentifier>{171577b3-4b22-46e8-929e-386e834719f0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="IGA">
-      <UniqueIdentifier>{a96d0202-a515-4f90-abe6-6267b6821aad}</UniqueIdentifier>
+    <Filter Include="parameter">
+      <UniqueIdentifier>{7d1a98ff-08a6-4d5f-ae25-ed8fca6f5a18}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -72,9 +66,6 @@
     <ClCompile Include="..\..\..\SRC\domain\domain\single\SingleDomPC_Iter.cpp">
       <Filter>domain</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\domain\domain\single\SingleDomParamIter.cpp">
-      <Filter>domain</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\SRC\domain\domain\single\SingleDomSP_Iter.cpp">
       <Filter>domain</Filter>
     </ClCompile>
@@ -85,36 +76,6 @@
       <Filter>domain</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\domain\component\DomainComponent.cpp">
-      <Filter>component</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\domain\component\ElementParameter.cpp">
-      <Filter>component</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\domain\component\ElementStateParameter.cpp">
-      <Filter>component</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\domain\component\InitialStateParameter.cpp">
-      <Filter>component</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\domain\component\MatParameter.cpp">
-      <Filter>component</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\domain\component\MaterialStageParameter.cpp">
-      <Filter>component</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\domain\component\NodeResponseParameter.cpp">
-      <Filter>component</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\domain\component\Parameter.cpp">
-      <Filter>component</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\domain\component\RVParameter.cpp">
-      <Filter>component</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\domain\component\TclParameterCommands.cpp">
-      <Filter>component</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\domain\component\TclUpdateMaterialCommand.cpp">
       <Filter>component</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\domain\load\ElementalLoadIter.cpp">
@@ -192,32 +153,8 @@
     <ClCompile Include="..\..\..\SRC\domain\pattern\PeerNGAMotion.cpp">
       <Filter>pattern</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\domain\pattern\TclPatternCommand.cpp">
-      <Filter>pattern</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\SRC\domain\pattern\UniformExcitation.cpp">
       <Filter>pattern</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\domain\pattern\drm\DRMBoundaryLayerDecorator.cpp">
-      <Filter>pattern\drm</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\domain\pattern\drm\DRMInputHandler.cpp">
-      <Filter>pattern\drm</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\domain\pattern\drm\DRMLoadPattern.cpp">
-      <Filter>pattern\drm</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\domain\pattern\drm\DRMLoadPatternWrapper.cpp">
-      <Filter>pattern\drm</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\domain\pattern\drm\GeometricBrickDecorator.cpp">
-      <Filter>pattern\drm</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\domain\pattern\drm\Mesh3DSubdomain.cpp">
-      <Filter>pattern\drm</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\domain\pattern\drm\PlaneDRMInputHandler.cpp">
-      <Filter>pattern\drm</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\domain\groundMotion\GroundMotion.cpp">
       <Filter>groundMotion</Filter>
@@ -228,13 +165,7 @@
     <ClCompile Include="..\..\..\SRC\domain\groundMotion\InterpolatedGroundMotion.cpp">
       <Filter>groundMotion</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\domain\groundMotion\TclGroundMotionCommand.cpp">
-      <Filter>groundMotion</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\SRC\domain\pattern\ConstantSeries.cpp">
-      <Filter>timeSeries</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\domain\pattern\DiscretizedRandomProcessSeries.cpp">
       <Filter>timeSeries</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\domain\pattern\LinearSeries.cpp">
@@ -255,15 +186,6 @@
     <ClCompile Include="..\..\..\SRC\domain\pattern\RectangularSeries.cpp">
       <Filter>timeSeries</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\domain\pattern\SimulatedRandomProcessSeries.cpp">
-      <Filter>timeSeries</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\domain\pattern\TclSeriesCommand.cpp">
-      <Filter>timeSeries</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\domain\pattern\TclSeriesIntegratorCommand.cpp">
-      <Filter>timeSeries</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\SRC\domain\pattern\TimeSeries.cpp">
       <Filter>timeSeries</Filter>
     </ClCompile>
@@ -279,20 +201,11 @@
     <ClCompile Include="..\..\..\SRC\domain\pattern\TrigSeries.cpp">
       <Filter>timeSeries</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\domain\region\MeshRegion.cpp">
-      <Filter>region</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\domain\region\TclRegionCommands.cpp">
-      <Filter>region</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\SRC\domain\load\Beam2dPartialUniformLoad.cpp">
       <Filter>load\beam</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\domain\pattern\SimpsonTimeSeriesIntegrator.cpp">
       <Filter>timeSeries</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\domain\component\LoadFactorParameter.cpp">
-      <Filter>component</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\domain\load\Beam2dThermalAction.cpp">
       <Filter>load\beam</Filter>
@@ -315,23 +228,47 @@
     <ClCompile Include="..\..\..\SRC\domain\load\Beam3dPartialUniformLoad.cpp">
       <Filter>load\beam</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\domain\IGA\gaussQuadrature.cpp">
-      <Filter>IGA</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\domain\IGA\IGAFollowerLoad.cpp">
-      <Filter>IGA</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\domain\IGA\IGASurfacePatch.cpp">
-      <Filter>IGA</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\domain\IGA\NurbsDers.cpp">
-      <Filter>IGA</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\SRC\domain\pattern\RampSeries.cpp">
       <Filter>timeSeries</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\domain\pattern\MPAccSeries.cpp">
       <Filter>timeSeries</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\SRC\element\surfaceLoad\SurfaceLoad.cpp">
+      <Filter>load</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\SRC\element\ElementalLoad.cpp">
+      <Filter>load</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\SRC\domain\component\ElementParameter.cpp">
+      <Filter>parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\SRC\domain\component\ElementStateParameter.cpp">
+      <Filter>parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\SRC\domain\component\InitialStateParameter.cpp">
+      <Filter>parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\SRC\domain\component\LoadFactorParameter.cpp">
+      <Filter>parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\SRC\domain\component\MaterialStageParameter.cpp">
+      <Filter>parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\SRC\domain\component\MatParameter.cpp">
+      <Filter>parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\SRC\domain\component\NodeResponseParameter.cpp">
+      <Filter>parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\SRC\domain\component\Parameter.cpp">
+      <Filter>parameter</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\SRC\domain\domain\single\SingleDomParamIter.cpp">
+      <Filter>domain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\SRC\domain\region\MeshRegion.cpp">
+      <Filter>domain</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -374,9 +311,6 @@
     <ClInclude Include="..\..\..\SRC\domain\domain\single\SingleDomPC_Iter.h">
       <Filter>domain</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\SRC\domain\domain\single\SingleDomParamIter.h">
-      <Filter>domain</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\SRC\domain\domain\single\SingleDomSP_Iter.h">
       <Filter>domain</Filter>
     </ClInclude>
@@ -390,30 +324,6 @@
       <Filter>domain</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\domain\component\DomainComponent.h">
-      <Filter>component</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\domain\component\ElementParameter.h">
-      <Filter>component</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\domain\component\ElementStateParameter.h">
-      <Filter>component</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\domain\component\InitialStateParameter.h">
-      <Filter>component</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\domain\component\MatParameter.h">
-      <Filter>component</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\domain\component\MaterialStageParameter.h">
-      <Filter>component</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\domain\component\NodeResponseParameter.h">
-      <Filter>component</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\domain\component\Parameter.h">
-      <Filter>component</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\domain\component\RVParameter.h">
       <Filter>component</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\domain\load\ElementalLoadIter.h">
@@ -494,27 +404,6 @@
     <ClInclude Include="..\..\..\SRC\domain\pattern\UniformExcitation.h">
       <Filter>pattern</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\SRC\domain\pattern\drm\DRMBoundaryLayerDecorator.h">
-      <Filter>pattern\drm</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\domain\pattern\drm\DRMInputHandler.h">
-      <Filter>pattern\drm</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\domain\pattern\drm\DRMLoadPattern.h">
-      <Filter>pattern\drm</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\domain\pattern\drm\DRMLoadPatternWrapper.h">
-      <Filter>pattern\drm</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\domain\pattern\drm\GeometricBrickDecorator.h">
-      <Filter>pattern\drm</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\domain\pattern\drm\Mesh3DSubdomain.h">
-      <Filter>pattern\drm</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\domain\pattern\drm\PlaneDRMInputHandler.h">
-      <Filter>pattern\drm</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\SRC\domain\groundMotion\GroundMotion.h">
       <Filter>groundMotion</Filter>
     </ClInclude>
@@ -525,9 +414,6 @@
       <Filter>groundMotion</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\domain\pattern\ConstantSeries.h">
-      <Filter>timeSeries</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\domain\pattern\DiscretizedRandomProcessSeries.h">
       <Filter>timeSeries</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\domain\pattern\LinearSeries.h">
@@ -548,9 +434,6 @@
     <ClInclude Include="..\..\..\SRC\domain\pattern\RectangularSeries.h">
       <Filter>timeSeries</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\SRC\domain\pattern\SimulatedRandomProcessSeries.h">
-      <Filter>timeSeries</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\SRC\domain\pattern\TimeSeries.h">
       <Filter>timeSeries</Filter>
     </ClInclude>
@@ -566,17 +449,11 @@
     <ClInclude Include="..\..\..\SRC\domain\pattern\TrigSeries.h">
       <Filter>timeSeries</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\SRC\domain\region\MeshRegion.h">
-      <Filter>region</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\SRC\domain\load\Beam2dPartialUniformLoad.h">
       <Filter>load\beam</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\domain\pattern\SimpsonTimeSeriesIntegrator.h">
       <Filter>timeSeries</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\domain\component\LoadFactorParameter.h">
-      <Filter>component</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\domain\load\Beam2dThermalAction.h">
       <Filter>load\beam</Filter>
@@ -599,20 +476,44 @@
     <ClInclude Include="..\..\..\SRC\domain\load\Beam3dPartialUniformLoad.h">
       <Filter>load\beam</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\SRC\domain\IGA\gaussQuadrature.h">
-      <Filter>IGA</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\domain\IGA\IGAFollowerLoad.h">
-      <Filter>IGA</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\domain\IGA\IGASurfacePatch.h">
-      <Filter>IGA</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\domain\IGA\NurbsDers.h">
-      <Filter>IGA</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\SRC\domain\pattern\RampSeries.h">
       <Filter>timeSeries</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\SRC\element\surfaceLoad\SurfaceLoad.h">
+      <Filter>load</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\SRC\element\ElementalLoad.h">
+      <Filter>load</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\SRC\domain\component\ElementParameter.h">
+      <Filter>parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\SRC\domain\component\ElementStateParameter.h">
+      <Filter>parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\SRC\domain\component\InitialStateParameter.h">
+      <Filter>parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\SRC\domain\component\LoadFactorParameter.h">
+      <Filter>parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\SRC\domain\component\MaterialStageParameter.h">
+      <Filter>parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\SRC\domain\component\MatParameter.h">
+      <Filter>parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\SRC\domain\component\NodeResponseParameter.h">
+      <Filter>parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\SRC\domain\component\Parameter.h">
+      <Filter>parameter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\SRC\domain\domain\single\SingleDomParamIter.h">
+      <Filter>domain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\SRC\domain\region\MeshRegion.h">
+      <Filter>domain</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

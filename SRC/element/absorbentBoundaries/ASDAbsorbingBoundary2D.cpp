@@ -193,7 +193,7 @@ OPS_ASDAbsorbingBoundary2D(void)
         numData = 1;
         int tsTag = 0;
         // util: get x
-        auto get_fx = [numData, &tsTag, &fx, descr]() -> bool {
+        auto get_fx = [&numData, &tsTag, &fx, descr]() -> bool {
             if (OPS_GetInt(&numData, &tsTag) != 0) {
                 opserr << "ASDAbsorbingBoundary2D ERROR: Invalid integer for -fx optional time series.\n" << descr;
                 return false;
@@ -206,7 +206,7 @@ OPS_ASDAbsorbingBoundary2D(void)
             return true;
         };
         // util: get y
-        auto get_fy = [numData, &tsTag, &fy, descr]() -> bool {
+        auto get_fy = [&numData, &tsTag, &fy, descr]() -> bool {
             if (OPS_GetInt(&numData, &tsTag) != 0) {
                 opserr << "ASDAbsorbingBoundary2D ERROR: Invalid integer for -fy optional time series.\n" << descr;
                 return false;

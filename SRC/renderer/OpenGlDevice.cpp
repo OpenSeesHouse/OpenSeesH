@@ -22,7 +22,7 @@
 // $Date: 2009-05-16 00:24:58 $
 // $Source: /usr/local/cvs/OpenSees/SRC/renderer/OpenGlDevice.cpp,v $
                                                                         
-#if !_DLL                                                                    
+#if !_NET                                                                    
 #include <OpenGlDevice.h>
 //#include <OPS_Globals.h>
 #include <stdlib.h>

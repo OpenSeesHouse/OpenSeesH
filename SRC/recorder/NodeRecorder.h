@@ -55,7 +55,7 @@ class NodeRecorder: public Recorder
 		 bool echoTimeFlag, TimeSeries **timeSeries);
 
     ~NodeRecorder();
-#if _DLL
+#if _NET
 	OPS_Stream* getOutputHandler() {
 		return theOutputHandler;
 	}

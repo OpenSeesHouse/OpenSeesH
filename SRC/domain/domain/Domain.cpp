@@ -374,17 +374,6 @@ Domain::~Domain()
   
   if (theSP_Iter != 0)
     delete theSP_Iter;
-	if (theParameters != 0)
-		delete theParameters;
-
-	if (theEleIter != 0)
-		delete theEleIter;
-
-	if (theNodIter != 0)
-		delete theNodIter;
-
-	if (theSP_Iter != 0)
-		delete theSP_Iter;
 
 	if (thePC_Iter != 0)
 		delete thePC_Iter;
@@ -478,7 +467,7 @@ Domain::addElement(Element* element)
 			return false;
 		}
 #endif    
-#if _DLL
+#if _NET
 		if (this->_DomainEvent_AddElement)
 			this->_DomainEvent_AddElement(element);
 #endif
@@ -501,7 +490,7 @@ Domain::addNode(Node* node)
 {
 	int nodTag = node->getTag();
 
-  TaggedObject *other = theNodes->getComponentPtr(nodTag);
+	TaggedObject *other = theNodes->getComponentPtr(nodTag);
   if (other != 0) {
     opserr << "Domain::addNode - node with tag " << nodTag << " already exists in model\n"; 
     return false;
@@ -510,7 +499,7 @@ Domain::addNode(Node* node)
   bool result = theNodes->addComponent(node);
   if (result == true) {
       node->setDomain(this);
-#if _DLL
+#if _NET
 	  if (this->_DomainEvent_AddNode)
 		  this->_DomainEvent_AddNode(node);
 #endif
@@ -628,7 +617,7 @@ Domain::addSP_Constraint(SP_Constraint* spConstraint)
 	}
 
 	spConstraint->setDomain(this);
-#if _DLL
+#if _NET
 	if (this->_DomainEvent_AddSP)
 		this->_DomainEvent_AddSP(spConstraint);
 #endif
@@ -784,7 +773,7 @@ Domain::addMP_Constraint(MP_Constraint* mpConstraint)
 
 	bool result = theMPs->addComponent(mpConstraint);
 	if (result == true) {
-#if _DLL
+#if _NET
 		if (this->_DomainEvent_AddMP)
 			this->_DomainEvent_AddMP(mpConstraint);
 #endif
@@ -815,7 +804,7 @@ Domain::addLoadPattern(LoadPattern* load)
 	bool result = theLoadPatterns->addComponent(load);
 	if (result == true) {
 		load->setDomain(this);
-#if _DLL
+#if _NET
 		if (this->_DomainEvent_AddLoadPattern)
 			this->_DomainEvent_AddLoadPattern(load);
 #endif
@@ -1106,7 +1095,7 @@ Domain::clearAll(void) {
 
 	dbEle = 0; dbNod = 0; dbSPs = 0; dbPCs = 0; dbMPs = 0; dbLPs = 0; dbParam = 0;
 
-#if _DLL
+#if _NET
 	if (this->_DomainEvent_ClearAll)
 		this->_DomainEvent_ClearAll();
 #endif
@@ -1129,7 +1118,7 @@ Domain::removeElement(int tag)
 	// perform a downward cast to an Element (safe as only Element added to
 	// this container, 0 the Elements DomainPtr and return the result of the cast  
 	Element* result = (Element*)mc;
-#if _DLL
+#if _NET
 	if (this->_DomainEvent_RemoveElement)
 		this->_DomainEvent_RemoveElement(result);
 #endif
@@ -1196,7 +1185,7 @@ Domain::removeNode(int tag)
   Node *result = (Node *)mc;
   // result->setDomain(0);
   
-#if _DLL
+#if _NET
   if (this->_DomainEvent_RemoveNode)
 	  this->_DomainEvent_RemoveNode(result);
 #endif
@@ -1270,7 +1259,7 @@ Domain::removeSP_Constraint(int tag)
 	// and return the result of the cast    
 	SP_Constraint* result = (SP_Constraint*)mc;
 	// result->setDomain(0);
-#if _DLL
+#if _NET
 	if (this->_DomainEvent_RemoveSP)
 		this->_DomainEvent_RemoveSP(result);
 #endif
@@ -1316,7 +1305,7 @@ Domain::removeMP_Constraint(int tag)
 	// perform a downward cast, set the objects domain pointer to 0
 	// and return the result of the cast        
 	MP_Constraint* result = (MP_Constraint*)mc;
-#if _DLL
+#if _NET
 	if (this->_DomainEvent_RemoveMP)
 		this->_DomainEvent_RemoveMP(result);
 #endif
@@ -1346,7 +1335,7 @@ Domain::removeMP_Constraints(int nodeTag)
 	for (int i = 0; i < sizeTags; i++) {
 		int  tag = tagsToRemove(i);
 		TaggedObject* mc = theMPs->removeComponent(tag);
-#if _DLL
+#if _NET
 		if (this->_DomainEvent_RemoveMP)
 			this->_DomainEvent_RemoveMP((MP_Constraint*)mc);
 #endif
@@ -1486,7 +1475,7 @@ Domain::removeLoadPattern(int tag)
 		this->domainChange();
 
 	// finally return the load pattern
-#if _DLL
+#if _NET
 	if (this->_DomainEvent_RemoveLoadPattern)
 		this->_DomainEvent_RemoveLoadPattern(result);
 #endif
@@ -2625,7 +2614,7 @@ Domain::addRecorder(Recorder& theRecorder)
 		return -1;
 	}
 
-#if _DLL
+#if _NET
 	if (this->_DomainEvent_AddRecorder)
 		this->_DomainEvent_AddRecorder(&theRecorder);
 #endif
@@ -2661,7 +2650,7 @@ Domain::removeRecorders(void)
 	for (int i = 0; i < numRecorders; i++)
 		if (theRecorders[i] != 0)
 		{
-#if _DLL
+#if _NET
 			if (this->_DomainEvent_RemoveRecorder)
 				this->_DomainEvent_RemoveRecorder(theRecorders[i]);
 #endif
@@ -2692,7 +2681,7 @@ Domain::removeRecorder(int tag)
 	for (int i = 0; i < numRecorders; i++) {
 		if (theRecorders[i] != 0) {
 			if (theRecorders[i]->getTag() == tag) {
-#if _DLL
+#if _NET
 				if (this->_DomainEvent_RemoveRecorder)
 					this->_DomainEvent_RemoveRecorder(theRecorders[i]);
 #endif

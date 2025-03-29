@@ -34,7 +34,7 @@
 #include <Node.h>
 #include <tcl.h>
 #include <TclModelBuilder.h>
-#include <WrapperElement.h>
+//#include <WrapperElement.h>
 
 #include <map>
 #include <UniaxialMaterial.h>
@@ -42,11 +42,11 @@
 #include <SectionForceDeformation.h>
 #include <CrdTransf.h>
 #include <FrictionModel.h>
-#include <WrapperUniaxialMaterial.h>
-#include <WrapperNDMaterial.h>
-#include <LimitCurve.h>
-#include <WrapperLimitCurve.h>
-#include <ReliabilityDomain.h>
+//#include <WrapperUniaxialMaterial.h>
+//#include <WrapperNDMaterial.h>
+//#include <LimitCurve.h>
+//#include <WrapperLimitCurve.h>
+//#include <ReliabilityDomain.h>
 
 #include <OPS_Globals.h>
 
@@ -69,6 +69,7 @@ typedef struct limitCurveFunction {
     struct limitCurveFunction* next;
 } LimitCurveFunction;
 
+extern SimulationInformation simulationInfo;
 extern AnalysisModel* theAnalysisModel;
 extern EquiSolnAlgo* theAlgorithm;
 extern ConstraintHandler* theHandler;
@@ -90,7 +91,7 @@ static LimitCurveFunction* theLimitCurveFunctions = NULL;
 
 static Tcl_Interp* theInterp = 0;
 static Domain* theDomain = 0;
-static ReliabilityDomain* theReliabilityDomain = 0;
+//static ReliabilityDomain* theReliabilityDomain = 0;
 
 static TclModelBuilder* theModelBuilder = 0;
 
@@ -179,6 +180,9 @@ int OPS_ResetCurrentInputArg(int cArg)
     return 0;
 }
 
+SimulationInformation* OPS_GetSimulationInfo() {
+  return &simulationInfo;
+}
 //extern "C"
 int OPS_ResetInput(ClientData clientData,
     Tcl_Interp* interp,
@@ -216,7 +220,7 @@ int OPS_ResetInputNoBuilder(ClientData clientData,
 }
 
 extern "C"
-int OPS_GetIntInput(const int* numData, int* data)
+int OPS_GetIntInput(int* numData, int* data)
 {
     int size = *numData;
 
@@ -1044,151 +1048,151 @@ int OPS_GetNodeIncrDeltaDisp(int* nodeTag, int* sizeData, double* data)
     return 0;
 }
 
-int
-Tcl_addWrapperElement(eleObj* theEle, ClientData clientData, Tcl_Interp* interp, int argc,
-    TCL_Char** argv, Domain* domain, TclModelBuilder* builder)
-{
-    theInterp = interp;
-    theDomain = domain;
-    theModelBuilder = builder;
-    currentArgv = argv;
-    currentArg = 2;
-    maxArg = argc;
+//int
+//Tcl_addWrapperElement(eleObj* theEle, ClientData clientData, Tcl_Interp* interp, int argc,
+//    TCL_Char** argv, Domain* domain, TclModelBuilder* builder)
+//{
+//    theInterp = interp;
+//    theDomain = domain;
+//    theModelBuilder = builder;
+//    currentArgv = argv;
+//    currentArg = 2;
+//    maxArg = argc;
+//
+//    // get the current load factor
+//    double time = theDomain->getCurrentTime();
+//    double dt = theDomain->getCurrentTime() - time;
+//
+//    static modelState theModelState;
+//    theModelState.time = time;
+//    theModelState.dt = dt;
+//
+//    // invoke the ele function with isw = 0
+//    int isw = ISW_INIT;
+//    int result = 0;
+//    theEle->eleFunctPtr(theEle, &theModelState, 0, 0, &isw, &result);
+//
+//    if (result != 0) {
+//        opserr << "Tcl_addWrapperElement - failed in element function " << result << endln;
+//        return TCL_ERROR;
+//    }
+//
+//    WrapperElement* theElement = new WrapperElement(argv[1], theEle);
+//
+//    if (theDomain->addElement(theElement) == false) {
+//        opserr << "WARNING could not add element of type: " << argv[1] << " to the domain\n";
+//        delete theElement;
+//        return TCL_ERROR;
+//    }
+//
+//    return 0;
+//}
 
-    // get the current load factor
-    double time = theDomain->getCurrentTime();
-    double dt = theDomain->getCurrentTime() - time;
+//UniaxialMaterial*
+//Tcl_addWrapperUniaxialMaterial(matObj* theMat, ClientData clientData, Tcl_Interp* interp, int argc, TCL_Char** argv)
+//{
+//    theInterp = interp;
+//
+//    currentArgv = argv;
+//    currentArg = 2;
+//    maxArg = argc;
+//
+//    // get the current load factor
+//    static modelState theModelState;
+//    if (theDomain != 0) {
+//        double time = theDomain->getCurrentTime();
+//        double dt = theDomain->getCurrentTime() - time;
+//        theModelState.time = time;
+//        theModelState.dt = dt;
+//    }
+//
+//    // invoke the mat function with isw = 0
+//    int isw = ISW_INIT;
+//    int result = 0;
+//    theMat->matFunctPtr(theMat, &theModelState, 0, 0, 0, &isw, &result);
+//    int matType = theMat->matType; // GR added to support material
+//
+//    if (result != 0 || matType != OPS_UNIAXIAL_MATERIAL_TYPE) {
+//        opserr << "Tcl_addWrapperUniaxialMaterial - failed in element function " << result << endln;
+//        return 0;
+//    }
+//
+//    WrapperUniaxialMaterial* theMaterial = new WrapperUniaxialMaterial(argv[1], theMat);
+//
+//    return theMaterial;
+//}
 
-    static modelState theModelState;
-    theModelState.time = time;
-    theModelState.dt = dt;
+//NDMaterial*
+//Tcl_addWrapperNDMaterial(matObj* theMat, ClientData clientData, Tcl_Interp* interp, int argc,
+//    TCL_Char** argv, TclModelBuilder* builder)
+//{
+//    theInterp = interp;
+//
+//    theModelBuilder = builder;
+//    currentArgv = argv;
+//    currentArg = 2;
+//    maxArg = argc;
+//
+//    // get the current load factor
+//    static modelState theModelState;
+//    if (theDomain != 0) {
+//        double time = theDomain->getCurrentTime();
+//        double dt = theDomain->getCurrentTime() - time;
+//        theModelState.time = time;
+//        theModelState.dt = dt;
+//    }
+//
+//    // invoke the mat function with isw = 0
+//    int isw = ISW_INIT;
+//    int result = 0;
+//    theMat->matFunctPtr(theMat, &theModelState, 0, 0, 0, &isw, &result);
+//    int matType = theMat->matType; // GR added to support material
+//
+//    if (result != 0 || (matType != OPS_PLANESTRESS_TYPE &&
+//        matType != OPS_PLANESTRAIN_TYPE &&
+//        matType != OPS_THREEDIMENSIONAL_TYPE)) {
+//        opserr << "Tcl_addWrapperNDMaterial - failed in element function " << result << endln;
+//        return 0;
+//    }
+//
+//    WrapperNDMaterial* theMaterial = new WrapperNDMaterial(argv[1], theMat, theMat->matType);
+//
+//    return theMaterial;
+//}
 
-    // invoke the ele function with isw = 0
-    int isw = ISW_INIT;
-    int result = 0;
-    theEle->eleFunctPtr(theEle, &theModelState, 0, 0, &isw, &result);
-
-    if (result != 0) {
-        opserr << "Tcl_addWrapperElement - failed in element function " << result << endln;
-        return TCL_ERROR;
-    }
-
-    WrapperElement* theElement = new WrapperElement(argv[1], theEle);
-
-    if (theDomain->addElement(theElement) == false) {
-        opserr << "WARNING could not add element of type: " << argv[1] << " to the domain\n";
-        delete theElement;
-        return TCL_ERROR;
-    }
-
-    return 0;
-}
-
-UniaxialMaterial*
-Tcl_addWrapperUniaxialMaterial(matObj* theMat, ClientData clientData, Tcl_Interp* interp, int argc, TCL_Char** argv)
-{
-    theInterp = interp;
-
-    currentArgv = argv;
-    currentArg = 2;
-    maxArg = argc;
-
-    // get the current load factor
-    static modelState theModelState;
-    if (theDomain != 0) {
-        double time = theDomain->getCurrentTime();
-        double dt = theDomain->getCurrentTime() - time;
-        theModelState.time = time;
-        theModelState.dt = dt;
-    }
-
-    // invoke the mat function with isw = 0
-    int isw = ISW_INIT;
-    int result = 0;
-    theMat->matFunctPtr(theMat, &theModelState, 0, 0, 0, &isw, &result);
-    int matType = theMat->matType; // GR added to support material
-
-    if (result != 0 || matType != OPS_UNIAXIAL_MATERIAL_TYPE) {
-        opserr << "Tcl_addWrapperUniaxialMaterial - failed in element function " << result << endln;
-        return 0;
-    }
-
-    WrapperUniaxialMaterial* theMaterial = new WrapperUniaxialMaterial(argv[1], theMat);
-
-    return theMaterial;
-}
-
-NDMaterial*
-Tcl_addWrapperNDMaterial(matObj* theMat, ClientData clientData, Tcl_Interp* interp, int argc,
-    TCL_Char** argv, TclModelBuilder* builder)
-{
-    theInterp = interp;
-
-    theModelBuilder = builder;
-    currentArgv = argv;
-    currentArg = 2;
-    maxArg = argc;
-
-    // get the current load factor
-    static modelState theModelState;
-    if (theDomain != 0) {
-        double time = theDomain->getCurrentTime();
-        double dt = theDomain->getCurrentTime() - time;
-        theModelState.time = time;
-        theModelState.dt = dt;
-    }
-
-    // invoke the mat function with isw = 0
-    int isw = ISW_INIT;
-    int result = 0;
-    theMat->matFunctPtr(theMat, &theModelState, 0, 0, 0, &isw, &result);
-    int matType = theMat->matType; // GR added to support material
-
-    if (result != 0 || (matType != OPS_PLANESTRESS_TYPE &&
-        matType != OPS_PLANESTRAIN_TYPE &&
-        matType != OPS_THREEDIMENSIONAL_TYPE)) {
-        opserr << "Tcl_addWrapperNDMaterial - failed in element function " << result << endln;
-        return 0;
-    }
-
-    WrapperNDMaterial* theMaterial = new WrapperNDMaterial(argv[1], theMat, theMat->matType);
-
-    return theMaterial;
-}
-
-LimitCurve*
-Tcl_addWrapperLimitCurve(limCrvObj* theLimCrv, ClientData clientData, Tcl_Interp* interp, int argc, TCL_Char** argv)
-{
-    theInterp = interp;
-
-    //  theModelBuilder = builder;
-    currentArgv = argv;
-    currentArg = 2;
-    maxArg = argc;
-
-    // get the current load factor
-    static modelState theModelState;
-    if (theDomain != 0) {
-        double time = theDomain->getCurrentTime();
-        double dt = theDomain->getCurrentTime() - time;
-        theModelState.time = time;
-        theModelState.dt = dt;
-    }
-
-    // invoke the limit curve function with isw = 0
-    int isw = ISW_INIT;
-    int result;
-    theLimCrv->limCrvFunctPtr(theLimCrv, &theModelState, 0, 0, 0, &isw, &result);
-
-    if (result != 0) {
-        opserr << "Tcl_addWrapperLimitCurve - failed in limit curve function " << result << endln;
-        return 0;
-    }
-
-    WrapperLimitCurve* theLimitCurve = new WrapperLimitCurve(argv[1], theLimCrv);
-
-    return theLimitCurve;
-}
+//LimitCurve*
+//Tcl_addWrapperLimitCurve(limCrvObj* theLimCrv, ClientData clientData, Tcl_Interp* interp, int argc, TCL_Char** argv)
+//{
+//    theInterp = interp;
+//
+//    //  theModelBuilder = builder;
+//    currentArgv = argv;
+//    currentArg = 2;
+//    maxArg = argc;
+//
+//    // get the current load factor
+//    static modelState theModelState;
+//    if (theDomain != 0) {
+//        double time = theDomain->getCurrentTime();
+//        double dt = theDomain->getCurrentTime() - time;
+//        theModelState.time = time;
+//        theModelState.dt = dt;
+//    }
+//
+//    // invoke the limit curve function with isw = 0
+//    int isw = ISW_INIT;
+//    int result;
+//    theLimCrv->limCrvFunctPtr(theLimCrv, &theModelState, 0, 0, 0, &isw, &result);
+//
+//    if (result != 0) {
+//        opserr << "Tcl_addWrapperLimitCurve - failed in limit curve function " << result << endln;
+//        return 0;
+//    }
+//
+//    WrapperLimitCurve* theLimitCurve = new WrapperLimitCurve(argv[1], theLimCrv);
+//
+//    return theLimitCurve;
+//}
 
 extern "C" int
 OPS_InvokeMaterial(eleObject * theEle, int* mat, modelState * model, double* strain, double* stress, double* tang, int* isw)
@@ -1292,17 +1296,17 @@ OPS_GetDomain(void)
     return theDomain;
 }
 
-ReliabilityDomain*
-OPS_GetReliabilityDomain(void)
-{
-  return theReliabilityDomain;
-}
+//ReliabilityDomain*
+//OPS_GetReliabilityDomain(void)
+//{
+//  return theReliabilityDomain;
+//}
 
-void
-OPS_SetReliabilityDomain(ReliabilityDomain *theDomain)
-{
-  theReliabilityDomain = theDomain;
-}
+//void
+//OPS_SetReliabilityDomain(ReliabilityDomain *theDomain)
+//{
+//  theReliabilityDomain = theDomain;
+//}
 
 void
 TCL_OPS_setModelBuilder(TclModelBuilder* theNewBuilder)
@@ -1310,11 +1314,11 @@ TCL_OPS_setModelBuilder(TclModelBuilder* theNewBuilder)
     theModelBuilder = theNewBuilder;
 }
 
-LimitCurve*
-OPS_GetLimitCurve(int LimCrvTag)
-{
-    return OPS_getLimitCurve(LimCrvTag);
-}
+//LimitCurve*
+//OPS_GetLimitCurve(int LimCrvTag)
+//{
+//    return OPS_getLimitCurve(LimCrvTag);
+//}
 
 AnalysisModel**
 OPS_GetAnalysisModel(void)

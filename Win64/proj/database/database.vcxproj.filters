@@ -20,9 +20,6 @@
     <ClCompile Include="..\..\..\SRC\database\NEESData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\database\TclDatabaseCommands.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\SRC\database\FE_Datastore.h">

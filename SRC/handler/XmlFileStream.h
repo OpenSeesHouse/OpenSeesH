@@ -43,7 +43,7 @@ class XmlFileStream : public OPS_Stream
   int setFile(const char *fileName, openMode mode = OVERWRITE);
   int open(void);
   int close(void);
-#if _DLL
+#if _NET
   int closeHandler() {
 	  return this->close();
   }

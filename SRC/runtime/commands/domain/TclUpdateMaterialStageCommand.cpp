@@ -25,7 +25,7 @@
 // $Date: 2007-10-16 00:15:07 $
 //
 #include <ID.h>
-#include <BasicModelBuilder.h>
+#include <../runtime/runtime/BasicModelBuilder.h>
 #include <PressureIndependMultiYield.h>
 #include <PressureDependMultiYield.h>
 #include <FluidSolidPorousMaterial.h>

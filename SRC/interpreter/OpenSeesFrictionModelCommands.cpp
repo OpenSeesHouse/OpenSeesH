@@ -25,10 +25,10 @@
 #include <map>
 
 void* OPS_Coulomb();
-void* OPS_VelDependent();
-void* OPS_VelPressureDep();
-void* OPS_VelDepMultiLinear();
-void* OPS_VelNormalFrcDep();
+//void* OPS_VelDependent();
+//void* OPS_VelPressureDep();
+//void* OPS_VelDepMultiLinear();
+//void* OPS_VelNormalFrcDep();
 
 namespace {
 
@@ -48,10 +48,10 @@ namespace {
     static int setUpFrictionModels(void)
     {
         frictionModelsMap.insert(std::make_pair("Coulomb", &OPS_Coulomb));
-        frictionModelsMap.insert(std::make_pair("VelDependent", &OPS_VelDependent));
-        frictionModelsMap.insert(std::make_pair("VelPressureDep", &OPS_VelPressureDep));
-        frictionModelsMap.insert(std::make_pair("VelDepMultiLinear", &OPS_VelDepMultiLinear));
-        frictionModelsMap.insert(std::make_pair("VelNormalFrcDep", &OPS_VelNormalFrcDep));
+        //frictionModelsMap.insert(std::make_pair("VelDependent", &OPS_VelDependent));
+        //frictionModelsMap.insert(std::make_pair("VelPressureDep", &OPS_VelPressureDep));
+        //frictionModelsMap.insert(std::make_pair("VelDepMultiLinear", &OPS_VelDepMultiLinear));
+        //frictionModelsMap.insert(std::make_pair("VelNormalFrcDep", &OPS_VelNormalFrcDep));
 
         return 0;
     }

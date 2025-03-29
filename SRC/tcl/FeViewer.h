@@ -20,44 +20,42 @@
                                                                         
 // $Revision: 1.9 $
 // $Date: 2007-06-26 20:13:25 $
-// $Source: /usr/local/cvs/OpenSees/SRC/tcl/TclFeViewer.h,v $
+// $Source: /usr/local/cvs/OpenSees/SRC/tcl/FeViewer.h,v $
                                                                         
                                                                         
-// File: ~/modelbuilder/tcl/TclFeViewer.h.h
+// File: ~/modelbuilder/tcl/FeViewer.h.h
 // 
 // Written: fmk 
 // Created: 4/99
 // Revision: A
 //
-// Description: This file contains the class definition for TclFeViewer.
-// A TclFeViewer adds commands to the interpreter for displaying the model.
+// Description: This file contains the class definition for FeViewer.
+// A FeViewer adds commands to the interpreter for displaying the model.
 //
 // What: "@(#) ModelBuilder.h, revA"
 
-#ifndef TclFeViewer_h
-#define TclFeViewer_h
+#ifndef FeViewer_h
+#define FeViewer_h
 
 #include <Recorder.h>
 class Renderer;
 class ColorMap;
 
-extern "C" {
-#include <tcl.h>
-}
+//extern "C" {
+//#include <tcl.h>
+//}
 
-class TclFeViewer : public Recorder
+class FeViewer : public Recorder
 {
   public:
-    TclFeViewer(const char *title, int xLoc, int yLoc, int width, int height,
-		Domain &theDomain, int wipeFlag, Tcl_Interp *interp,
-        double deltaT = 0.0, double relDeltaTTol = 0.00001);
+    FeViewer(const char *title, int xLoc, int yLoc, int width, int height,
+		Domain &theDomain, int wipeFlag, double deltaT = 0.0, double relDeltaTTol = 0.00001);
 
-    TclFeViewer(const char *title, int xLoc, int yLoc, int width, int height,
-        const char *fileName, Domain &theDomain, Tcl_Interp *interp,
-        double deltaT = 0.0, double relDeltaTTol = 0.00001);
+    FeViewer(const char *title, int xLoc, int yLoc, int width, int height,
+        const char *fileName, Domain &theDomain, double deltaT = 0.0, double relDeltaTTol = 0.00001);
 
-    TclFeViewer();
-    ~TclFeViewer();
+    FeViewer();
+    ~FeViewer();
 
     int buildFE_Model(void);
     

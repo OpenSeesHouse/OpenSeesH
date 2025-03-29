@@ -54,7 +54,7 @@ Matrix NDMaterial::errMatrix(1,1);
 Vector NDMaterial::errVector(1);
 
 static MapOfTaggedObjects theNDMaterialObjects;
-#if _DLL
+#if _NET
 static ModelBuilderNDMaterialEventHandler modelBuilderNDMaterialEventHandler;
 void OPSDLL_SetNDMaterialEventHandlers(ModelBuilder_AddNDMaterial add, ModelBuilder_RemoveNDMaterial remove, ModelBuilder_ClearAllNDMaterial clear) {
 	modelBuilderNDMaterialEventHandler._ModelBuilder_AddNDMaterial = add;
@@ -64,7 +64,7 @@ void OPSDLL_SetNDMaterialEventHandlers(ModelBuilder_AddNDMaterial add, ModelBuil
 #endif
 bool OPS_addNDMaterial(NDMaterial *newComponent)
 {
-#if _DLL
+#if _NET
 	bool ret = theNDMaterialObjects.addComponent(newComponent);
 	if (ret && modelBuilderNDMaterialEventHandler._ModelBuilder_AddNDMaterial != 0) {
 		modelBuilderNDMaterialEventHandler._ModelBuilder_AddNDMaterial(newComponent);
@@ -80,7 +80,7 @@ bool OPS_removeNDMaterial(int tag)
     TaggedObject* obj = theNDMaterialObjects.removeComponent(tag);
     if (obj != 0) {
 	delete obj;
-#if _DLL
+#if _NET
 	if (modelBuilderNDMaterialEventHandler._ModelBuilder_RemoveNDMaterial != 0) {
 		modelBuilderNDMaterialEventHandler._ModelBuilder_RemoveNDMaterial(tag);
 	}
@@ -105,7 +105,7 @@ NDMaterial *OPS_getNDMaterial(int tag)
 void OPS_clearAllNDMaterial(void)
 {
     theNDMaterialObjects.clearAll();
-#if _DLL
+#if _NET
 	if (modelBuilderNDMaterialEventHandler._ModelBuilder_ClearAllNDMaterial != 0) {
 		modelBuilderNDMaterialEventHandler._ModelBuilder_ClearAllNDMaterial();
 	}

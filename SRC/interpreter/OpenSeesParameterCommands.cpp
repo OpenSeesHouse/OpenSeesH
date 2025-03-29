@@ -32,7 +32,7 @@
 #include <OPS_Stream.h>
 #include <Parameter.h>
 #include <ParameterIter.h>
-#include <RVParameter.h>
+//#include <RVParameter.h>
 #include <elementAPI.h>
 #include <stdlib.h>
 #include <string.h>
@@ -41,9 +41,9 @@
 
 #ifdef _RELIABILITY
 
-#include <ReliabilityDomain.h>
+//#include <ReliabilityDomain.h>
 
-ReliabilityDomain *OPS_GetReliabilityDomain();
+//ReliabilityDomain *OPS_GetReliabilityDomain();
 
 #endif
 
@@ -124,7 +124,7 @@ int OPS_Parameter() {
   Element *element = 0;
   MeshRegion *region = 0;
   LoadPattern *pattern = 0;
-  RandomVariable *theRV = 0;
+  //RandomVariable *theRV = 0;
   DomainComponent *theObject = 0;
   std::vector<const char *> argv;
 
@@ -333,13 +333,13 @@ int OPS_Parameter() {
   }
 
   // add parameter
-  if (theRV != 0) {
-    RVParameter *newRVParameter =
-        new RVParameter(paramTag, theRV, newParameter);
-    theDomain->addParameter(newRVParameter);
-  } else {
+  //if (theRV != 0) {
+  //  RVParameter *newRVParameter =
+  //      new RVParameter(paramTag, theRV, newParameter);
+  //  theDomain->addParameter(newRVParameter);
+  //} else {
     theDomain->addParameter(newParameter);
-  }
+  //}
 
   if (OPS_SetIntOutput(&num, &paramTag, true) < 0) {
     opserr << "WARNING: parameter - failed to set parameter tag\n";

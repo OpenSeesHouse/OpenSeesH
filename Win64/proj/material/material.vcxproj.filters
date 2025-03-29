@@ -4,23 +4,8 @@
     <Filter Include="uniaxial">
       <UniqueIdentifier>{bc332476-e2aa-4b41-b3a0-ea37ab6bd6bf}</UniqueIdentifier>
     </Filter>
-    <Filter Include="uniaxial\fedeas">
-      <UniqueIdentifier>{17e6d5d3-c9e1-4870-a449-13ae4d58fb52}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="uniaxial\drain">
-      <UniqueIdentifier>{5fd1b4c8-ead2-4216-a7fb-970ebb495472}</UniqueIdentifier>
-    </Filter>
     <Filter Include="uniaxial\py_tz_qz">
       <UniqueIdentifier>{8594df04-6b78-4ab8-8def-e2c7f0da533f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="uniaxial\snap">
-      <UniqueIdentifier>{27b2bc90-d8a6-4fdb-a6c9-d23e789c4ae3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="uniaxial\LimitState">
-      <UniqueIdentifier>{efbb9b17-b057-460b-8d7d-c9335fdc32c5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="uniaxial\backbone">
-      <UniqueIdentifier>{fa11160b-5b70-4e78-b792-d71ee1dc7e91}</UniqueIdentifier>
     </Filter>
     <Filter Include="nD">
       <UniqueIdentifier>{759adb02-2319-4a20-b4c5-4e9354bcbbc8}</UniqueIdentifier>
@@ -36,12 +21,6 @@
     </Filter>
     <Filter Include="nD\wrappers">
       <UniqueIdentifier>{8097a352-49bb-4a30-b5f3-105810415f63}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="nD\feap">
-      <UniqueIdentifier>{de83219b-2a2e-4400-b729-698f242836aa}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="nD\cyclicSoil">
-      <UniqueIdentifier>{aa0816d3-4a68-438e-904e-c2628eeac21c}</UniqueIdentifier>
     </Filter>
     <Filter Include="nD\reinforcedConcretePlaneStress">
       <UniqueIdentifier>{2f58f1a4-b4c9-458d-b213-195a92972cb0}</UniqueIdentifier>
@@ -59,10 +38,6 @@
     <Filter Include="section\repres\patch">
       <UniqueIdentifier>{2125e4b8-95b9-48e7-ab41-15c4bd1afe96}</UniqueIdentifier>
     </Filter>
-    <Filter Include="section\repres\reinfBar">
-      <UniqueIdentifier>{94426a91-c11b-4a54-bf6b-c4eb51a6d19e}</UniqueIdentifier>
-      <Extensions>.cpp; .h</Extensions>
-    </Filter>
     <Filter Include="section\repres\reinfLayer">
       <UniqueIdentifier>{c2774fa5-4854-4aad-a185-52ff226c62af}</UniqueIdentifier>
       <Extensions>.cpp; .h</Extensions>
@@ -74,38 +49,11 @@
     <Filter Include="section\fiber">
       <UniqueIdentifier>{c9fa4252-00fb-44b9-8e34-19885e923686}</UniqueIdentifier>
     </Filter>
-    <Filter Include="section\ysSection">
-      <UniqueIdentifier>{a87e8894-9aff-46a8-9c77-67f9ac4aff25}</UniqueIdentifier>
-    </Filter>
     <Filter Include="section\integration">
       <UniqueIdentifier>{50795814-6271-484c-82e6-c82e5429ca2c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="yieldSurface">
-      <UniqueIdentifier>{9b9c944f-03ca-40c1-bca8-17c0f2b25fa3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="yieldSurface\yieldSurfaceBC">
-      <UniqueIdentifier>{0fc59005-15fe-4d30-b623-004a6cc647cd}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="yieldSurface\evolution">
-      <UniqueIdentifier>{aa21076d-ec8a-4e9c-8b21-79d06bfd1eb2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="yieldSurface\plasticHardening">
-      <UniqueIdentifier>{705a4ae4-3dce-45bd-96a7-6d75f2b0f0c9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="nD\matCMM">
-      <UniqueIdentifier>{03aae77f-2de0-490a-8ce5-d376296d50cd}</UniqueIdentifier>
-    </Filter>
     <Filter Include="nD\stressDensityModel">
       <UniqueIdentifier>{6e3e6f77-1c02-4196-ab9f-b240564e4535}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="uniaxial\stiffness">
-      <UniqueIdentifier>{2b934f0c-e610-4ccf-a7a3-34e8bd5cfe3e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="uniaxial\strength">
-      <UniqueIdentifier>{7ffd3a5e-e58e-4baf-8cd9-7972fd481e56}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="uniaxial\unloading">
-      <UniqueIdentifier>{d4aedfe5-97d5-4d94-b70e-20f8d5014980}</UniqueIdentifier>
     </Filter>
     <Filter Include="nD\UWmaterials">
       <UniqueIdentifier>{be456511-844e-4f02-b923-14685753222d}</UniqueIdentifier>
@@ -127,43 +75,16 @@
     <ClCompile Include="..\..\..\SRC\material\uniaxial\AxialSpHD.cpp">
       <Filter>uniaxial</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\BWBN.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\uniaxial\BarSlipMaterial.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\BilinearOilDamper.cpp">
       <Filter>uniaxial</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\uniaxial\Bond_SP01.cpp">
       <Filter>uniaxial</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\BoucWenMaterial.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\CFSSSWP.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\CFSWSWP.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\uniaxial\CableMaterial.cpp">
       <Filter>uniaxial</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\Cast.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\ASD_SMA_3K.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\ASDConcrete1DMaterial.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\uniaxial\Concrete01.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\Concrete01WithSITC.cpp">
       <Filter>uniaxial</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\uniaxial\Concrete02.cpp">
@@ -181,40 +102,10 @@
     <ClCompile Include="..\..\..\SRC\material\uniaxial\Concrete07.cpp">
       <Filter>uniaxial</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\ConcreteD.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\ConcreteSakaiKawashima.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\ConcretewBeta.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\ConfinedConcrete01.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\CubicSpline.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\Dodd_Restrepo.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\DrainMaterial.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\ECC01.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\uniaxial\ENTMaterial.cpp">
       <Filter>uniaxial</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\uniaxial\EPPGapMaterial.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\Elastic2Material.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\ElasticBilin.cpp">
       <Filter>uniaxial</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\uniaxial\ElasticMaterial.cpp">
@@ -226,19 +117,10 @@
     <ClCompile Include="..\..\..\SRC\material\uniaxial\ElasticPPMaterial.cpp">
       <Filter>uniaxial</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\FRPConfinedConcrete.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\uniaxial\FatigueMaterial.cpp">
       <Filter>uniaxial</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\FedeasMaterial.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\uniaxial\HardeningMaterial.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\HookGap.cpp">
       <Filter>uniaxial</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\uniaxial\HyperbolicGapMaterial.cpp">
@@ -247,22 +129,10 @@
     <ClCompile Include="..\..\..\SRC\material\uniaxial\HystereticMaterial.cpp">
       <Filter>uniaxial</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\ImpactMaterial.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\InitStrainMaterial.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\InitStressMaterial.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\uniaxial\KikuchiAikenHDR.cpp">
       <Filter>uniaxial</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\uniaxial\KikuchiAikenLRB.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\Maxwell.cpp">
       <Filter>uniaxial</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\Src\material\uniaxial\MinMaxMaterial.cpp">
@@ -280,18 +150,6 @@
     <ClCompile Include="..\..\..\SRC\material\uniaxial\ModIMKPinching02.cpp">
       <Filter>uniaxial</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\MultiLinear.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\NewUniaxialMaterial.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\OriginCentered.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\fedeas\PD1.c">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\uniaxial\ParallelMaterial.cpp">
       <Filter>uniaxial</Filter>
     </ClCompile>
@@ -307,15 +165,6 @@
     <ClCompile Include="..\..\..\SRC\material\uniaxial\ReinforcingSteel.cpp">
       <Filter>uniaxial</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\ResilienceLow.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\ResilienceMaterialHR.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\SAWSMaterial.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\uniaxial\SelfCenteringMaterial.cpp">
       <Filter>uniaxial</Filter>
     </ClCompile>
@@ -323,12 +172,6 @@
       <Filter>uniaxial</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\uniaxial\ShearPanelMaterial.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\SimpleFractureMaterial.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\SmoothPSConcrete.cpp">
       <Filter>uniaxial</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\uniaxial\Steel01.cpp">
@@ -343,24 +186,6 @@
     <ClCompile Include="..\..\..\SRC\material\uniaxial\Steel02Thermal.cpp">
       <Filter>uniaxial</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\Steel03.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\Steel2.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\SteelBRB.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\SteelMP.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\TclModelBuilderUniaxialMaterialCommand.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\TriMatrix.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\uniaxial\UniaxialJ2Plasticity.cpp">
       <Filter>uniaxial</Filter>
     </ClCompile>
@@ -373,62 +198,8 @@
     <ClCompile Include="..\..\..\SRC\material\uniaxial\ViscousMaterial.cpp">
       <Filter>uniaxial</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\WrapperUniaxialMaterial.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\uniaxial\pyUCLA.cpp">
       <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\fedeas\FedeasBond1Material.cpp">
-      <Filter>uniaxial\fedeas</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\fedeas\FedeasBond2Material.cpp">
-      <Filter>uniaxial\fedeas</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\fedeas\FedeasConcr1Material.cpp">
-      <Filter>uniaxial\fedeas</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\fedeas\FedeasConcr2Material.cpp">
-      <Filter>uniaxial\fedeas</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\fedeas\FedeasConcr3Material.cpp">
-      <Filter>uniaxial\fedeas</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\fedeas\FedeasHardeningMaterial.cpp">
-      <Filter>uniaxial\fedeas</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\fedeas\FedeasHyster1Material.cpp">
-      <Filter>uniaxial\fedeas</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\fedeas\FedeasHyster2Material.cpp">
-      <Filter>uniaxial\fedeas</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\fedeas\FedeasSteel1Material.cpp">
-      <Filter>uniaxial\fedeas</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\fedeas\FedeasSteel2Material.cpp">
-      <Filter>uniaxial\fedeas</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\fedeas\TclFedeasMaterialCommand.cpp">
-      <Filter>uniaxial\fedeas</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\drain\DrainBilinearMaterial.cpp">
-      <Filter>uniaxial\drain</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\drain\DrainClough1Material.cpp">
-      <Filter>uniaxial\drain</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\drain\DrainClough2Material.cpp">
-      <Filter>uniaxial\drain</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\drain\DrainHardeningMaterial.cpp">
-      <Filter>uniaxial\drain</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\drain\DrainPinch1Material.cpp">
-      <Filter>uniaxial\drain</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\drain\TclDrainMaterialCommand.cpp">
-      <Filter>uniaxial\drain</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\uniaxial\PY\PyLiq1.cpp">
       <Filter>uniaxial\py_tz_qz</Filter>
@@ -451,9 +222,6 @@
     <ClCompile Include="..\..\..\SRC\material\uniaxial\PY\ShallowFoundationGen.cpp">
       <Filter>uniaxial\py_tz_qz</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\PY\TclPyTzQzMaterialCommand.cpp">
-      <Filter>uniaxial\py_tz_qz</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\uniaxial\PY\TzLiq1.cpp">
       <Filter>uniaxial\py_tz_qz</Filter>
     </ClCompile>
@@ -466,124 +234,10 @@
     <ClCompile Include="..\..\..\SRC\material\uniaxial\PY\TzSimple2.cpp">
       <Filter>uniaxial\py_tz_qz</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\snap\Bilinear.cpp">
-      <Filter>uniaxial\snap</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\snap\Clough.cpp">
-      <Filter>uniaxial\snap</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\snap\CloughDamage.cpp">
-      <Filter>uniaxial\snap</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\snap\CloughHenry.cpp">
-      <Filter>uniaxial\snap</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\snap\Pinching.cpp">
-      <Filter>uniaxial\snap</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\snap\PinchingDamage.cpp">
-      <Filter>uniaxial\snap</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\snap\TclSnapMaterialCommand.cpp">
-      <Filter>uniaxial\snap</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\limitState\limitCurve\AxialCurve.cpp">
-      <Filter>uniaxial\LimitState</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\limitState\limitCurve\LimitCurve.cpp">
-      <Filter>uniaxial\LimitState</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\limitState\LimitStateMaterial.cpp">
-      <Filter>uniaxial\LimitState</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\limitState\limitCurve\RotationShearCurve.cpp">
-      <Filter>uniaxial\LimitState</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\limitState\limitCurve\ShearCurve.cpp">
-      <Filter>uniaxial\LimitState</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\limitState\TclLimitState.cpp">
-      <Filter>uniaxial\LimitState</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\limitState\limitCurve\ThreePointCurve.cpp">
-      <Filter>uniaxial\LimitState</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\limitState\limitCurve\WrapperLimitCurve.cpp">
-      <Filter>uniaxial\LimitState</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\backbone\ArctangentBackbone.cpp">
-      <Filter>uniaxial\backbone</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\backbone\HystereticBackbone.cpp">
-      <Filter>uniaxial\backbone</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\backbone\ManderBackbone.cpp">
-      <Filter>uniaxial\backbone</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\backbone\RaynorBackbone.cpp">
-      <Filter>uniaxial\backbone</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\backbone\ReeseSandBackbone.cpp">
-      <Filter>uniaxial\backbone</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\backbone\ReeseSoftClayBackbone.cpp">
-      <Filter>uniaxial\backbone</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\backbone\ReeseStiffClayBelowWS.cpp">
-      <Filter>uniaxial\backbone</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\backbone\TclModelBuilderBackboneCommand.cpp">
-      <Filter>uniaxial\backbone</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\backbone\TrilinearBackbone.cpp">
-      <Filter>uniaxial\backbone</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\DowelType.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\DuctileFracture.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\AcousticMedium.cpp">
-      <Filter>nD</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\CapPlasticity.cpp">
-      <Filter>nD</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\ConcreteS.cpp">
-      <Filter>nD</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\CycLiqCP.cpp">
-      <Filter>nD</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\CycLiqCP3D.cpp">
-      <Filter>nD</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\CycLiqCPPlaneStrain.cpp">
-      <Filter>nD</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\CycLiqCPSP.cpp">
-      <Filter>nD</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\CycLiqCPSP3D.cpp">
-      <Filter>nD</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\CycLiqCPSPPlaneStrain.cpp">
-      <Filter>nD</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\nD\ElasticOrthotropicMaterial.cpp">
       <Filter>nD</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\nD\ElasticOrthotropicThreeDimensional.cpp">
-      <Filter>nD</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\InitStressNDMaterial.cpp">
-      <Filter>nD</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\InitStrainNDMaterial.cpp">
-      <Filter>nD</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\LinearCap.cpp">
       <Filter>nD</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\nD\matCMM\MaterialCMM.cpp">
@@ -591,24 +245,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\nD\NDMaterial.cpp">
       <Filter>nD</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\SimplifiedJ2.cpp">
-      <Filter>nD</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\ASDConcrete3DMaterial.cpp">
-      <Filter>nD</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\TclModelBuilderNDMaterialCommand.cpp">
-      <Filter>nD</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\WrapperNDMaterial.cpp">
-      <Filter>nD</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\ElasticIsotropicAxiSymm.cpp">
-      <Filter>nD\elasticIsotropic</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\ElasticIsotropicBeamFiber.cpp">
-      <Filter>nD\elasticIsotropic</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\nD\ElasticIsotropicMaterial.cpp">
       <Filter>nD\elasticIsotropic</Filter>
@@ -620,9 +256,6 @@
       <Filter>nD\elasticIsotropic</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\nD\ElasticIsotropicPlateFiber.cpp">
-      <Filter>nD\elasticIsotropic</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\ElasticIsotropicThreeDimensional.cpp">
       <Filter>nD\elasticIsotropic</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\nD\J2AxiSymm.cpp">
@@ -664,9 +297,6 @@
     <ClCompile Include="..\..\..\SRC\material\nD\soil\T2Vector.cpp">
       <Filter>nD\soilModels</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\soil\TclUpdateMaterialStageCommand.cpp">
-      <Filter>nD\soilModels</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\nD\BeamFiberMaterial.cpp">
       <Filter>nD\wrappers</Filter>
     </ClCompile>
@@ -687,30 +317,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\nD\PlateFiberMaterial.cpp">
       <Filter>nD\wrappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\feap\FeapMaterial01.cpp">
-      <Filter>nD\feap</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\feap\FeapMaterial02.cpp">
-      <Filter>nD\feap</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\feap\FeapMaterial03.cpp">
-      <Filter>nD\feap</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\feap\TclFeapMaterialCommand.cpp">
-      <Filter>nD\feap</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\cyclicSoil\MultiaxialCyclicPlasticity.cpp">
-      <Filter>nD\cyclicSoil</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\cyclicSoil\MultiaxialCyclicPlasticity3D.cpp">
-      <Filter>nD\cyclicSoil</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\cyclicSoil\MultiaxialCyclicPlasticityAxiSymm.cpp">
-      <Filter>nD\cyclicSoil</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\cyclicSoil\MultiaxialCyclicPlasticityPlaneStrain.cpp">
-      <Filter>nD\cyclicSoil</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\nD\reinforcedConcretePlaneStress\ConcreteL01.cpp">
       <Filter>nD\reinforcedConcretePlaneStress</Filter>
@@ -748,9 +354,6 @@
     <ClCompile Include="..\..\..\SRC\material\nD\reinforcedConcretePlaneStress\TendonL01.cpp">
       <Filter>nD\reinforcedConcretePlaneStress</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Src\material\section\Bidirectional.cpp">
-      <Filter>section</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\section\ElasticMembranePlateSection.cpp">
       <Filter>section</Filter>
     </ClCompile>
@@ -761,15 +364,6 @@
       <Filter>section</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\section\ElasticSection3d.cpp">
-      <Filter>section</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\section\ElasticShearSection2d.cpp">
-      <Filter>section</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\section\ElasticShearSection3d.cpp">
-      <Filter>section</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\section\ElasticTubeSection3d.cpp">
       <Filter>section</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\section\FiberSection2d.cpp">
@@ -784,12 +378,6 @@
     <ClCompile Include="..\..\..\SRC\material\section\FiberSectionGJ.cpp">
       <Filter>section</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\section\GenericSection1d.cpp">
-      <Filter>section</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\section\Isolator2spring.cpp">
-      <Filter>section</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\section\LayeredShellFiberSection.cpp">
       <Filter>section</Filter>
     </ClCompile>
@@ -802,16 +390,10 @@
     <ClCompile Include="..\..\..\SRC\material\section\NDFiberSection3d.cpp">
       <Filter>section</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\section\ParallelSection.cpp">
-      <Filter>section</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\section\SectionAggregator.cpp">
       <Filter>section</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\section\SectionForceDeformation.cpp">
-      <Filter>section</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\section\TclModelBuilderSectionCommand.cpp">
       <Filter>section</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\section\repres\cell\Cell.cpp">
@@ -831,9 +413,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\section\repres\patch\QuadPatch.cpp">
       <Filter>section\repres\patch</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\section\repres\reinfBar\ReinfBar.cpp">
-      <Filter>section\repres\reinfBar</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\section\repres\reinfLayer\CircReinfLayer.cpp">
       <Filter>section\repres\reinfLayer</Filter>
@@ -859,18 +438,6 @@
     <ClCompile Include="..\..\..\SRC\material\section\fiber\UniaxialFiber3d.cpp">
       <Filter>section\fiber</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\section\yieldSurface\TclModelBuilderYS_SectionCommand.cpp">
-      <Filter>section\ysSection</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\section\yieldSurface\YS_Section2D01.cpp">
-      <Filter>section\ysSection</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\section\yieldSurface\YS_Section2D02.cpp">
-      <Filter>section\ysSection</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\section\yieldSurface\YieldSurfaceSection2d.cpp">
-      <Filter>section\ysSection</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\section\integration\RCSectionIntegration.cpp">
       <Filter>section\integration</Filter>
     </ClCompile>
@@ -883,120 +450,18 @@
     <ClCompile Include="..\..\..\SRC\material\section\integration\WideFlangeSectionIntegration.cpp">
       <Filter>section\integration</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\yieldSurface\yieldSurfaceBC\Attalla2D.cpp">
-      <Filter>yieldSurface\yieldSurfaceBC</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\yieldSurface\yieldSurfaceBC\ElTawil2D.cpp">
-      <Filter>yieldSurface\yieldSurfaceBC</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\yieldSurface\yieldSurfaceBC\ElTawil2DUnSym.cpp">
-      <Filter>yieldSurface\yieldSurfaceBC</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\yieldSurface\yieldSurfaceBC\Hajjar2D.cpp">
-      <Filter>yieldSurface\yieldSurfaceBC</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\yieldSurface\yieldSurfaceBC\NullYS2D.cpp">
-      <Filter>yieldSurface\yieldSurfaceBC</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\yieldSurface\yieldSurfaceBC\Orbison2D.cpp">
-      <Filter>yieldSurface\yieldSurfaceBC</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\yieldSurface\yieldSurfaceBC\TclModelBuilderYieldSurfaceBCCommand.cpp">
-      <Filter>yieldSurface\yieldSurfaceBC</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\yieldSurface\yieldSurfaceBC\YieldSurface_BC.cpp">
-      <Filter>yieldSurface\yieldSurfaceBC</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\yieldSurface\yieldSurfaceBC\YieldSurface_BC2D.cpp">
-      <Filter>yieldSurface\yieldSurfaceBC</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\yieldSurface\evolution\BkStressLimSurface2D.cpp">
-      <Filter>yieldSurface\evolution</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\yieldSurface\evolution\BoundingSurface2D.cpp">
-      <Filter>yieldSurface\evolution</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\yieldSurface\evolution\CombinedIsoKin2D01.cpp">
-      <Filter>yieldSurface\evolution</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\yieldSurface\evolution\CombinedIsoKin2D02.cpp">
-      <Filter>yieldSurface\evolution</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\yieldSurface\evolution\Isotropic2D01.cpp">
-      <Filter>yieldSurface\evolution</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\yieldSurface\evolution\Kinematic2D01.cpp">
-      <Filter>yieldSurface\evolution</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\yieldSurface\evolution\Kinematic2D02.cpp">
-      <Filter>yieldSurface\evolution</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\yieldSurface\evolution\NullEvolution.cpp">
-      <Filter>yieldSurface\evolution</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\yieldSurface\evolution\PeakOriented2D01.cpp">
-      <Filter>yieldSurface\evolution</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\yieldSurface\evolution\PeakOriented2D02.cpp">
-      <Filter>yieldSurface\evolution</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\yieldSurface\evolution\PlasticHardening2D.cpp">
-      <Filter>yieldSurface\evolution</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\yieldSurface\evolution\TclModelBuilderYS_EvolutionCommand.cpp">
-      <Filter>yieldSurface\evolution</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\yieldSurface\evolution\YS_Evolution.cpp">
-      <Filter>yieldSurface\evolution</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\yieldSurface\evolution\YS_Evolution2D.cpp">
-      <Filter>yieldSurface\evolution</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\yieldSurface\plasticHardeningMaterial\ExponReducing.cpp">
-      <Filter>yieldSurface\plasticHardening</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\yieldSurface\plasticHardeningMaterial\MultiLinearKp.cpp">
-      <Filter>yieldSurface\plasticHardening</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\yieldSurface\plasticHardeningMaterial\NullPlasticMaterial.cpp">
-      <Filter>yieldSurface\plasticHardening</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\yieldSurface\plasticHardeningMaterial\PlasticHardeningMaterial.cpp">
-      <Filter>yieldSurface\plasticHardening</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\yieldSurface\plasticHardeningMaterial\TclModelBuilderYSPlasticMaterialCommand.cpp">
-      <Filter>yieldSurface\plasticHardening</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\Material.cpp" />
     <ClCompile Include="..\..\..\SRC\material\uniaxial\ConcreteCM.cpp">
       <Filter>uniaxial</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\SteelMPF.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\nD\FSAM.cpp">
       <Filter>nD</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\FRPConfinedConcrete02.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\Steel4.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\section\ElasticWarpingShearSection2d.cpp">
-      <Filter>section</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\section\NDFiberSectionWarping2d.cpp">
-      <Filter>section</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\nD\J2BeamFiber2d.cpp">
       <Filter>nD\j2Plasticity</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\nD\J2PlateFibre.cpp">
       <Filter>nD\j2Plasticity</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\PlasticDamageConcrete3d.cpp">
-      <Filter>nD</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\nD\PlasticDamageConcretePlaneStress.cpp">
       <Filter>nD</Filter>
@@ -1007,25 +472,13 @@
     <ClCompile Include="..\..\..\SRC\material\nD\J2BeamFiber3d.cpp">
       <Filter>nD\j2Plasticity</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\section\Elliptical2.cpp">
-      <Filter>section</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\nD\BeamFiberMaterial2d.cpp">
       <Filter>nD\wrappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\ElasticIsotropicBeamFiber2d.cpp">
-      <Filter>nD\elasticIsotropic</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\nD\PlaneStressLayeredMaterial.cpp">
       <Filter>nD\wrappers</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\nD\PlaneStressRebarMaterial.cpp">
-      <Filter>nD\wrappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\PlaneStressSimplifiedJ2.cpp">
-      <Filter>nD\wrappers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\PlaneStressUserMaterial.cpp">
       <Filter>nD\wrappers</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\nD\PlateFromPlaneStressMaterial.cpp">
@@ -1045,9 +498,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\uniaxial\SteelECThermal.cpp">
       <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\section\yieldSurface\SoilFootingSection2d.cpp">
-      <Filter>section\ysSection</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\nD\J2PlasticityThermal.cpp">
       <Filter>nD\j2Plasticity</Filter>
@@ -1088,9 +538,6 @@
     <ClCompile Include="..\..\..\SRC\material\section\MembranePlateFiberSectionThermal.cpp">
       <Filter>section</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\BoucWenOriginal.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\uniaxial\DamperMaterial.cpp">
       <Filter>uniaxial</Filter>
     </ClCompile>
@@ -1100,17 +547,8 @@
     <ClCompile Include="..\..\..\SRC\material\section\integration\TubeSectionIntegration.cpp">
       <Filter>section\integration</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\section\BiaxialHysteretic.cpp">
-      <Filter>section</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\nD\stressDensityModel\stressDensity.cpp">
       <Filter>nD\stressDensityModel</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\GNGMaterial.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\TensionOnlyMaterial.cpp">
-      <Filter>uniaxial</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\uniaxial\SPSW02.cpp">
       <Filter>uniaxial</Filter>
@@ -1121,97 +559,10 @@
     <ClCompile Include="..\..\..\SRC\material\nD\BeamFiberMaterial2dPS.cpp">
       <Filter>nD\wrappers</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\ConcreteMcftNonLinear5.cpp">
-      <Filter>nD</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\ConcreteMcftNonLinear7.cpp">
-      <Filter>nD</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\section\integration\RCTunnelSectionIntegration.cpp">
       <Filter>section\integration</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\stiffness\ConstantStiffnessDegradation.cpp">
-      <Filter>uniaxial\stiffness</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\stiffness\DuctilityStiffnessDegradation.cpp">
-      <Filter>uniaxial\stiffness</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\stiffness\EnergyStiffnessDegradation.cpp">
-      <Filter>uniaxial\stiffness</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\stiffness\PincheiraStiffnessDegradation.cpp">
-      <Filter>uniaxial\stiffness</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\stiffness\StiffnessDegradation.cpp">
-      <Filter>uniaxial\stiffness</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\stiffness\TclModelBuilderStiffnessDegradationCommand.cpp">
-      <Filter>uniaxial\stiffness</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\strength\ACIStrengthDegradation.cpp">
-      <Filter>uniaxial\strength</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\strength\ConstantStrengthDegradation.cpp">
-      <Filter>uniaxial\strength</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\strength\DuctilityStrengthDegradation.cpp">
-      <Filter>uniaxial\strength</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\strength\EnergyStrengthDegradation.cpp">
-      <Filter>uniaxial\strength</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\strength\PetrangeliStrengthDegradation.cpp">
-      <Filter>uniaxial\strength</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\strength\SectionStrengthDegradation.cpp">
-      <Filter>uniaxial\strength</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\strength\StrengthDegradation.cpp">
-      <Filter>uniaxial\strength</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\strength\TclModelBuilderStrengthDegradationCommand.cpp">
-      <Filter>uniaxial\strength</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\unloading\ConstantUnloadingRule.cpp">
-      <Filter>uniaxial\unloading</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\unloading\EnergyUnloadingRule.cpp">
-      <Filter>uniaxial\unloading</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\unloading\KarsanUnloadingRule.cpp">
-      <Filter>uniaxial\unloading</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\unloading\TakedaUnloadingRule.cpp">
-      <Filter>uniaxial\unloading</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\unloading\TclModelBuilderUnloadingRuleCommand.cpp">
-      <Filter>uniaxial\unloading</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\unloading\UnloadingRule.cpp">
-      <Filter>uniaxial\unloading</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\uniaxial\MaterialState.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\OOHystereticMaterial.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\Steel02Fatigue.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\Concrete02IS.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\backbone\MultilinearBackbone.cpp">
-      <Filter>uniaxial\backbone</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\ExternalUniaxialMaterial.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\ExternalNDMaterial.cpp">
-      <Filter>nD</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\HardeningMaterial2.cpp">
       <Filter>uniaxial</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\nD\matCMM\MaterialCMM.cpp">
@@ -1223,49 +574,10 @@
     <ClCompile Include="..\..\..\SRC\material\section\fiber\NDFiber3d.cpp">
       <Filter>section\fiber</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\section\ElasticBDShearSection2d.cpp">
-      <Filter>section</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\section\TimoshenkoSection3d.cpp">
       <Filter>section</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\section\WFFiberSection2d.cpp">
-      <Filter>section</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\section\WSection2d.cpp">
-      <Filter>section</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\backbone\CappedBackbone.cpp">
-      <Filter>uniaxial\backbone</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\backbone\LinearCappedBackbone.cpp">
-      <Filter>uniaxial\backbone</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\BackboneMaterial.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\backbone\MaterialBackbone.cpp">
-      <Filter>uniaxial\backbone</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\fedeas\PlasticDamageMaterial.cpp">
-      <Filter>uniaxial\fedeas</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\limitState\PinchingLimitStateMaterial.cpp">
-      <Filter>uniaxial\LimitState</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\BraceMaterial.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\uniaxial\Concrete05.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\ContinuumUniaxial.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\ElasticBDMaterial.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\ElasticPowerFunc.cpp">
       <Filter>uniaxial</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\uniaxial\IMKBilin.cpp">
@@ -1277,16 +589,7 @@
     <ClCompile Include="..\..\..\SRC\material\uniaxial\IMKPinching.cpp">
       <Filter>uniaxial</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\Neoprene.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\SecantConcrete.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\nD\PressureDependentElastic3D.cpp">
-      <Filter>nD</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\FeapMaterial.cpp">
       <Filter>nD</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\nD\UWmaterials\BoundingCamClay.cpp">
@@ -1343,77 +646,11 @@
     <ClCompile Include="..\..\..\SRC\material\nD\UWmaterials\PM4Silt.cpp">
       <Filter>nD\UWmaterials</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\UVCmultiaxial.cpp">
-      <Filter>nD</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\UVCplanestress.cpp">
-      <Filter>nD</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\UVCuniaxial.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\Bilin.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\Bilin02.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\TDConcrete.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\TDConcreteEXP.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\TDConcreteMC10.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\TDConcreteMC10NL.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\DegradingPinchedBW.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\SLModel.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\IncrementalElasticIsotropicThreeDimensional.cpp">
-      <Filter>nD\elasticIsotropic</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\nD\UWmaterials\J2CyclicBoundingSurface3D.cpp">
       <Filter>nD\UWmaterials</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\nD\UWmaterials\J2CyclicBoundingSurfacePlaneStrain.cpp">
       <Filter>nD\UWmaterials</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\section\ASDCoupledHinge3D.cpp">
-      <Filter>section</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\HystereticPoly.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\section\FiberSectionWarping3d.cpp">
-      <Filter>section</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\section\FiberSectionAsym3d.cpp">
-      <Filter>section</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\SteelFractureDI.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\Masonry.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\Trilinwp.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\Trilinwp2.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\Masonryt.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\SMAMaterial.cpp">
-      <Filter>uniaxial</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\uniaxial\PY\QzLiq1.cpp">
       <Filter>uniaxial\py_tz_qz</Filter>
@@ -1421,47 +658,8 @@
     <ClCompile Include="..\..\..\SRC\material\section\integration\HSSSectionIntegration.cpp">
       <Filter>section\integration</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\UANDESmaterials\SAniSandMS.cpp">
-      <Filter>nD</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\UANDESmaterials\SAniSandMS3D.cpp">
-      <Filter>nD</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\UANDESmaterials\SAniSandMSPlaneStrain.cpp">
-      <Filter>nD</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\SteelDRC.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\section\DoubleMembranePlateFiberSection.cpp">
       <Filter>section</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\backbone\CementedSoil.cpp">
-      <Filter>uniaxial\backbone</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\backbone\LiquefiedSand.cpp">
-      <Filter>uniaxial\backbone</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\backbone\ReeseStiffClayAboveWS.cpp">
-      <Filter>uniaxial\backbone</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\backbone\VuggyLimestone.cpp">
-      <Filter>uniaxial\backbone</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\backbone\WeakRock.cpp">
-      <Filter>uniaxial\backbone</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\MultiplierMaterial.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\BoucWenInfill.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\Trilinwpd.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\HystereticAsym.cpp">
-      <Filter>uniaxial</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\uniaxial\HystereticSmooth.cpp">
       <Filter>uniaxial</Filter>
@@ -1472,52 +670,7 @@
     <ClCompile Include="..\..\..\SRC\material\nD\ElasticPlaneStress.cpp">
       <Filter>nD</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\VonPapaDamage.cpp">
-      <Filter>nD</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\FRCC.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\CoulombDamperMaterial.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\HystereticSMMaterial.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\ConcreteZBH_fitted.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\ConcreteZBH_original.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\ConcreteZBH_smoothed.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\FlagShapeMaterial.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\Hertzdamp.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\JankowskiImpact.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\ViscoelasticGap.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\GMG_CyclicReinforcedConcrete.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\TDConcreteNL.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\uniaxial\PenaltyMaterial.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\Ratchet.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\CreepMaterial.cpp">
       <Filter>uniaxial</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\nD\OrthotropicRotatingAngleConcreteT2DMaterial01\OrthotropicRotatingAngleConcreteT2DMaterial01.cpp">
@@ -1535,30 +688,6 @@
     <ClCompile Include="..\..\..\SRC\material\section\LayeredMembraneSection\ElasticMembraneSection.cpp">
       <Filter>section\LayeredMembraneSection</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\APDFMD.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\APDMD.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\APDVFD.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\MinMaxNDMaterial.cpp">
-      <Filter>nD</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\PipeMaterial.cpp">
-      <Filter>uniaxial</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\section\PipeSection.cpp">
-      <Filter>section</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\SRC\material\nD\ModelBuilderNDMaterialEventHandler.cpp" />
-    <ClCompile Include="..\..\..\SRC\material\section\ModelBuilderSectionEventHandler.cpp" />
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\BucklingMaterial.cpp" />
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\BucklingStrut.cpp" />
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\ConfinedConcrete.cpp" />
-    <ClCompile Include="..\..\..\SRC\material\uniaxial\ModelBuilderUniaxialMaterialEventHandler.cpp" />
     <ClCompile Include="..\..\..\SRC\material\uniaxial\TzSandCPT.cpp">
       <Filter>uniaxial</Filter>
     </ClCompile>
@@ -1566,6 +695,18 @@
       <Filter>uniaxial</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\SRC\material\uniaxial\Steel05.cpp">
+      <Filter>uniaxial</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\SRC\material\uniaxial\SmoothIMK.cpp">
+      <Filter>uniaxial</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\SRC\material\uniaxial\ConfinedConcrete.cpp">
+      <Filter>uniaxial</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\SRC\material\section\repres\reinfBar\ReinfBar.cpp">
+      <Filter>section\repres\reinfLayer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\SRC\material\uniaxial\Bilin.cpp">
       <Filter>uniaxial</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1576,43 +717,16 @@
     <ClInclude Include="..\..\..\SRC\material\uniaxial\AxialSpHD.h">
       <Filter>uniaxial</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\BWBN.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\uniaxial\BarSlipMaterial.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\BilinearOilDamper.h">
       <Filter>uniaxial</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\uniaxial\Bond_SP01.h">
       <Filter>uniaxial</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\BoucWenMaterial.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\CFSSSWP.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\CFSWSWP.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\uniaxial\CableMaterial.h">
       <Filter>uniaxial</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\Cast.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\ASD_SMA_3K.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\ASDConcrete1DMaterial.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\uniaxial\Concrete01.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\Concrete01WithSITC.h">
       <Filter>uniaxial</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\uniaxial\Concrete02.h">
@@ -1630,37 +744,10 @@
     <ClInclude Include="..\..\..\SRC\material\uniaxial\Concrete07.h">
       <Filter>uniaxial</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\ConcreteD.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\ConcreteSakaiKawashima.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\ConcretewBeta.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\ConfinedConcrete01.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\CubicSpline.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\DrainMaterial.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\ECC01.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\uniaxial\ENTMaterial.h">
       <Filter>uniaxial</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\uniaxial\EPPGapMaterial.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\Elastic2Material.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\ElasticBilin.h">
       <Filter>uniaxial</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\uniaxial\ElasticMaterial.h">
@@ -1672,19 +759,10 @@
     <ClInclude Include="..\..\..\SRC\material\uniaxial\ElasticPPMaterial.h">
       <Filter>uniaxial</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\FRPConfinedConcrete.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\uniaxial\FatigueMaterial.h">
       <Filter>uniaxial</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\FedeasMaterial.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\uniaxial\HardeningMaterial.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\HookGap.h">
       <Filter>uniaxial</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\uniaxial\HyperbolicGapMaterial.h">
@@ -1693,22 +771,10 @@
     <ClInclude Include="..\..\..\SRC\material\uniaxial\HystereticMaterial.h">
       <Filter>uniaxial</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\ImpactMaterial.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\InitStrainMaterial.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\InitStressMaterial.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\uniaxial\KikuchiAikenHDR.h">
       <Filter>uniaxial</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\uniaxial\KikuchiAikenLRB.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\Maxwell.h">
       <Filter>uniaxial</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\Src\material\uniaxial\MinMaxMaterial.h">
@@ -1726,15 +792,6 @@
     <ClInclude Include="..\..\..\SRC\material\uniaxial\ModIMKPinching02.h">
       <Filter>uniaxial</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\MultiLinear.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\NewUniaxialMaterial.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\OriginCentered.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\uniaxial\ParallelMaterial.h">
       <Filter>uniaxial</Filter>
     </ClInclude>
@@ -1750,15 +807,6 @@
     <ClInclude Include="..\..\..\SRC\material\uniaxial\ReinforcingSteel.h">
       <Filter>uniaxial</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\ResilienceLow.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\ResilienceMaterialHR.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\SAWSMaterial.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\uniaxial\SelfCenteringMaterial.h">
       <Filter>uniaxial</Filter>
     </ClInclude>
@@ -1766,12 +814,6 @@
       <Filter>uniaxial</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\uniaxial\ShearPanelMaterial.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\SimpleFractureMaterial.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\SmoothPSConcrete.h">
       <Filter>uniaxial</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\uniaxial\Steel01.h">
@@ -1786,21 +828,6 @@
     <ClInclude Include="..\..\..\SRC\material\uniaxial\Steel02Thermal.h">
       <Filter>uniaxial</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\Steel03.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\Steel2.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\SteelBRB.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\SteelMP.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\TriMatrix.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\uniaxial\UniaxialJ2Plasticity.h">
       <Filter>uniaxial</Filter>
     </ClInclude>
@@ -1813,56 +840,8 @@
     <ClInclude Include="..\..\..\SRC\material\uniaxial\ViscousMaterial.h">
       <Filter>uniaxial</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\WrapperUniaxialMaterial.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\uniaxial\pyUCLA.h">
       <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\fedeas\FedeasBond1Material.h">
-      <Filter>uniaxial\fedeas</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\fedeas\FedeasBond2Material.h">
-      <Filter>uniaxial\fedeas</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\fedeas\FedeasConcr1Material.h">
-      <Filter>uniaxial\fedeas</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\fedeas\FedeasConcr2Material.h">
-      <Filter>uniaxial\fedeas</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\fedeas\FedeasConcr3Material.h">
-      <Filter>uniaxial\fedeas</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\fedeas\FedeasHardeningMaterial.h">
-      <Filter>uniaxial\fedeas</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\fedeas\FedeasHyster1Material.h">
-      <Filter>uniaxial\fedeas</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\fedeas\FedeasHyster2Material.h">
-      <Filter>uniaxial\fedeas</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\fedeas\FedeasSteel1Material.h">
-      <Filter>uniaxial\fedeas</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\fedeas\FedeasSteel2Material.h">
-      <Filter>uniaxial\fedeas</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\drain\DrainBilinearMaterial.h">
-      <Filter>uniaxial\drain</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\drain\DrainClough1Material.h">
-      <Filter>uniaxial\drain</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\drain\DrainClough2Material.h">
-      <Filter>uniaxial\drain</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\drain\DrainHardeningMaterial.h">
-      <Filter>uniaxial\drain</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\drain\DrainPinch1Material.h">
-      <Filter>uniaxial\drain</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\uniaxial\PY\PyLiq1.h">
       <Filter>uniaxial\py_tz_qz</Filter>
@@ -1897,134 +876,14 @@
     <ClInclude Include="..\..\..\SRC\material\uniaxial\PY\TzSimple2.h">
       <Filter>uniaxial\py_tz_qz</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\snap\Bilinear.h">
-      <Filter>uniaxial\snap</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\snap\Clough.h">
-      <Filter>uniaxial\snap</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\snap\CloughDamage.h">
-      <Filter>uniaxial\snap</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\snap\CloughHenry.h">
-      <Filter>uniaxial\snap</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\snap\Pinching.h">
-      <Filter>uniaxial\snap</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\snap\PinchingDamage.h">
-      <Filter>uniaxial\snap</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\limitState\limitCurve\AxialCurve.h">
-      <Filter>uniaxial\LimitState</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\limitState\limitCurve\LimitCurve.h">
-      <Filter>uniaxial\LimitState</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\limitState\LimitStateMaterial.h">
-      <Filter>uniaxial\LimitState</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\limitState\limitCurve\RotationShearCurve.h">
-      <Filter>uniaxial\LimitState</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\limitState\limitCurve\ShearCurve.h">
-      <Filter>uniaxial\LimitState</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\limitState\limitCurve\ThreePointCurve.h">
-      <Filter>uniaxial\LimitState</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\limitState\limitCurve\WrapperLimitCurve.h">
-      <Filter>uniaxial\LimitState</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\backbone\ArctangentBackbone.h">
-      <Filter>uniaxial\backbone</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\backbone\HystereticBackbone.h">
-      <Filter>uniaxial\backbone</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\backbone\ManderBackbone.h">
-      <Filter>uniaxial\backbone</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\backbone\RaynorBackbone.h">
-      <Filter>uniaxial\backbone</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\backbone\ReeseSandBackbone.h">
-      <Filter>uniaxial\backbone</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\backbone\ReeseSoftClayBackbone.h">
-      <Filter>uniaxial\backbone</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\backbone\ReeseStiffClayBelowWS.h">
-      <Filter>uniaxial\backbone</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\backbone\TrilinearBackbone.h">
-      <Filter>uniaxial\backbone</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\DowelType.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\DuctileFracture.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\AcousticMedium.h">
-      <Filter>nD</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\CapPlasticity.h">
-      <Filter>nD</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\ConcreteS.h">
-      <Filter>nD</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\CycLiqCP.h">
-      <Filter>nD</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\CycLiqCP3D.h">
-      <Filter>nD</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\CycLiqCPPlaneStrain.h">
-      <Filter>nD</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\CycLiqCPSP.h">
-      <Filter>nD</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\CycLiqCPSP3D.h">
-      <Filter>nD</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\CycLiqCPSPPlaneStrain.h">
-      <Filter>nD</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\nD\ElasticOrthotropicMaterial.h">
       <Filter>nD</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\nD\ElasticOrthotropicThreeDimensional.h">
       <Filter>nD</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\InitStressNDMaterial.h">
-      <Filter>nD</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\InitStrainNDMaterial.h">
-      <Filter>nD</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\LinearCap.h">
-      <Filter>nD</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\nD\NDMaterial.h">
       <Filter>nD</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\SimplifiedJ2.h">
-      <Filter>nD</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\ASDConcrete3DMaterial.h">
-      <Filter>nD</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\WrapperNDMaterial.h">
-      <Filter>nD</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\ElasticIsotropicAxiSymm.h">
-      <Filter>nD\elasticIsotropic</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\ElasticIsotropicBeamFiber.h">
-      <Filter>nD\elasticIsotropic</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\nD\ElasticIsotropicMaterial.h">
       <Filter>nD\elasticIsotropic</Filter>
@@ -2036,9 +895,6 @@
       <Filter>nD\elasticIsotropic</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\nD\ElasticIsotropicPlateFiber.h">
-      <Filter>nD\elasticIsotropic</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\ElasticIsotropicThreeDimensional.h">
       <Filter>nD\elasticIsotropic</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\nD\J2AxiSymm.h">
@@ -2101,27 +957,6 @@
     <ClInclude Include="..\..\..\SRC\material\nD\PlateFiberMaterial.h">
       <Filter>nD\wrappers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\feap\FeapMaterial01.h">
-      <Filter>nD\feap</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\feap\FeapMaterial02.h">
-      <Filter>nD\feap</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\feap\FeapMaterial03.h">
-      <Filter>nD\feap</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\cyclicSoil\MultiaxialCyclicPlasticity.h">
-      <Filter>nD\cyclicSoil</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\cyclicSoil\MultiaxialCyclicPlasticity3D.h">
-      <Filter>nD\cyclicSoil</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\cyclicSoil\MultiaxialCyclicPlasticityAxiSymm.h">
-      <Filter>nD\cyclicSoil</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\cyclicSoil\MultiaxialCyclicPlasticityPlaneStrain.h">
-      <Filter>nD\cyclicSoil</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\nD\reinforcedConcretePlaneStress\ConcreteL01.h">
       <Filter>nD\reinforcedConcretePlaneStress</Filter>
     </ClInclude>
@@ -2158,9 +993,6 @@
     <ClInclude Include="..\..\..\SRC\material\nD\reinforcedConcretePlaneStress\TendonL01.h">
       <Filter>nD\reinforcedConcretePlaneStress</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Src\material\section\Bidirectional.h">
-      <Filter>section</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\section\ElasticMembranePlateSection.h">
       <Filter>section</Filter>
     </ClInclude>
@@ -2171,15 +1003,6 @@
       <Filter>section</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\section\ElasticSection3d.h">
-      <Filter>section</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\section\ElasticShearSection2d.h">
-      <Filter>section</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\section\ElasticShearSection3d.h">
-      <Filter>section</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\section\ElasticTubeSection3d.h">
       <Filter>section</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\section\FiberSection2d.h">
@@ -2194,12 +1017,6 @@
     <ClInclude Include="..\..\..\SRC\material\section\FiberSectionGJ.h">
       <Filter>section</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\section\GenericSection1d.h">
-      <Filter>section</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\section\Isolator2spring.h">
-      <Filter>section</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\section\LayeredShellFiberSection.h">
       <Filter>section</Filter>
     </ClInclude>
@@ -2210,9 +1027,6 @@
       <Filter>section</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\section\NDFiberSection3d.h">
-      <Filter>section</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\section\ParallelSection.h">
       <Filter>section</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\section\SectionAggregator.h">
@@ -2239,9 +1053,6 @@
     <ClInclude Include="..\..\..\SRC\material\section\repres\patch\QuadPatch.h">
       <Filter>section\repres\patch</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\section\repres\reinfBar\ReinfBar.h">
-      <Filter>section\repres\reinfBar</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\section\repres\reinfLayer\CircReinfLayer.h">
       <Filter>section\repres\reinfLayer</Filter>
     </ClInclude>
@@ -2266,15 +1077,6 @@
     <ClInclude Include="..\..\..\SRC\material\section\fiber\UniaxialFiber3d.h">
       <Filter>section\fiber</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\section\yieldSurface\YS_Section2D01.h">
-      <Filter>section\ysSection</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\section\yieldSurface\YS_Section2D02.h">
-      <Filter>section\ysSection</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\section\yieldSurface\YieldSurfaceSection2d.h">
-      <Filter>section\ysSection</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\section\integration\RCSectionIntegration.h">
       <Filter>section\integration</Filter>
     </ClInclude>
@@ -2287,114 +1089,18 @@
     <ClInclude Include="..\..\..\SRC\material\section\integration\WideFlangeSectionIntegration.h">
       <Filter>section\integration</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\yieldSurface\yieldSurfaceBC\Attalla2D.h">
-      <Filter>yieldSurface\yieldSurfaceBC</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\yieldSurface\yieldSurfaceBC\ElTawil2D.h">
-      <Filter>yieldSurface\yieldSurfaceBC</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\yieldSurface\yieldSurfaceBC\ElTawil2DUnSym.h">
-      <Filter>yieldSurface\yieldSurfaceBC</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\yieldSurface\yieldSurfaceBC\Hajjar2D.h">
-      <Filter>yieldSurface\yieldSurfaceBC</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\yieldSurface\yieldSurfaceBC\NullYS2D.h">
-      <Filter>yieldSurface\yieldSurfaceBC</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\yieldSurface\yieldSurfaceBC\Orbison2D.h">
-      <Filter>yieldSurface\yieldSurfaceBC</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\yieldSurface\yieldSurfaceBC\YieldSurface_BC.h">
-      <Filter>yieldSurface\yieldSurfaceBC</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\yieldSurface\yieldSurfaceBC\YieldSurface_BC2D.h">
-      <Filter>yieldSurface\yieldSurfaceBC</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\yieldSurface\evolution\BkStressLimSurface2D.h">
-      <Filter>yieldSurface\evolution</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\yieldSurface\evolution\BoundingSurface2D.h">
-      <Filter>yieldSurface\evolution</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\yieldSurface\evolution\CombinedIsoKin2D01.h">
-      <Filter>yieldSurface\evolution</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\yieldSurface\evolution\CombinedIsoKin2D02.h">
-      <Filter>yieldSurface\evolution</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\yieldSurface\evolution\Isotropic2D01.h">
-      <Filter>yieldSurface\evolution</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\yieldSurface\evolution\Kinematic2D01.h">
-      <Filter>yieldSurface\evolution</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\yieldSurface\evolution\Kinematic2D02.h">
-      <Filter>yieldSurface\evolution</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\yieldSurface\evolution\NullEvolution.h">
-      <Filter>yieldSurface\evolution</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\yieldSurface\evolution\PeakOriented2D01.h">
-      <Filter>yieldSurface\evolution</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\yieldSurface\evolution\PeakOriented2D02.h">
-      <Filter>yieldSurface\evolution</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\yieldSurface\evolution\PlasticHardening2D.h">
-      <Filter>yieldSurface\evolution</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\yieldSurface\evolution\YS_Evolution.h">
-      <Filter>yieldSurface\evolution</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\yieldSurface\evolution\YS_Evolution2D.h">
-      <Filter>yieldSurface\evolution</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\yieldSurface\plasticHardeningMaterial\ExponReducing.h">
-      <Filter>yieldSurface\plasticHardening</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\yieldSurface\plasticHardeningMaterial\MultiLinearKp.h">
-      <Filter>yieldSurface\plasticHardening</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\yieldSurface\plasticHardeningMaterial\NullPlasticMaterial.h">
-      <Filter>yieldSurface\plasticHardening</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\yieldSurface\plasticHardeningMaterial\PlasticHardeningMaterial.h">
-      <Filter>yieldSurface\plasticHardening</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\Material.h" />
     <ClInclude Include="..\..\..\SRC\material\uniaxial\ConcreteCM.h">
       <Filter>uniaxial</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\SteelMPF.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\nD\FSAM.h">
       <Filter>nD</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\FRPConfinedConcrete02.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\Steel4.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\section\ElasticWarpingShearSection2d.h">
-      <Filter>section</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\section\NDFiberSectionWarping2d.h">
-      <Filter>section</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\nD\J2BeamFiber2d.h">
       <Filter>nD\j2Plasticity</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\nD\J2PlateFibre.h">
       <Filter>nD\j2Plasticity</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\PlasticDamageConcrete3d.h">
-      <Filter>nD</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\Dodd_Restrepo.h">
-      <Filter>uniaxial</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\nD\PlasticDamageConcretePlaneStress.h">
       <Filter>nD</Filter>
@@ -2405,25 +1111,13 @@
     <ClInclude Include="..\..\..\SRC\material\nD\J2BeamFiber3d.h">
       <Filter>nD\j2Plasticity</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\section\Elliptical2.h">
-      <Filter>section</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\nD\BeamFiberMaterial2d.h">
       <Filter>nD\wrappers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\ElasticIsotropicBeamFiber2d.h">
-      <Filter>nD\elasticIsotropic</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\nD\PlaneStressLayeredMaterial.h">
       <Filter>nD\wrappers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\nD\PlaneStressRebarMaterial.h">
-      <Filter>nD\wrappers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\PlaneStressSimplifiedJ2.h">
-      <Filter>nD\wrappers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\PlaneStressUserMaterial.h">
       <Filter>nD\wrappers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\nD\PlateFromPlaneStressMaterial.h">
@@ -2443,9 +1137,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\uniaxial\SteelECThermal.h">
       <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\section\yieldSurface\SoilFootingSection2d.h">
-      <Filter>section\ysSection</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\nD\J2PlasticityThermal.h">
       <Filter>nD\j2Plasticity</Filter>
@@ -2486,9 +1177,6 @@
     <ClInclude Include="..\..\..\SRC\material\section\MembranePlateFiberSectionThermal.h">
       <Filter>section</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\BoucWenOriginal.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\uniaxial\DamperMaterial.h">
       <Filter>uniaxial</Filter>
     </ClInclude>
@@ -2498,17 +1186,8 @@
     <ClInclude Include="..\..\..\SRC\material\section\integration\TubeSectionIntegration.h">
       <Filter>section\integration</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\section\BiaxialHysteretic.h">
-      <Filter>section</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\nD\stressDensityModel\stressDensity.h">
       <Filter>nD\stressDensityModel</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\GNGMaterial.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\TensionOnlyMaterial.h">
-      <Filter>uniaxial</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\uniaxial\SPSW02.h">
       <Filter>uniaxial</Filter>
@@ -2519,83 +1198,11 @@
     <ClInclude Include="..\..\..\SRC\material\nD\BeamFiberMaterial2dPS.h">
       <Filter>nD\wrappers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\ConcreteMcftNonLinear5.h">
-      <Filter>nD</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\ConcreteMcftNonLinear7.h">
-      <Filter>nD</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\section\integration\RCTunnelSectionIntegration.h">
       <Filter>section\integration</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\stiffness\ConstantStiffnessDegradation.h">
-      <Filter>uniaxial\stiffness</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\stiffness\DuctilityStiffnessDegradation.h">
-      <Filter>uniaxial\stiffness</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\stiffness\EnergyStiffnessDegradation.h">
-      <Filter>uniaxial\stiffness</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\stiffness\PincheiraStiffnessDegradation.h">
-      <Filter>uniaxial\stiffness</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\stiffness\StiffnessDegradation.h">
-      <Filter>uniaxial\stiffness</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\strength\ACIStrengthDegradation.h">
-      <Filter>uniaxial\strength</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\strength\ConstantStrengthDegradation.h">
-      <Filter>uniaxial\strength</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\strength\DuctilityStrengthDegradation.h">
-      <Filter>uniaxial\strength</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\strength\EnergyStrengthDegradation.h">
-      <Filter>uniaxial\strength</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\strength\PetrangeliStrengthDegradation.h">
-      <Filter>uniaxial\strength</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\strength\SectionStrengthDegradation.h">
-      <Filter>uniaxial\strength</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\strength\StrengthDegradation.h">
-      <Filter>uniaxial\strength</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\unloading\ConstantUnloadingRule.h">
-      <Filter>uniaxial\unloading</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\unloading\EnergyUnloadingRule.h">
-      <Filter>uniaxial\unloading</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\unloading\KarsanUnloadingRule.h">
-      <Filter>uniaxial\unloading</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\unloading\TakedaUnloadingRule.h">
-      <Filter>uniaxial\unloading</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\unloading\UnloadingRule.h">
-      <Filter>uniaxial\unloading</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\uniaxial\MaterialState.h">
       <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\OOHystereticMaterial.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\ExternalUniaxialMaterial.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\ExternalNDMaterial.h">
-      <Filter>nD</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\HardeningMaterial2.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\matCMM\MaterialCMM.h">
-      <Filter>nD\matCMM</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\section\fiber\NDFiber2d.h">
       <Filter>section\fiber</Filter>
@@ -2603,55 +1210,10 @@
     <ClInclude Include="..\..\..\SRC\material\section\fiber\NDFiber3d.h">
       <Filter>section\fiber</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\section\ElasticBDShearSection2d.h">
-      <Filter>section</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\section\TimoshenkoSection3d.h">
       <Filter>section</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\section\WFFiberSection2d.h">
-      <Filter>section</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\section\WSection2d.h">
-      <Filter>section</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\section\ASDCoupledHinge3D.h">
-      <Filter>section</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\backbone\CappedBackbone.h">
-      <Filter>uniaxial\backbone</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\backbone\LinearCappedBackbone.h">
-      <Filter>uniaxial\backbone</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\BackboneMaterial.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\backbone\MaterialBackbone.h">
-      <Filter>uniaxial\backbone</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\fedeas\PlasticDamageMaterial.h">
-      <Filter>uniaxial\fedeas</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\limitState\PinchingLimitStateMaterial.h">
-      <Filter>uniaxial\LimitState</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\BraceMaterial.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\Concrete02IS.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\uniaxial\Concrete05.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\ContinuumUniaxial.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\ElasticBDMaterial.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\ElasticPowerFunc.h">
       <Filter>uniaxial</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\uniaxial\IMKBilin.h">
@@ -2663,16 +1225,7 @@
     <ClInclude Include="..\..\..\SRC\material\uniaxial\IMKPinching.h">
       <Filter>uniaxial</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\Neoprene.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\SecantConcrete.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\nD\PressureDependentElastic3D.h">
-      <Filter>nD</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\FeapMaterial.h">
       <Filter>nD</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\nD\UWmaterials\BoundingCamClay.h">
@@ -2729,83 +1282,11 @@
     <ClInclude Include="..\..\..\SRC\material\nD\UWmaterials\PM4Silt.h">
       <Filter>nD\UWmaterials</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\UVCmultiaxial.h">
-      <Filter>nD</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\UVCplanestress.h">
-      <Filter>nD</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\UVCuniaxial.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\Bilin.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\Bilin02.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\TDConcrete.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\TDConcreteEXP.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\TDConcreteMC10.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\TDConcreteMC10NL.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\DegradingPinchedBW.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\SLModel.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\IncrementalElasticIsotropicThreeDimensional.h">
-      <Filter>nD\elasticIsotropic</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\nD\UWmaterials\J2CyclicBoundingSurface3D.h">
       <Filter>nD\UWmaterials</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\nD\UWmaterials\J2CyclicBoundingSurfacePlaneStrain.h">
       <Filter>nD\UWmaterials</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\section\FiberSectionWarping3d.h">
-      <Filter>section</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\section\FiberSectionAsym3d.h">
-      <Filter>section</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\SteelFractureDI.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\HystereticPoly.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\BoucWenInfill.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\MultiplierMaterial.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\SMAMaterial.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\Steel02Fatigue.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\SteelDRC.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\Trilinwp.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\Trilinwp2.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\Trilinwpd.h">
-      <Filter>uniaxial</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\section\DoubleMembranePlateFiberSection.h">
       <Filter>section</Filter>
@@ -2815,15 +1296,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\nD\ElasticPlaneStress.h">
       <Filter>nD</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\VonPapaDamage.h">
-      <Filter>nD</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\HystereticSMMaterial.h">
-      <Filter>uniaxial</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\TDConcreteNL.h">
-      <Filter>uniaxial</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\nD\OrthotropicRotatingAngleConcreteT2DMaterial01\OrthotropicRotatingAngleConcreteT2DMaterial01.h">
       <Filter>nD\OrthotropicRotatingAngleConcreteT2DMaterial01</Filter>
@@ -2840,14 +1312,6 @@
     <ClInclude Include="..\..\..\SRC\material\section\LayeredMembraneSection\ElasticMembraneSection.h">
       <Filter>section\LayeredMembraneSection</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\MinMaxNDMaterial.h">
-      <Filter>nD</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\SRC\material\nD\ModelBuilderNDMaterialEventHandler.h" />
-    <ClInclude Include="..\..\..\SRC\material\section\ModelBuilderSectionEventHandler.h" />
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\BucklingMaterial.h" />
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\BucklingStrut.h" />
-    <ClInclude Include="..\..\..\SRC\material\uniaxial\ModelBuilderUniaxialMaterialEventHandler.h" />
     <ClInclude Include="..\..\..\SRC\material\uniaxial\TzSandCPT.h">
       <Filter>uniaxial</Filter>
     </ClInclude>
@@ -2855,6 +1319,15 @@
       <Filter>uniaxial</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\SRC\material\uniaxial\Steel05.h">
+      <Filter>uniaxial</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\SRC\material\uniaxial\SmoothIMK.h">
+      <Filter>uniaxial</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\SRC\material\section\repres\reinfBar\ReinfBar.h">
+      <Filter>section\repres\reinfLayer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\SRC\material\uniaxial\Bilin.h">
       <Filter>uniaxial</Filter>
     </ClInclude>
   </ItemGroup>

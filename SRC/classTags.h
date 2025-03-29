@@ -1188,7 +1188,7 @@
 #define RECORDER_TAGS_YsVisual                  11
 #define RECORDER_TAGS_DamageRecorder		12
 #define RECORDER_TAGS_PatternRecorder		13
-#define RECORDER_TAGS_TclFeViewer		14
+#define RECORDER_TAGS_FeViewer		14
 #define RECORDER_TAGS_NormElementRecorder	16
 #define RECORDER_TAGS_NormNodeRecorder	        17
 #define RECORDER_TAGS_NormEnvelopeElementRecorder	18

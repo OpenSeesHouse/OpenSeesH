@@ -35,10 +35,10 @@
 extern "C" int OPS_ResetInputNoBuilder(ClientData clientData, Tcl_Interp * interp, int cArg, int mArg, TCL_Char * *argv, Domain * domain);
 
 extern void *OPS_Coulomb();
-extern void *OPS_VelDependent();
-extern void *OPS_VelDepMultiLinear();
-extern void *OPS_VelNormalFrcDep();
-extern void *OPS_VelPressureDep();
+//extern void *OPS_VelDependent();
+//extern void *OPS_VelDepMultiLinear();
+//extern void *OPS_VelNormalFrcDep();
+//extern void *OPS_VelPressureDep();
 
 
 static void printCommand(int argc, TCL_Char **argv)
@@ -74,40 +74,40 @@ int TclModelBuilderFrictionModelCommand(ClientData clientData, Tcl_Interp *inter
     }
     
     // ----------------------------------------------------------------------------	
-    if (strcmp(argv[1],"VelDependent") == 0 || strcmp(argv[1],"VDependent") == 0)  {
-        void *theFrn = OPS_VelDependent();
-        if (theFrn != 0)
-            theFrnMdl = (FrictionModel *)theFrn;
-        else
-            return TCL_ERROR;
-    }
+    //if (strcmp(argv[1],"VelDependent") == 0 || strcmp(argv[1],"VDependent") == 0)  {
+    //    void *theFrn = OPS_VelDependent();
+    //    if (theFrn != 0)
+    //        theFrnMdl = (FrictionModel *)theFrn;
+    //    else
+    //        return TCL_ERROR;
+    //}
     
     // ----------------------------------------------------------------------------	
-    if (strcmp(argv[1], "VelDepMultiLinear") == 0 || strcmp(argv[1], "VDependentMultiLinear") == 0) {
-        void *theFrn = OPS_VelDepMultiLinear();
-        if (theFrn != 0)
-            theFrnMdl = (FrictionModel *)theFrn;
-        else
-            return TCL_ERROR;
-    }
+    //if (strcmp(argv[1], "VelDepMultiLinear") == 0 || strcmp(argv[1], "VDependentMultiLinear") == 0) {
+    //    void *theFrn = OPS_VelDepMultiLinear();
+    //    if (theFrn != 0)
+    //        theFrnMdl = (FrictionModel *)theFrn;
+    //    else
+    //        return TCL_ERROR;
+    //}
 
     // ----------------------------------------------------------------------------	
-    if (strcmp(argv[1], "VelNormalFrcDep") == 0 || strcmp(argv[1], "VNDependent") == 0) {
-        void *theFrn = OPS_VelNormalFrcDep();
-        if (theFrn != 0)
-            theFrnMdl = (FrictionModel *)theFrn;
-        else
-            return TCL_ERROR;
-    }
+    //if (strcmp(argv[1], "VelNormalFrcDep") == 0 || strcmp(argv[1], "VNDependent") == 0) {
+    //    void *theFrn = OPS_VelNormalFrcDep();
+    //    if (theFrn != 0)
+    //        theFrnMdl = (FrictionModel *)theFrn;
+    //    else
+    //        return TCL_ERROR;
+    //}
 
     // ----------------------------------------------------------------------------	
-    if (strcmp(argv[1],"VelPressureDep") == 0 || strcmp(argv[1],"VPDependent") == 0)  {
-        void *theFrn = OPS_VelPressureDep();
-        if (theFrn != 0)
-            theFrnMdl = (FrictionModel *)theFrn;
-        else
-            return TCL_ERROR;
-    }
+    //if (strcmp(argv[1],"VelPressureDep") == 0 || strcmp(argv[1],"VPDependent") == 0)  {
+    //    void *theFrn = OPS_VelPressureDep();
+    //    if (theFrn != 0)
+    //        theFrnMdl = (FrictionModel *)theFrn;
+    //    else
+    //        return TCL_ERROR;
+    //}
     
     // ----------------------------------------------------------------------------	
     if (theFrnMdl == 0)  {

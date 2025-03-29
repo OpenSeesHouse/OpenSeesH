@@ -86,7 +86,7 @@
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <OmitFramePointers>true</OmitFramePointers>
-      <AdditionalIncludeDirectories>..\..\..\src\tagged\storage;..\..\..\src\damage;..\..\..\src\recorder\response;..\..\..\src\ndarray;..\..\..\src\modelbuilder;..\..\..\src;..\..\..\src\actor\actor;..\..\..\src\element;..\..\..\src\tagged;..\..\..\src\modelbuilder\tcl;..\..\..\src\handler;..\..\..\src\matrix;..\..\..\src\domain\component;c:\Program Files\tcl;c:\Program Files\tcl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\src\tagged\storage;..\..\..\src\damage;..\..\..\src\recorder\response;..\..\..\src\ndarray;..\..\..\src\modelbuilder;..\..\..\src;..\..\..\src\actor\actor;..\..\..\src\element;..\..\..\src\tagged;..\..\..\src\modelbuilder\tcl;..\..\..\src\handler;..\..\..\src\matrix;..\..\..\src\domain\component;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_TCL85;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -115,7 +115,6 @@
     <ClCompile Include="..\..\..\SRC\damage\Mehanny.cpp" />
     <ClCompile Include="..\..\..\SRC\damage\NormalizedPeak.cpp" />
     <ClCompile Include="..\..\..\SRC\damage\ParkAng.cpp" />
-    <ClCompile Include="..\..\..\SRC\damage\TclModelBuilderDamageModelCommand.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\SRC\damage\DamageModel.h" />

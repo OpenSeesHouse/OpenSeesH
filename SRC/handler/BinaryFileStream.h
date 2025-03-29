@@ -48,7 +48,7 @@ class BinaryFileStream : public OPS_Stream
   int close(void);
   int flush();
 
-#if _DLL
+#if _NET
   int closeHandler() {
 	  return this->close();
   }

@@ -39,7 +39,7 @@
 // What: "@(#) NDMaterial.h, revA"
 
 #include <Material.h>
-#if _DLL
+#if _NET
 #include <ModelBuilderNDMaterialEventHandler.h>
 #endif
 class Matrix;
@@ -110,7 +110,7 @@ extern NDMaterial *OPS_getNDMaterial(int tag);
 extern bool OPS_removeNDMaterial(int tag);
 extern void OPS_clearAllNDMaterial(void);
 extern void OPS_printNDMaterial(OPS_Stream &s, int flag = 0);
-#if _DLL
+#if _NET
 extern void OPSDLL_SetNDMaterialEventHandlers(ModelBuilder_AddNDMaterial add, ModelBuilder_RemoveNDMaterial remove, ModelBuilder_ClearAllNDMaterial clear);
 #endif
 #endif

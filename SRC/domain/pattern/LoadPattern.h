@@ -65,7 +65,7 @@ class LoadPattern : public DomainComponent
 
     // method to set the associated TimeSeries and Domain
     virtual void setTimeSeries(TimeSeries *theSeries);
-#if _DLL
+#if _NET
 	virtual inline TimeSeries* getTimeSeries() { return this->theSeries; };
 #endif
     virtual void setDomain(Domain *theDomain);

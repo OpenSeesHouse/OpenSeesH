@@ -5,6 +5,10 @@
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="PyDebug|x64">
+      <Configuration>PyDebug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|x64">
       <Configuration>Release</Configuration>
       <Platform>x64</Platform>
@@ -27,6 +31,11 @@
     <CharacterSet>MultiByte</CharacterSet>
     <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='PyDebug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release.DLL|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
@@ -41,11 +50,16 @@
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='PyDebug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\..\..\lib\release\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='PyDebug|x64'">.\..\..\lib\pyDebug\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\..\..\obj\recorder\release\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='PyDebug|x64'">.\..\..\obj\recorder\pyDebug\</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\..\..\lib\debug\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\..\..\obj\recorder\debug\</IntDir>
   </PropertyGroup>
@@ -67,6 +81,34 @@
     </ClCompile>
     <Lib>
       <OutputFile>.\..\..\lib\release\recorder.lib</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </Lib>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <BuildLog>
+      <Path>.\..\..\obj\recorder\release\$(MSBuildProjectName).log</Path>
+    </BuildLog>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='PyDebug|x64'">
+    <ClCompile>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <AdditionalIncludeDirectories>..\..\..\src\material\uniaxial;..\..\..\src\coordTransformation;..\..\..\src\domain\load;..\..\..\src\api;..\..\..\src\utility;..\..\..\src\actor\message;..\..\..\src\actor\objectBroker;..\..\..\src\modelbuilder\tcl;..\..\..\src\damage;..\..\..\src\domain\pattern;..\..\..\src\system_of_eqn;..\..\..\src\system_of_eqn\linearSOE;..\..\..\src\analysis\integrator;..\..\..\src\material\section\fiber;..\..\..\src\material;..\..\..\src\recorder\response;..\..\..\src\analysis\algorithm;..\..\..\src\analysis\algorithm\equiSolnAlgo;..\..\..\src\handler;..\..\..\src\renderer;..\..\..\src\tcl;..\..\..\src\actor\channel;..\..\..\src\modelbuilder;..\..\..\src\database;..\..\..\src\tagged;..\..\..\src\tagged\storage;..\..\..\src\actor\actor;..\..\..\src\domain\component;..\..\..\src\element;..\..\..\src\element\PFEMElement;..\..\..\src\matrix;..\..\..\src\domain\domain;..\..\..\src;..\..\..\src\recorder;..\..\..\src\domain\node;..\..\..\src\nDarray;..\..\..\src\domain\region;..\..\..\src\domain\constraints;..\..\..\src\element\updatedlagrangianbeamcolumn;..\..\..\src\material\yieldSurface\evolution;..\..\..\src\material\yieldsurface\yieldSurfaceBC;c:\Program Files\tcl;c:\Program Files\tcl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;WIN32;_LIB;_WGL;_TCL85;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeaderOutputFile>.\..\..\obj\recorder\release/recorder.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>.\..\..\obj\recorder\release/</AssemblerListingLocation>
+      <ObjectFileName>.\..\..\obj\recorder\release/</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\..\obj\recorder\release/</ProgramDataBaseFileName>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <CompileAs>Default</CompileAs>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(OutDir)recorder.lib</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Lib>
     <ResourceCompile>
@@ -110,69 +152,39 @@
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\SRC\recorder\AlgorithmIncrements.cpp" />
     <ClCompile Include="..\..\..\SRC\recorder\ConditionalDriftRecorder.cpp" />
     <ClCompile Include="..\..\..\SRC\recorder\ConditionalElementRecorder.cpp" />
     <ClCompile Include="..\..\..\SRC\recorder\ConditionalNodeRecorder.cpp" />
-    <ClCompile Include="..\..\..\SRC\recorder\DamageRecorder.cpp" />
-    <ClCompile Include="..\..\..\SRC\recorder\DatastoreRecorder.cpp" />
     <ClCompile Include="..\..\..\SRC\recorder\DriftRecorder.cpp" />
     <ClCompile Include="..\..\..\SRC\recorder\ElementRecorder.cpp" />
-    <ClCompile Include="..\..\..\SRC\recorder\ElementRecorderRMS.cpp" />
     <ClCompile Include="..\..\..\SRC\recorder\EnvelopeDriftRecorder.cpp" />
     <ClCompile Include="..\..\..\SRC\recorder\EnvelopeElementRecorder.cpp" />
     <ClCompile Include="..\..\..\SRC\recorder\EnvelopeNodeRecorder.cpp" />
     <ClCompile Include="..\..\..\SRC\recorder\FilePlotter.cpp" />
-    <ClCompile Include="..\..\..\SRC\recorder\GmshRecorder.cpp" />
-    <ClCompile Include="..\..\..\Src\recorder\GSA_Recorder.cpp" />
-    <ClCompile Include="..\..\..\SRC\recorder\MaxNodeDispRecorder.cpp" />
-    <ClCompile Include="..\..\..\SRC\recorder\MPCORecorder.cpp" />
     <ClCompile Include="..\..\..\SRC\recorder\NodeRecorder.cpp" />
-    <ClCompile Include="..\..\..\SRC\recorder\NodeRecorderRMS.cpp" />
-    <ClCompile Include="..\..\..\SRC\recorder\NormElementRecorder.cpp" />
-    <ClCompile Include="..\..\..\SRC\recorder\NormEnvelopeElementRecorder.cpp" />
-    <ClCompile Include="..\..\..\SRC\recorder\OpsRecorderCommands.cpp" />
-    <ClCompile Include="..\..\..\SRC\recorder\PatternRecorder.cpp" />
-    <ClCompile Include="..\..\..\SRC\recorder\PVDRecorder.cpp" />
     <ClCompile Include="..\..\..\SRC\recorder\Recorder.cpp" />
-    <ClCompile Include="..\..\..\SRC\recorder\RemoveRecorder.cpp" />
     <ClCompile Include="..\..\..\SRC\recorder\ResidDriftRecorder.cpp" />
     <ClCompile Include="..\..\..\SRC\recorder\ResidElementRecorder.cpp" />
     <ClCompile Include="..\..\..\SRC\recorder\ResidNodeRecorder.cpp" />
     <ClCompile Include="..\..\..\SRC\recorder\response\CrdTransfResponse.cpp" />
-    <ClCompile Include="..\..\..\SRC\recorder\TclRecorderCommands.cpp" />
     <ClCompile Include="..\..\..\SRC\recorder\response\CompositeResponse.cpp" />
     <ClCompile Include="..\..\..\SRC\recorder\response\ElementResponse.cpp" />
     <ClCompile Include="..\..\..\SRC\recorder\response\FiberResponse.cpp" />
     <ClCompile Include="..\..\..\SRC\recorder\response\MaterialResponse.cpp" />
     <ClCompile Include="..\..\..\SRC\recorder\response\Response.cpp" />
-    <ClCompile Include="..\..\..\SRC\recorder\VTK_Recorder.cpp" />
+    <ClCompile Include="..\..\..\SRC\tcl\FeViewer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\SRC\recorder\ConditionalDriftRecorder.h" />
     <ClInclude Include="..\..\..\SRC\recorder\ConditionalElementRecorder.h" />
     <ClInclude Include="..\..\..\SRC\recorder\ConditionalNodeRecorder.h" />
-    <ClInclude Include="..\..\..\SRC\recorder\DamageRecorder.h" />
-    <ClInclude Include="..\..\..\SRC\recorder\ElementRecorderRMS.h" />
     <ClInclude Include="..\..\..\SRC\recorder\EnvelopeDriftRecorder.h" />
-    <ClInclude Include="..\..\..\SRC\recorder\GmshRecorder.h" />
-    <ClInclude Include="..\..\..\SRC\recorder\MPCORecorder.h" />
-    <ClInclude Include="..\..\..\SRC\recorder\NodeRecorderRMS.h" />
-    <ClInclude Include="..\..\..\SRC\recorder\NormElementRecorder.h" />
-    <ClInclude Include="..\..\..\SRC\recorder\NormEnvelopeElementRecorder.h" />
-    <ClInclude Include="..\..\..\SRC\recorder\PVDRecorder.h" />
-    <ClInclude Include="..\..\..\SRC\recorder\RemoveRecorder.h" />
-    <ClInclude Include="..\..\..\SRC\recorder\AlgorithmIncrements.h" />
-    <ClInclude Include="..\..\..\SRC\recorder\DatastoreRecorder.h" />
     <ClInclude Include="..\..\..\SRC\recorder\DriftRecorder.h" />
     <ClInclude Include="..\..\..\SRC\recorder\ElementRecorder.h" />
     <ClInclude Include="..\..\..\SRC\recorder\EnvelopeElementRecorder.h" />
     <ClInclude Include="..\..\..\SRC\recorder\EnvelopeNodeRecorder.h" />
     <ClInclude Include="..\..\..\SRC\recorder\FilePlotter.h" />
-    <ClInclude Include="..\..\..\Src\recorder\GSA_Recorder.h" />
-    <ClInclude Include="..\..\..\SRC\recorder\MaxNodeDispRecorder.h" />
     <ClInclude Include="..\..\..\SRC\recorder\NodeRecorder.h" />
-    <ClInclude Include="..\..\..\SRC\recorder\PatternRecorder.h" />
     <ClInclude Include="..\..\..\SRC\recorder\Recorder.h" />
     <ClInclude Include="..\..\..\SRC\recorder\ResidDriftRecorder.h" />
     <ClInclude Include="..\..\..\SRC\recorder\ResidElementRecorder.h" />
@@ -183,7 +195,7 @@
     <ClInclude Include="..\..\..\SRC\recorder\response\FiberResponse.h" />
     <ClInclude Include="..\..\..\SRC\recorder\response\MaterialResponse.h" />
     <ClInclude Include="..\..\..\SRC\recorder\response\Response.h" />
-    <ClInclude Include="..\..\..\SRC\recorder\VTK_Recorder.h" />
+    <ClInclude Include="..\..\..\SRC\tcl\FeViewer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

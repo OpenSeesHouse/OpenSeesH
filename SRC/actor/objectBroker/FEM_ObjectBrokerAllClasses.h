@@ -17,11 +17,11 @@
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
 **                                                                    **
 ** ****************************************************************** */
-                                                                        
+
 // $Revision: 1.5 $
 // $Date: 2009-05-14 22:52:04 $
 // $Source: /usr/local/cvs/OpenSees/SRC/actor/objectBroker/FEM_ObjectBrokerAllClasses.h,v $
-                                                                        
+
 // Written: fmk
 // Revision: A
 //
@@ -40,94 +40,94 @@
 
 class FEM_ObjectBrokerAllClasses : public FEM_ObjectBroker
 {
-  public:
-    FEM_ObjectBrokerAllClasses();
-    ~FEM_ObjectBrokerAllClasses();
+public:
+	FEM_ObjectBrokerAllClasses();
+	~FEM_ObjectBrokerAllClasses();
 
-    Actor*getNewActor(int classTag, Channel *theChannel);
-    
-    PartitionedModelBuilder *
-      getPtrNewPartitionedModelBuilder(Subdomain &theSub,
-				       int classTag);
-    
-    GraphNumberer *getPtrNewGraphNumberer(int classTag);
-    
-    // methods to get new modelling class objects
-    Element       *getNewElement(int classTag);
-    Node          *getNewNode(int classTag);
-    MP_Constraint *getNewMP(int classTag);
-    SP_Constraint *getNewSP(int classTag);
-    Pressure_Constraint *getNewPC(int classTag);
-    NodalLoad     *getNewNodalLoad(int classTag);
-    ElementalLoad *getNewElementalLoad(int classTag);
-    
-    CrdTransf *getNewCrdTransf(int classTag);
-    Damping *getNewDamping(int classTag);
+	Actor* getNewActor(int classTag, Channel* theChannel);
 
-    BeamIntegration *getNewBeamIntegration(int classTag);
-    SectionIntegration *getNewSectionIntegration(int classTag);    
+	PartitionedModelBuilder*
+		getPtrNewPartitionedModelBuilder(Subdomain& theSub,
+			int classTag);
 
-    UniaxialMaterial  *getNewUniaxialMaterial(int classTag);
-    SectionForceDeformation  *getNewSection(int classTag);    
-    NDMaterial *getNewNDMaterial(int classTag);
-    Fiber *getNewFiber(int classTag);
-    FrictionModel *getNewFrictionModel(int classTag);
+	GraphNumberer* getPtrNewGraphNumberer(int classTag);
 
-  HystereticBackbone *getNewHystereticBackbone(int classTag);
-  UnloadingRule *getNewUnloadingRule(int classTag);  
-  StiffnessDegradation *getNewStiffnessDegradation(int classTag);
-  StrengthDegradation *getNewStrengthDegradation(int classTag);
-  
-    ConvergenceTest       *getNewConvergenceTest(int classTag);
-    LoadPattern           *getNewLoadPattern(int classTag);
-    GroundMotion          *getNewGroundMotion(int classTag);
-    TimeSeries            *getNewTimeSeries(int classTag);    
-    TimeSeriesIntegrator  *getNewTimeSeriesIntegrator(int classTag);    
-    
-    // matrix vector and id objects
-    Matrix	  *getPtrNewMatrix(int classTag, int noRows, int noCols);
-    Vector	  *getPtrNewVector(int classTag, int size);
-    ID	          *getPtrNewID(int classTag, int size);
+	// methods to get new modelling class objects
+	Element* getNewElement(int classTag);
+	Node* getNewNode(int classTag);
+	MP_Constraint* getNewMP(int classTag);
+	SP_Constraint* getNewSP(int classTag);
+	Pressure_Constraint* getNewPC(int classTag);
+	NodalLoad* getNewNodalLoad(int classTag);
+	ElementalLoad* getNewElementalLoad(int classTag);
 
-    // methods for output objects
-    //    DataOutputHandler *getPtrNewDataOutputHandler(int classTag);
-    OPS_Stream *getPtrNewStream(int classTag);
-    Recorder *getPtrNewRecorder(int classTag);
-    
-    
-    // methods to get new analysis objects
-    ConstraintHandler     *getNewConstraintHandler(int classTag);
-    DOF_Numberer          *getNewNumberer(int classTag);
-    AnalysisModel         *getNewAnalysisModel(int classTag);
-    EquiSolnAlgo          *getNewEquiSolnAlgo(int classTag);
-    Accelerator           *getAccelerator(int classTag);
-    LineSearch            *getLineSearch(int classTag);
-    DomainDecompAlgo      *getNewDomainDecompAlgo(int classTag);
-    StaticIntegrator      *getNewStaticIntegrator(int classTag);
-    TransientIntegrator   *getNewTransientIntegrator(int classTag);
-    IncrementalIntegrator *getNewIncrementalIntegrator(int classTag);
+	CrdTransf* getNewCrdTransf(int classTag);
+	Damping* getNewDamping(int classTag);
 
-    LinearSOE *getNewLinearSOE(int classTagSOE);
-    EigenSOE *getNewEigenSOE(int classTagSOE);
-    
-    LinearSOE *getPtrNewDDLinearSOE(int classTagSOE, 
-				    int classTagDDSolver);
+	BeamIntegration* getNewBeamIntegration(int classTag);
+	SectionIntegration* getNewSectionIntegration(int classTag);
 
-    DomainSolver *getNewDomainSolver(void);
+	UniaxialMaterial* getNewUniaxialMaterial(int classTag);
+	SectionForceDeformation* getNewSection(int classTag);
+	NDMaterial* getNewNDMaterial(int classTag);
+	Fiber* getNewFiber(int classTag);
+	FrictionModel* getNewFrictionModel(int classTag);
 
-    DomainDecompositionAnalysis *
-      getNewDomainDecompAnalysis(int classTag, Subdomain &theDomain);
+	HystereticBackbone* getNewHystereticBackbone(int classTag);
+	UnloadingRule* getNewUnloadingRule(int classTag);
+	StiffnessDegradation* getNewStiffnessDegradation(int classTag);
+	StrengthDegradation* getNewStrengthDegradation(int classTag);
 
-    Subdomain  *getSubdomainPtr(int classTag);
+	ConvergenceTest* getNewConvergenceTest(int classTag);
+	LoadPattern* getNewLoadPattern(int classTag);
+	GroundMotion* getNewGroundMotion(int classTag);
+	TimeSeries* getNewTimeSeries(int classTag);
+	TimeSeriesIntegrator* getNewTimeSeriesIntegrator(int classTag);
 
-    Parameter *getParameter(int classTag);
+	// matrix vector and id objects
+	Matrix* getPtrNewMatrix(int classTag, int noRows, int noCols);
+	Vector* getPtrNewVector(int classTag, int size);
+	ID* getPtrNewID(int classTag, int size);
 
-  // int addUniaxialMaterial(int classTag, const char *lib, const char *funcName, UniaxialMaterial *(*)(void));
-    
-  protected:
-    
-  private:
-    DomainSolver *lastDomainSolver;
+	// methods for output objects
+	//    DataOutputHandler *getPtrNewDataOutputHandler(int classTag);
+	OPS_Stream* getPtrNewStream(int classTag);
+	Recorder* getPtrNewRecorder(int classTag);
+
+
+	// methods to get new analysis objects
+	ConstraintHandler* getNewConstraintHandler(int classTag);
+	DOF_Numberer* getNewNumberer(int classTag);
+	AnalysisModel* getNewAnalysisModel(int classTag);
+	EquiSolnAlgo* getNewEquiSolnAlgo(int classTag);
+	Accelerator* getAccelerator(int classTag);
+	LineSearch* getLineSearch(int classTag);
+	DomainDecompAlgo* getNewDomainDecompAlgo(int classTag);
+	StaticIntegrator* getNewStaticIntegrator(int classTag);
+	TransientIntegrator* getNewTransientIntegrator(int classTag);
+	IncrementalIntegrator* getNewIncrementalIntegrator(int classTag);
+
+	LinearSOE* getNewLinearSOE(int classTagSOE);
+	EigenSOE* getNewEigenSOE(int classTagSOE);
+
+	LinearSOE* getPtrNewDDLinearSOE(int classTagSOE,
+		int classTagDDSolver);
+
+	DomainSolver* getNewDomainSolver(void);
+
+	DomainDecompositionAnalysis*
+		getNewDomainDecompAnalysis(int classTag, Subdomain& theDomain);
+
+	Subdomain* getSubdomainPtr(int classTag);
+
+	Parameter *getParameter(int classTag);
+
+// int addUniaxialMaterial(int classTag, const char *lib, const char *funcName, UniaxialMaterial *(*)(void));
+
+protected:
+
+private:
+	DomainSolver* lastDomainSolver;
 };
 
 #endif

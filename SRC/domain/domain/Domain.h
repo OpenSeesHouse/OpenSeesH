@@ -77,7 +77,7 @@ class FEM_ObjectBroker;
 
 class TaggedObjectStorage;
 
-#if _DLL
+#if _NET
 typedef int(__stdcall* DomainEvent_AddNode) (Node* node);
 typedef int(__stdcall* DomainEvent_RemoveNode) (Node* node);
 typedef int(__stdcall* DomainEvent_AddElement) (Element* element);
@@ -263,7 +263,7 @@ class Domain
     virtual int calculateNodalReactions(int flag);
 	Recorder* getRecorder(int tag);	//by SAJalali
 
-#if _DLL
+#if _NET
    DomainEvent_AddNode _DomainEvent_AddNode;
    DomainEvent_RemoveNode _DomainEvent_RemoveNode;
    DomainEvent_AddElement _DomainEvent_AddElement;
@@ -288,7 +288,7 @@ class Domain
 
     virtual int buildEleGraph(Graph *theEleGraph);
     virtual int buildNodeGraph(Graph *theNodeGraph);
-#if !_DLL
+#if !_NET
     Recorder **theRecorders;
     int numRecorders;    
 #endif

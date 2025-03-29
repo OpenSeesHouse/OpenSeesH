@@ -105,6 +105,7 @@ struct eleObject {
 
 typedef struct eleObject eleObj;
 
+class SimulationInformation;
 class AnalysisModel;
 class EquiSolnAlgo;
 class ConstraintHandler;
@@ -118,6 +119,7 @@ class StaticIntegrator;
 class TransientIntegrator;
 class ConvergenceTest;
 
+#define OPS_GetSimulationInfo ops_getsimulationinfo_
 #define OPS_Error ops_error_
 #define OPS_GetIntInput ops_getintinput_
 #define OPS_SetIntOutput ops_setintoutput_
@@ -180,10 +182,12 @@ class ConvergenceTest;
 #include <OPS_Globals.h>
 #include <vector>
 #include <map>
+//#include "utility/SimulationInformation.h"
 // #include <tcl.h>
 //#include "TclModelBuilder.h"
 
 #ifdef __cplusplus
+extern "C" SimulationInformation* OPS_GetSimulationInfo();
 extern "C" int         OPS_GetNDM();
 extern "C" int         OPS_GetNDF();
 extern "C" int         OPS_Error(char* errorMessage, int length);
@@ -191,7 +195,7 @@ extern "C" int         OPS_GetNumRemainingInputArgs();
 extern "C" int         OPS_ResetCurrentInputArg(int cArg);
 //extern "C" int       OPS_ResetInput(ClientData clientData, Tcl_Interp * interp, int cArg, int mArg, TCL_Char * *argv, Domain * domain, TclModelBuilder * builder);
 //extern "C" int       OPS_ResetInputNoBuilder(ClientData clientData, Tcl_Interp * interp, int cArg, int mArg, TCL_Char * *argv, Domain * domain);
-extern "C" int         OPS_GetIntInput(const int* numData, int* data);
+extern "C" int         OPS_GetIntInput(int* numData, int* data);
 extern "C" int         OPS_SetIntOutput(int* numData, int* data, bool scalar);
 extern "C" int         OPS_SetIntListsOutput(std::vector<std::vector<int>>& data);
 extern "C" int         OPS_SetIntDictOutput(std::map<const char*, int>& data);

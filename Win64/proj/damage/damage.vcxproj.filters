@@ -36,9 +36,6 @@
     <ClCompile Include="..\..\..\SRC\damage\ParkAng.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\SRC\damage\TclModelBuilderDamageModelCommand.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\SRC\damage\DamageModel.h">

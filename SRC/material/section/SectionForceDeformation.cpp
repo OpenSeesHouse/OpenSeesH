@@ -49,7 +49,7 @@
 #include <MapOfTaggedObjectsIter.h>
 
 static MapOfTaggedObjects theSectionForceDeformationObjects;
-#if _DLL
+#if _NET
 static ModelBuilderSectionEventHandler modelBuilderSectionEventHandler;
 void OPSDLL_SetSectionEventHandlers(ModelBuilder_AddSection add, ModelBuilder_RemoveSection remove, ModelBuilder_ClearAllSection clear) {
 	modelBuilderSectionEventHandler._ModelBuilder_AddSection = add;
@@ -58,7 +58,7 @@ void OPSDLL_SetSectionEventHandlers(ModelBuilder_AddSection add, ModelBuilder_Re
 }
 #endif
 bool OPS_addSectionForceDeformation(SectionForceDeformation *newComponent) {
-#if _DLL
+#if _NET
 	bool ret = theSectionForceDeformationObjects.addComponent(newComponent);
 	if (ret && modelBuilderSectionEventHandler._ModelBuilder_AddSection != 0) {
 		modelBuilderSectionEventHandler._ModelBuilder_AddSection(newComponent);
@@ -74,7 +74,7 @@ bool OPS_removeSectionForceDeformation(int tag)
     TaggedObject* obj = theSectionForceDeformationObjects.removeComponent(tag);
     if (obj != 0) {
 	delete obj;
-#if _DLL
+#if _NET
 	if (modelBuilderSectionEventHandler._ModelBuilder_RemoveSection != 0) {
 		modelBuilderSectionEventHandler._ModelBuilder_RemoveSection(tag);
 	}
@@ -98,7 +98,7 @@ SectionForceDeformation *OPS_getSectionForceDeformation(int tag) {
 
 void OPS_clearAllSectionForceDeformation(void) {
   theSectionForceDeformationObjects.clearAll();
-#if _DLL
+#if _NET
   if (modelBuilderSectionEventHandler._ModelBuilder_ClearAllSection != 0) {
 	  modelBuilderSectionEventHandler._ModelBuilder_ClearAllSection();
   }

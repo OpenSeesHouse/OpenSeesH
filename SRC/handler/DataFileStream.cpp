@@ -40,7 +40,7 @@ using std::setiosflags;
 using std::ifstream;
 using std::string;
 using std::getline;
-#if _DLL
+#if _NET
 using std::to_string;
 #endif
 
@@ -48,7 +48,7 @@ DataFileStream::DataFileStream(int indent)
 	:OPS_Stream(OPS_STREAM_TAGS_DataFileStream),
 	fileOpen(0), fileName(0), indentSize(indent), sendSelfCount(0), theChannels(0), numDataRows(0),
 	mapping(0), maxCount(0), sizeColumns(0), theColumns(0), theData(0), theRemoteData(0), doCSV(0), commonColumns(0)
-#if _DLL
+#if _NET
 	, xmlOrderProcessed(0), xmlString(0), xmlStringLength(0), numXMLTags(0), xmlColumns(0), attributeMode(false), numTag(0), sizeTags(0), tags(0)
 #endif
 {
@@ -66,7 +66,7 @@ DataFileStream::DataFileStream(const char* file, openMode mode, int indent, int 
 	mapping(0), maxCount(0), sizeColumns(0),
 	theColumns(0), theData(0), theRemoteData(0),
 	doCSV(csv), closeOnWrite(closeWrite), commonColumns(0)
-#if _DLL
+#if _NET
 	, xmlOrderProcessed(0), xmlString(0), xmlStringLength(0), numXMLTags(0), xmlColumns(0), attributeMode(false), numTag(0), sizeTags(0), tags(0)
 #endif
 {
@@ -119,7 +119,7 @@ DataFileStream::~DataFileStream()
 		if (sizeColumns != 0) delete sizeColumns;
 		if (commonColumns != 0) delete commonColumns;
 
-#if _DLL
+#if _NET
 		if (xmlColumns != 0)
 			delete xmlColumns;
 #endif
@@ -199,7 +199,7 @@ DataFileStream::open(void)
 		fileOpen = 1;
 	if (doScientific == true)
 		theFile << std::scientific;
-#if _DLL
+#if _NET
 	if (sendSelfCount >= 0) {
 		headers = "";
 		//theFile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
@@ -221,7 +221,7 @@ DataFileStream::open(void)
 int 
 DataFileStream::close(openMode nextOpenMode)
 {
-#if _DLL
+#if _NET
 	if (fileOpen == 1) {
 		for (int i = 0; i < numTag; i++) {
 			this->endTag();
@@ -279,7 +279,7 @@ DataFileStream::setFloatField(floatField field)
 int
 DataFileStream::tag(const char* tagName)
 {
-#if !_DLL
+#if !_NET
 	return 0;
 #else 
 	if (numTag == sizeTags) {
@@ -341,7 +341,7 @@ DataFileStream::tag(const char* tagName)
 int
 DataFileStream::tag(const char* tagName, const char* value)
 {
-#if !_DLL
+#if !_NET
 	return 0;
 #else 
 	//  if (sendSelfCount == 0) {
@@ -376,7 +376,7 @@ DataFileStream::tag(const char* tagName, const char* value)
 int
 DataFileStream::endTag()
 {
-#if !_DLL
+#if !_NET
 	return 0;
 #else 
 	if (numTag != 0) {
@@ -415,7 +415,7 @@ DataFileStream::endTag()
 int
 DataFileStream::attr(const char* name, int value)
 {
-#if _DLL
+#if _NET
 //	theFile << " " << name << "=\"" << value << "\"";
 	headers.append(" ");
 	headers.append(name);
@@ -429,7 +429,7 @@ DataFileStream::attr(const char* name, int value)
 int
 DataFileStream::attr(const char* name, double value)
 {
-#if _DLL
+#if _NET
 	//	theFile << " " << name << "=\"" << value << "\"";
 	headers.append(" ");
 	headers.append(name);
@@ -443,7 +443,7 @@ DataFileStream::attr(const char* name, double value)
 int
 DataFileStream::attr(const char* name, const char* value)
 {
-#if _DLL
+#if _NET
 	//	theFile << " " << name << "=\"" << value << "\"";
 	headers.append(" ");
 	headers.append(name);
@@ -1142,7 +1142,7 @@ int DataFileStream::flush() {
   return 0;
 }
 
-#if _DLL
+#if _NET
 const char* 
 DataFileStream::getStreamHeader() {
 	if (headers.empty()) return 0;

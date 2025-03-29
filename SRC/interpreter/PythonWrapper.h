@@ -43,11 +43,13 @@ UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 
 #ifdef _DEBUG
 #undef _DEBUG
+#define NDEBUG
 #include <Python.h>
 #define _DEBUG
+#undef NDEBUG
 #else
 #include <Python.h>
-#endif
+#endif // _DEBUG
 
 #include <vector>
 #include <map>

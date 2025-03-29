@@ -1235,7 +1235,7 @@ NodeRecorder::initialize(void)
 	sprintf(nodeCrdData, "coord");
 
 	// fixing TimeOutput for node recorder
-#if _DLL
+#if _NET
 	if (echoTimeFlag == true) {
 		if (theNodalTags != 0) {
 			theOutputHandler->tag("TimeOutput");

@@ -26,7 +26,7 @@
 #ifndef OpenGlDevice_H
 #define OpenGlDevice_H
 
-#if _DLL
+#if _NET
 
 class OpenGlDevice // dummy
 {

@@ -57,7 +57,7 @@ class ID
     int resize(int newSize, int fill_value=0);
     int fill(int fill_value);
 
-#if _DLL
+#if _NET
 	inline int* GetData() { return this->data; }
 	void Print() {
 		opserr << "[";

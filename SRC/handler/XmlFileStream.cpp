@@ -39,7 +39,7 @@ using std::setiosflags;
 using std::string;
 using std::ifstream;
 using std::getline;
-#if _DLL
+#if _NET
 using std::to_string;
 #endif
 
@@ -218,7 +218,7 @@ XmlFileStream::open(void)
 		theFile << " <OpenSees\n";
 		theFile << "  xmlns:xsi = \"http://www.w3.org/2001/XMLSchema-instance\"\n";
 		theFile << "  xsi:noNamespaceSchemaLocation = \"http://OpenSees.berkeley.edu/xml-schema/xmlns/OpenSees.xsd\">\n";
-#if _DLL
+#if _NET
 		headers = "";
 		headers.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 		headers.append("<OpenSees\n");
@@ -241,14 +241,14 @@ XmlFileStream::close(void)
 {
 	if (fileOpen == 1) {
 		for (int i = 0; i < numTag; i++) {
-#if _DLL
+#if _NET
 			if (i == 0)
 				headers.append(">\n");
 #endif
 			this->endTag();
 		}
 		theFile << "</OpenSees>\n";
-#if _DLL
+#if _NET
 		headers.append("</OpenSees>\n");
 #endif
 		theFile.close();
@@ -344,7 +344,7 @@ XmlFileStream::tag(const char* tagName)
 	//  if (sendSelfCount == 0 || (strstr(tagName,"Data") != 0)) {
 	if (attributeMode == true) {
 		theFile << ">\n";
-#if _DLL
+#if _NET
 		headers.append(">\n");
 #endif
 	}
@@ -354,7 +354,7 @@ XmlFileStream::tag(const char* tagName)
 	numIndent++;
 	this->indent();
 	theFile << "<" << tagName;
-#if _DLL
+#if _NET
 	headers.append("<");
 	headers.append(tagName);
 #endif
@@ -402,7 +402,7 @@ XmlFileStream::tag(const char* tagName, const char* value)
 	//  if (sendSelfCount == 0) {
 	if (attributeMode == true) {
 		theFile << ">\n";
-#if _DLL
+#if _NET
 		headers.append(">\n");
 #endif
 	}
@@ -411,7 +411,7 @@ XmlFileStream::tag(const char* tagName, const char* value)
 	numIndent++;
 	this->indent();
 	theFile << "<" << tagName << ">" << value << "</" << tagName << ">" << endln;
-#if _DLL
+#if _NET
 	headers.append("<");
 	headers.append(tagName);
 	headers.append(">");
@@ -472,7 +472,7 @@ XmlFileStream::endTag()
     if (numTag != 0) {
       if (attributeMode == true) {
 	theFile << "/>\n";
-#if _DLL
+#if _NET
 	headers.append("/>\n");
 #endif
 	delete [] tags[numTag-1];
@@ -481,7 +481,7 @@ XmlFileStream::endTag()
       } else {
 	this->indent();
 	theFile << "</" << tags[numTag-1] << ">\n";
-#if _DLL
+#if _NET
 	headers.append("</");
 	headers.append(tags[numTag - 1]);
 	headers.append(">\n");
@@ -578,7 +578,7 @@ XmlFileStream::attr(const char* name, int value)
 	//  if (sendSelfCount == 0 ) {
 
 	theFile << " " << name << "=\"" << value << "\"";
-#if _DLL
+#if _NET
 	headers.append(" ");
 	headers.append(name);
 	headers.append("=\"");
@@ -622,7 +622,7 @@ XmlFileStream::attr(const char* name, double value)
 	//  if (sendSelfCount == 0) {
 
 	theFile << " " << name << "=\"" << value << "\"";
-#if _DLL
+#if _NET
 	//	theFile << " " << name << "=\"" << value << "\"";
 	headers.append(" ");
 	headers.append(name);
@@ -666,7 +666,7 @@ XmlFileStream::attr(const char* name, const char* value)
 	//  if (sendSelfCount == 0) {
 
 	theFile << " " << name << "=\"" << value << "\"";
-#if _DLL
+#if _NET
 	//	theFile << " " << name << "=\"" << value << "\"";
 	headers.append(" ");
 	headers.append(name);
@@ -1553,7 +1553,7 @@ XmlFileStream::mergeXML()
 	return 0;
 }
 
-#if _DLL
+#if _NET
 const char*
 XmlFileStream::getStreamHeader() {
 	if (headers.empty()) return 0;

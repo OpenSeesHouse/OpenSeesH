@@ -29,7 +29,7 @@
 
 #include <fstream>
 using std::ofstream;
-#if _DLL
+#if _NET
 using std::string;
 #endif
 
@@ -46,7 +46,7 @@ class DataFileStream : public OPS_Stream
   int close(openMode nextOpen = APPEND);
   int open(void);
   int flush();
-#if _DLL
+#if _NET
   int closeHandler() {
 	  return this->close();
   }
@@ -112,7 +112,7 @@ class DataFileStream : public OPS_Stream
   int numIndent;
   char *indentString;
 
-#if _DLL
+#if _NET
   bool attributeMode;
   int numTag;
   int sizeTags;

@@ -49,7 +49,7 @@
 #ifdef _CSS
 #include <Node.h> //by SAJalali
 #include <Domain.h>
-extern Domain theDomain;
+extern Domain* OPS_GetDomain();
 #endif // _CSS
 
 using namespace std;
@@ -359,7 +359,7 @@ midNodeY = 0.0;  //Coordinate of mid node of foundation along Y
 
 #ifdef _CSS
 //by SAJalali
-Node* theNode = theDomain.getNode(ConNode);
+Node* theNode = OPS_GetDomain()->getNode(ConNode);
 if (theNode != 0) {
 	const Vector& coords = theNode->getCrds();
 	midNodeX = coords(0);

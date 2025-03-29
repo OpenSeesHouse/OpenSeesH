@@ -2,14 +2,14 @@
 Copyright (c) 2015-2017, The Regents of the University of California (Regents).
 All rights reserved.
 
-Redistribution and use in source and binary forms, with or without 
+Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
 
 1. Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer.
+	 list of conditions and the following disclaimer.
 2. Redistributions in binary form must reproduce the above copyright notice,
-   this list of conditions and the following disclaimer in the documentation
-   and/or other materials provided with the distribution.
+	 this list of conditions and the following disclaimer in the documentation
+	 and/or other materials provided with the distribution.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -26,10 +26,10 @@ The views and conclusions contained in the software and documentation are those
 of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
 
-REGENTS SPECIFICALLY DISCLAIMS ANY WARRANTIES, INCLUDING, BUT NOT LIMITED TO, 
+REGENTS SPECIFICALLY DISCLAIMS ANY WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
 THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-THE SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS 
-PROVIDED "AS IS". REGENTS HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, 
+THE SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS
+PROVIDED "AS IS". REGENTS HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT,
 UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 
 *************************************************************************** */
@@ -49,420 +49,424 @@ UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 
 // define opserr
 static PythonStream sserr;
-OPS_Stream *opserrPtr = &sserr;
+OPS_Stream* opserrPtr = &sserr;
 
 
 PythonModule::PythonModule()
-        : wrapper(), cmds(this) {
-    // does nothing
+	: wrapper(), cmds(this) {
+	// does nothing
 }
 
 PythonModule::~PythonModule() {
-    // does nothing
+	// does nothing
 }
 
 int
 PythonModule::run() {
-    return 0;
+	return 0;
 }
 
 int
-PythonModule::addCommand(const char *, Command &) {
-    return -1;
+PythonModule::addCommand(const char*, Command&) {
+	return -1;
 }
 
 int
-PythonModule::removeCommand(const char *) {
-    return -1;
+PythonModule::removeCommand(const char*) {
+	return -1;
 }
 
-const char *PythonModule::trimSpaces(PyObject *o) {
-  Py_ssize_t size = 0;
-  const char *s = PyUnicode_AsUTF8AndSize(o, &size);
+const char* PythonModule::trimSpaces(PyObject* o) {
+	Py_ssize_t size = 0;
+	const char* s = PyUnicode_AsUTF8AndSize(o, &size);
 
-  // empty string
-  if (size == 0) {
-    return s;
-  }
+	// empty string
+	if (size == 0) {
+		return s;
+	}
 
-  // find first char that is not space
-  Py_ssize_t firstLoc = 0;
-  for (Py_ssize_t i = 0; i < size; ++i) {
-    if (isspace(s[i])) {
-      firstLoc = i + 1;
-    } else {
-      break;
-    }
-  }
+	// find first char that is not space
+	Py_ssize_t firstLoc = 0;
+	for (Py_ssize_t i = 0; i < size; ++i) {
+		if (isspace(s[i])) {
+			firstLoc = i + 1;
+		}
+		else {
+			break;
+		}
+	}
 
-  // find last char that is not space
-  Py_ssize_t lastLoc = size - 1;
-  for (Py_ssize_t i = size - 1; i >= 0; --i) {
-    if (isspace(s[i])) {
-      lastLoc = i - 1;
-    } else {
-      break;
-    }
-  }
+	// find last char that is not space
+	Py_ssize_t lastLoc = size - 1;
+	for (Py_ssize_t i = size - 1; i >= 0; --i) {
+		if (isspace(s[i])) {
+			lastLoc = i - 1;
+		}
+		else {
+			break;
+		}
+	}
 
-  // new Py Object
-  PyObject *newo = 0;
+	// new Py Object
+	PyObject* newo = 0;
 
-  // all spaces: make an empty string
-  if (firstLoc == size || lastLoc < 0) {
-    newo = PyUnicode_FromString("");
-  }
+	// all spaces: make an empty string
+	if (firstLoc == size || lastLoc < 0) {
+		newo = PyUnicode_FromString("");
+	}
 
-  // get substring
-  else if (firstLoc > 0 || lastLoc < size - 1) {
-    newo = PyUnicode_Substring(o, firstLoc, lastLoc + 1);
-  }
+	// get substring
+	else if (firstLoc > 0 || lastLoc < size - 1) {
+		newo = PyUnicode_Substring(o, firstLoc, lastLoc + 1);
+	}
 
-  // get string
-  if (newo == 0) {
-    return s;
-  }
+	// get string
+	if (newo == 0) {
+		return s;
+	}
 
-  const char* news = PyUnicode_AsUTF8(newo);
-  Py_DECREF(newo);
-  return news;
+	const char* news = PyUnicode_AsUTF8(newo);
+	Py_DECREF(newo);
+	return news;
 }
 
 int
 PythonModule::getNumRemainingInputArgs(void) {
-    return wrapper.getNumberArgs() - wrapper.getCurrentArg();
+	return wrapper.getNumberArgs() - wrapper.getCurrentArg();
 }
 
 int
-PythonModule::getInt(int *data, int numArgs) {
-    if ((wrapper.getNumberArgs() - wrapper.getCurrentArg()) < numArgs) {
-        return -1;
-    }
+PythonModule::getInt(int* data, int numArgs) {
+	if ((wrapper.getNumberArgs() - wrapper.getCurrentArg()) < numArgs) {
+		return -1;
+	}
 
-    for (int i = 0; i < numArgs; i++) {
-        PyObject *o = PyTuple_GetItem(wrapper.getCurrentArgv(), wrapper.getCurrentArg());
-        wrapper.incrCurrentArg();
-        if (PyLong_Check(o) || PyFloat_Check(o) || PyBool_Check(o)) {
-            PyErr_Clear();
-            data[i] = PyLong_AsLong(o);
-            if (PyErr_Occurred()) {
-                return -1;
-            }
-        } else {
-            return -1;
-        }
-    }
+	for (int i = 0; i < numArgs; i++) {
+		PyObject* o = PyTuple_GetItem(wrapper.getCurrentArgv(), wrapper.getCurrentArg());
+		wrapper.incrCurrentArg();
+		if (PyLong_Check(o) || PyFloat_Check(o) || PyBool_Check(o)) {
+			PyErr_Clear();
+			data[i] = PyLong_AsLong(o);
+			if (PyErr_Occurred()) {
+				return -1;
+			}
+		}
+		else {
+			return -1;
+		}
+	}
 
-    return 0;
+	return 0;
 }
 
 int
-PythonModule::getDouble(double *data, int numArgs) {
-    if ((wrapper.getNumberArgs() - wrapper.getCurrentArg()) < numArgs) {
-        return -1;
-    }
+PythonModule::getDouble(double* data, int numArgs) {
+	if ((wrapper.getNumberArgs() - wrapper.getCurrentArg()) < numArgs) {
+		return -1;
+	}
 
-    for (int i = 0; i < numArgs; i++) {
-        PyObject *o = PyTuple_GetItem(wrapper.getCurrentArgv(), wrapper.getCurrentArg());
-        wrapper.incrCurrentArg();
-        if (PyLong_Check(o) || PyFloat_Check(o) || PyBool_Check(o)) {
-            PyErr_Clear();
-            data[i] = PyFloat_AsDouble(o);
-            if (PyErr_Occurred()) {
-                return -1;
-            }
-        } else {
-            return -1;
-        }
-    }
+	for (int i = 0; i < numArgs; i++) {
+		PyObject* o = PyTuple_GetItem(wrapper.getCurrentArgv(), wrapper.getCurrentArg());
+		wrapper.incrCurrentArg();
+		if (PyLong_Check(o) || PyFloat_Check(o) || PyBool_Check(o)) {
+			PyErr_Clear();
+			data[i] = PyFloat_AsDouble(o);
+			if (PyErr_Occurred()) {
+				return -1;
+			}
+		}
+		else {
+			return -1;
+		}
+	}
 
-    return 0;
+	return 0;
 }
 
 int PythonModule::getDoubleList(int* size, Vector* data)
 {
-    if (wrapper.getCurrentArg() >= wrapper.getNumberArgs()) {
-        return -1;
-    }
+	if (wrapper.getCurrentArg() >= wrapper.getNumberArgs()) {
+		return -1;
+	}
 
-    PyObject* o = PyTuple_GetItem(wrapper.getCurrentArgv(), wrapper.getCurrentArg());
-    wrapper.incrCurrentArg();
+	PyObject* o = PyTuple_GetItem(wrapper.getCurrentArgv(), wrapper.getCurrentArg());
+	wrapper.incrCurrentArg();
 
-    if (PyList_Check(o)) {
-        *size = PyList_Size(o);
-        data->resize(*size);
-        for (int i = 0; i < *size; i++) {
-            PyErr_Clear();
-            PyObject* item = PyList_GetItem(o, i);
-            if (!(PyLong_Check(item) || PyFloat_Check(item) || PyBool_Check(item))) {
-                opserr << "PythonModule::getDoubleList error: item " << i << " in list is not a float (or int or bool)\n";
-                return -1;
-            }
-            (*data)(i) = PyFloat_AsDouble(item);
-            if (PyErr_Occurred()) {
-                return -1;
-            }
-        }
-    }
-    else if (PyTuple_Check(o)) {
-        *size = PyTuple_Size(o);
-        data->resize(*size);
-        for (int i = 0; i < *size; i++) {
-            PyErr_Clear();
-            PyObject* item = PyTuple_GetItem(o, i);
-            if (!(PyLong_Check(item) || PyFloat_Check(item) || PyBool_Check(item))) {
-                opserr << "PythonModule::getDoubleList error: item " << i << " in tuple is not a float (or int or bool)\n";
-                return -1;
-            }
-            (*data)(i) = PyFloat_AsDouble(item);
-            if (PyErr_Occurred()) {
-                return -1;
-            }
-        }
-    }
-    else {
-        opserr << "PythonModule::getDoubleList error: input is neither a list nor a tuple\n";
-        return -1;
-    }
+	if (PyList_Check(o)) {
+		*size = PyList_Size(o);
+		data->resize(*size);
+		for (int i = 0; i < *size; i++) {
+			PyErr_Clear();
+			PyObject* item = PyList_GetItem(o, i);
+			if (!(PyLong_Check(item) || PyFloat_Check(item) || PyBool_Check(item))) {
+				opserr << "PythonModule::getDoubleList error: item " << i << " in list is not a float (or int or bool)\n";
+				return -1;
+			}
+			(*data)(i) = PyFloat_AsDouble(item);
+			if (PyErr_Occurred()) {
+				return -1;
+			}
+		}
+	}
+	else if (PyTuple_Check(o)) {
+		*size = PyTuple_Size(o);
+		data->resize(*size);
+		for (int i = 0; i < *size; i++) {
+			PyErr_Clear();
+			PyObject* item = PyTuple_GetItem(o, i);
+			if (!(PyLong_Check(item) || PyFloat_Check(item) || PyBool_Check(item))) {
+				opserr << "PythonModule::getDoubleList error: item " << i << " in tuple is not a float (or int or bool)\n";
+				return -1;
+			}
+			(*data)(i) = PyFloat_AsDouble(item);
+			if (PyErr_Occurred()) {
+				return -1;
+			}
+		}
+	}
+	else {
+		opserr << "PythonModule::getDoubleList error: input is neither a list nor a tuple\n";
+		return -1;
+	}
 
-    return 0;
+	return 0;
 }
 
-const char *
+const char*
 PythonModule::getString() {
-    if (wrapper.getCurrentArg() >= wrapper.getNumberArgs()) {
-        return 0;
-    }
+	if (wrapper.getCurrentArg() >= wrapper.getNumberArgs()) {
+		return 0;
+	}
 
-    PyObject *o = PyTuple_GetItem(wrapper.getCurrentArgv(), wrapper.getCurrentArg());
-    wrapper.incrCurrentArg();
+	PyObject* o = PyTuple_GetItem(wrapper.getCurrentArgv(), wrapper.getCurrentArg());
+	wrapper.incrCurrentArg();
 #if PY_MAJOR_VERSION >= 3
-    if (!PyUnicode_Check(o)) {
-        return 0;
-    }
+	if (!PyUnicode_Check(o)) {
+		return 0;
+	}
 
-    // PyObject* space = PyUnicode_FromString(" ");
-    // PyObject* empty = PyUnicode_FromString("");
-    // PyObject* newo = PyUnicode_Replace(o, space, empty, -1);
-    const char* res = trimSpaces(o);
-    // Py_DECREF(newo);
-    // Py_DECREF(space);
-    // Py_DECREF(empty);
+	// PyObject* space = PyUnicode_FromString(" ");
+	// PyObject* empty = PyUnicode_FromString("");
+	// PyObject* newo = PyUnicode_Replace(o, space, empty, -1);
+	const char* res = trimSpaces(o);
+	// Py_DECREF(newo);
+	// Py_DECREF(space);
+	// Py_DECREF(empty);
 
-    return res;
+	return res;
 #else
-    if (!PyString_Check(o)) {
-        return 0;
-    }
+	if (!PyString_Check(o)) {
+		return 0;
+	}
 
-    return PyString_AS_STRING(o);
+	return PyString_AS_STRING(o);
 #endif
 }
 
-const char *PythonModule::getStringFromAll(char* buffer, int len) {
-    if (wrapper.getCurrentArg() >= wrapper.getNumberArgs()) {
-        return 0;
-    }
+const char* PythonModule::getStringFromAll(char* buffer, int len) {
+	if (wrapper.getCurrentArg() >= wrapper.getNumberArgs()) {
+		return 0;
+	}
 
-    PyObject *o =
-        PyTuple_GetItem(wrapper.getCurrentArgv(), wrapper.getCurrentArg());
-    wrapper.incrCurrentArg();
+	PyObject* o =
+		PyTuple_GetItem(wrapper.getCurrentArgv(), wrapper.getCurrentArg());
+	wrapper.incrCurrentArg();
 
-    // check if int
-    if (PyLong_Check(o) || PyBool_Check(o)) {
-        PyErr_Clear();
-        int data = PyLong_AsLong(o);
-        if (PyErr_Occurred()) {
-            return 0;
-        }
-        snprintf(buffer, len, "%d", data);
-        return buffer;
-    }
-    // check if double
-    else if (PyFloat_Check(o)) {
-        PyErr_Clear();
-        double data = PyFloat_AsDouble(o);
-        if (PyErr_Occurred()) {
-            return 0;
-        }
-        snprintf(buffer, len, "%.20f", data);
-        return buffer;
-    }
+	// check if int
+	if (PyLong_Check(o) || PyBool_Check(o)) {
+		PyErr_Clear();
+		int data = PyLong_AsLong(o);
+		if (PyErr_Occurred()) {
+			return 0;
+		}
+		snprintf(buffer, len, "%d", data);
+		return buffer;
+	}
+	// check if double
+	else if (PyFloat_Check(o)) {
+		PyErr_Clear();
+		double data = PyFloat_AsDouble(o);
+		if (PyErr_Occurred()) {
+			return 0;
+		}
+		snprintf(buffer, len, "%.20f", data);
+		return buffer;
+	}
 
 #if PY_MAJOR_VERSION >= 3
-    if (!PyUnicode_Check(o)) {
-        return 0;
-    }
+	if (!PyUnicode_Check(o)) {
+		return 0;
+	}
 
-    // PyObject *space = PyUnicode_FromString(" ");
-    // PyObject *empty = PyUnicode_FromString("");
-    // PyObject *newo = PyUnicode_Replace(o, space, empty, -1);
-    const char* res = trimSpaces(o);
-    // Py_DECREF(newo);
-    // Py_DECREF(space);
-    // Py_DECREF(empty);
+	// PyObject *space = PyUnicode_FromString(" ");
+	// PyObject *empty = PyUnicode_FromString("");
+	// PyObject *newo = PyUnicode_Replace(o, space, empty, -1);
+	const char* res = trimSpaces(o);
+	// Py_DECREF(newo);
+	// Py_DECREF(space);
+	// Py_DECREF(empty);
 
-    int lenres = int(strlen(res)) + 1;
-    if (lenres > len) {
-        lenres = len;
-    }
+	int lenres = int(strlen(res)) + 1;
+	if (lenres > len) {
+		lenres = len;
+	}
 
-    strncpy(buffer, res, lenres);
+	strncpy(buffer, res, lenres);
 
-    return buffer;
+	return buffer;
 #else
-    if (!PyString_Check(o)) {
-        return 0;
-    }
+	if (!PyString_Check(o)) {
+		return 0;
+	}
 
-    return PyString_AS_STRING(o);
+	return PyString_AS_STRING(o);
 #endif
 }
 
 int
-PythonModule::getStringCopy(char **stringPtr) {
-    return -1;
+PythonModule::getStringCopy(char** stringPtr) {
+	return -1;
 }
 
-int 
+int
 PythonModule::evalDoubleStringExpression(const char* theExpression, double& current_val)
 {
-    if (theExpression == 0) {
-        opserr << "OPS_EvalDoubleStringExpression Error: Expression not set\n";
-        return -1;
-    }
+	if (theExpression == 0) {
+		opserr << "OPS_EvalDoubleStringExpression Error: Expression not set\n";
+		return -1;
+	}
 
-    // run the string and get results
-    PyObject* py_main = PyImport_AddModule("__main__");
-    if (py_main == NULL) {
-        opserr << "OPS_EvalDoubleStringExpression Error: cannot add module  __main__\n";
-        return -1;
-    }
-    PyObject* py_dict = PyModule_GetDict(py_main);
-    if (py_main == NULL) {
-        opserr << "OPS_EvalDoubleStringExpression Error: cannot get dict of module __main__\n";
-        return -1;
-    }
-    PyObject* PyRes = PyRun_String(theExpression, Py_eval_input, py_dict, py_dict);
+	// run the string and get results
+	PyObject* py_main = PyImport_AddModule("__main__");
+	if (py_main == NULL) {
+		opserr << "OPS_EvalDoubleStringExpression Error: cannot add module  __main__\n";
+		return -1;
+	}
+	PyObject* py_dict = PyModule_GetDict(py_main);
+	if (py_main == NULL) {
+		opserr << "OPS_EvalDoubleStringExpression Error: cannot get dict of module __main__\n";
+		return -1;
+	}
+	PyObject* PyRes = PyRun_String(theExpression, Py_eval_input, py_dict, py_dict);
 
-    if (PyRes == NULL) {
-        opserr << "OPS_EvalDoubleStringExpression Error: failed to evaluate expression\n";
-        return -1;
-    }
+	if (PyRes == NULL) {
+		opserr << "OPS_EvalDoubleStringExpression Error: failed to evaluate expression\n";
+		return -1;
+	}
 
-    // get results
-    if (!(PyLong_Check(PyRes) || PyFloat_Check(PyRes) || PyBool_Check(PyRes))) {
-        opserr << "OPS_EvalDoubleStringExpression Error: the expression must return a float (or int or bool)\n";
-        return -1;
-    }
-    current_val = PyFloat_AsDouble(PyRes);
+	// get results
+	if (!(PyLong_Check(PyRes) || PyFloat_Check(PyRes) || PyBool_Check(PyRes))) {
+		opserr << "OPS_EvalDoubleStringExpression Error: the expression must return a float (or int or bool)\n";
+		return -1;
+	}
+	current_val = PyFloat_AsDouble(PyRes);
 
-    // done
-    return 0;
+	// done
+	return 0;
 }
 
 void
 PythonModule::resetInput(int cArg) {
-    wrapper.resetCommandLine(cArg);
+	wrapper.resetCommandLine(cArg);
 }
 
 int
-PythonModule::setInt(int *data, int numArgs, bool scalar) {
-    wrapper.setOutputs(data, numArgs, scalar);
+PythonModule::setInt(int* data, int numArgs, bool scalar) {
+	wrapper.setOutputs(data, numArgs, scalar);
 
-    return 0;
+	return 0;
 }
 
-int PythonModule::setInt(std::vector<std::vector<int>> &data) {
-    wrapper.setOutputs(data);
-    return 0;
+int PythonModule::setInt(std::vector<std::vector<int>>& data) {
+	wrapper.setOutputs(data);
+	return 0;
 }
 
 int PythonModule::setInt(std::map<const char*, int>& data) {
-    wrapper.setOutputs(data);
-    return 0;
+	wrapper.setOutputs(data);
+	return 0;
 }
 
 int PythonModule::setInt(std::map<const char*, std::vector<int>>& data) {
-    wrapper.setOutputs(data);
-    return 0;
+	wrapper.setOutputs(data);
+	return 0;
 }
 
 int
-PythonModule::setDouble(double *data, int numArgs, bool scalar) {
-    wrapper.setOutputs(data, numArgs, scalar);
+PythonModule::setDouble(double* data, int numArgs, bool scalar) {
+	wrapper.setOutputs(data, numArgs, scalar);
 
-    return 0;
+	return 0;
 }
 
-int PythonModule::setDouble(std::vector<std::vector<double>> &data) {
-    wrapper.setOutputs(data);
-    return 0;
+int PythonModule::setDouble(std::vector<std::vector<double>>& data) {
+	wrapper.setOutputs(data);
+	return 0;
 }
 
 int PythonModule::setDouble(std::map<const char*, double>& data) {
-    wrapper.setOutputs(data);
-    return 0;
+	wrapper.setOutputs(data);
+	return 0;
 }
 
 int PythonModule::setDouble(std::map<const char*, std::vector<double>>& data) {
-    wrapper.setOutputs(data);
-    return 0;
+	wrapper.setOutputs(data);
+	return 0;
 }
 
 int
-PythonModule::setString(const char *str) {
-    wrapper.setOutputs(str);
+PythonModule::setString(const char* str) {
+	wrapper.setOutputs(str);
 
-    return 0;
+	return 0;
 }
 
 int
 PythonModule::setString(std::vector<const char*>& data) {
-    wrapper.setOutputs(data);
-    return 0;
+	wrapper.setOutputs(data);
+	return 0;
 }
 
 int
 PythonModule::setString(std::vector<std::vector<const char*>>& data) {
-    wrapper.setOutputs(data);
-    return 0;
+	wrapper.setOutputs(data);
+	return 0;
 }
 
 int PythonModule::setString(std::map<const char*, const char*>& data) {
-    wrapper.setOutputs(data);
-    return 0;
+	wrapper.setOutputs(data);
+	return 0;
 }
 
 int PythonModule::setString(std::map<const char*, std::vector<const char*>>& data) {
-    wrapper.setOutputs(data);
-    return 0;
+	wrapper.setOutputs(data);
+	return 0;
 }
 
 int
-PythonModule::runCommand(const char *cmd) {
-    return PyRun_SimpleString(cmd);
+PythonModule::runCommand(const char* cmd) {
+	return PyRun_SimpleString(cmd);
 }
 
-static PythonModule *module = 0;
+static PythonModule* module = 0;
 
-PyMethodDef *getmethodsFunc() {
-    module = new PythonModule;
-    PythonWrapper *wrapper = module->getWrapper();
-    wrapper->addOpenSeesCommands();
+PyMethodDef* getmethodsFunc() {
+	module = new PythonModule;
+	PythonWrapper* wrapper = module->getWrapper();
+	wrapper->addOpenSeesCommands();
 
-    return wrapper->getMethods();
+	return wrapper->getMethods();
 }
 
 void cleanupFunc() {
-    module->getCmds().wipe();
-    if (module != 0) {
-        delete module;
-    }
+	module->getCmds().wipe();
+	if (module != 0) {
+		delete module;
+	}
 }
 
 struct module_state {
-    PyObject *error;
+	PyObject* error;
 };
 
 #if PY_MAJOR_VERSION >= 3
@@ -483,28 +487,28 @@ static struct module_state _state;
 
 #if PY_MAJOR_VERSION >= 3
 
-static int opensees_traverse(PyObject *m, visitproc visit, void *arg) {
-    Py_VISIT(GETSTATE(m)->error);
+static int opensees_traverse(PyObject* m, visitproc visit, void* arg) {
+	Py_VISIT(GETSTATE(m)->error);
 
-    return 0;
+	return 0;
 }
 
-static int opensees_clear(PyObject *m) {
-    Py_CLEAR(GETSTATE(m)->error);
+static int opensees_clear(PyObject* m) {
+	Py_CLEAR(GETSTATE(m)->error);
 
-    return 0;
+	return 0;
 }
 
 static struct PyModuleDef moduledef = {
-        PyModuleDef_HEAD_INIT,
-        "opensees",
-        NULL,
-        sizeof(struct module_state),
-        getmethodsFunc(),
-        NULL,
-        opensees_traverse,
-        opensees_clear,
-        NULL
+				PyModuleDef_HEAD_INIT,
+				"opensees",
+				NULL,
+				sizeof(struct module_state),
+				getmethodsFunc(),
+				NULL,
+				opensees_traverse,
+				opensees_clear,
+				NULL
 };
 
 #define INITERROR return NULL
@@ -521,39 +525,39 @@ initopensees(void)
 #endif
 {
 #if PY_MAJOR_VERSION >= 3
-    PyObject *pymodule = PyModule_Create(&moduledef);
+	PyObject* pymodule = PyModule_Create(&moduledef);
 #else
-    PyObject *pymodule = Py_InitModule("opensees", getmethodsFunc());
+	PyObject* pymodule = Py_InitModule("opensees", getmethodsFunc());
 #endif
 
-    if (pymodule == NULL)
-        INITERROR;
-    struct module_state *st = GETSTATE(pymodule);
+	if (pymodule == NULL)
+		INITERROR;
+	struct module_state* st = GETSTATE(pymodule);
 
-    // add OpenSeesError
-    st->error = PyErr_NewExceptionWithDoc("opensees.OpenSeesError", "Internal OpenSees errors.", NULL, NULL);
-    if (st->error == NULL) {
-        Py_DECREF(pymodule);
-        INITERROR;
-    }
-    Py_INCREF(st->error);
-    PyModule_AddObject(pymodule, "OpenSeesError", st->error);
+	// add OpenSeesError
+	st->error = PyErr_NewExceptionWithDoc("opensees.OpenSeesError", "Internal OpenSees errors.", NULL, NULL);
+	if (st->error == NULL) {
+		Py_DECREF(pymodule);
+		INITERROR;
+	}
+	Py_INCREF(st->error);
+	PyModule_AddObject(pymodule, "OpenSeesError", st->error);
 
-    // add OpenSeesParameter dict
-    auto *par = PyDict_New();
-    if (par == NULL) {
-      INITERROR;
-    }
-    if (PyModule_AddObject(pymodule, "OpenSeesParameter", par) < 0) {
-        Py_DECREF(par);
-        INITERROR;
-    }
+	// add OpenSeesParameter dict
+	auto* par = PyDict_New();
+	if (par == NULL) {
+		INITERROR;
+	}
+	if (PyModule_AddObject(pymodule, "OpenSeesParameter", par) < 0) {
+		Py_DECREF(par);
+		INITERROR;
+	}
 
-    sserr.setError(st->error);
+	sserr.setError(st->error);
 
-    Py_AtExit(cleanupFunc);
+	Py_AtExit(cleanupFunc);
 
 #if PY_MAJOR_VERSION >= 3
-    return pymodule;
+	return pymodule;
 #endif
 }

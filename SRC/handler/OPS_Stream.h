@@ -28,7 +28,7 @@
 #include <MovableObject.h>
 
 
-#if _DLL
+#if _NET
 #include <fstream>
 using std::string;
 #endif
@@ -87,7 +87,7 @@ class OPS_Stream:  public MovableObject
   virtual OPS_Stream& operator<<(double n);
   virtual OPS_Stream& operator<<(float n);
 
-#if _DLL
+#if _NET
   virtual inline const char* getStreamHeader() { return 0; }
 #endif
 
@@ -97,7 +97,7 @@ class OPS_Stream:  public MovableObject
   virtual int sendSelf(int commitTag, Channel &theChannel) =0;  
   virtual int recvSelf(int commitTag, Channel &theChannel, 
 		       FEM_ObjectBroker &theBroker) =0;
-#if _DLL
+#if _NET
   virtual int closeHandler() {
 	  return 0;
   }
@@ -110,7 +110,7 @@ class OPS_Stream:  public MovableObject
 #endif
  protected:
   int addCommonFlag;
-#if _DLL
+#if _NET
   std::string headers;
 #endif
  private:
