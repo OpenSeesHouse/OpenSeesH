@@ -95,7 +95,7 @@ extern void* OPS_UniaxialJ2Plasticity(void);
 extern void* OPS_HystereticMaterial(void);
 // extern void* OPS_HystereticSMMaterial(void);
 extern void* OPS_CableMaterial(void);
-// extern void* OPS_Bilin(void);
+extern void* OPS_Bilin(void);
 // extern void* OPS_Bilin02(void);
 extern void* OPS_Steel01(void);
 extern void* OPS_Steel_01(void);
@@ -306,13 +306,6 @@ TclModelBuilderUniaxialMaterialCommand(ClientData clientData, Tcl_Interp* interp
 			return TCL_ERROR;
 	}
 #ifdef _CSS
-	//if (strcmp(argv[1], "SmoothIMK") == 0) {
-	//	void* theMat = OPS_SmoothIMK();
-	//	if (theMat != 0)
-	//		theMaterial = (UniaxialMaterial*)theMat;
-	//	else
-	//		return TCL_ERROR;
-	//}
 	if (strcmp(argv[1], "Steel05") == 0) {
 		void* theMat = OPS_Steel05();
 		if (theMat != 0)
@@ -1196,17 +1189,17 @@ TclModelBuilderUniaxialMaterialCommand(ClientData clientData, Tcl_Interp* interp
 			return TCL_ERROR;
 	}
 
-	/*if ((strcmp(argv[1], "SAWSMaterial") == 0) || (strcmp(argv[1], "SAWS") == 0)) {
+	if ((strcmp(argv[1], "BilinMaterial") == 0) || (strcmp(argv[1], "Bilin") == 0)) {
 
-		void* theMat = OPS_SAWSMaterial();
+		void* theMat = OPS_Bilin();
 		if (theMat != 0)
 			theMaterial = (UniaxialMaterial*)theMat;
 		else
 			return TCL_ERROR;
 	}
-	if ((strcmp(argv[1], "BilinMaterial") == 0) || (strcmp(argv[1], "Bilin") == 0)) {
+	/*if ((strcmp(argv[1], "SAWSMaterial") == 0) || (strcmp(argv[1], "SAWS") == 0)) {
 
-		void* theMat = OPS_Bilin();
+		void* theMat = OPS_SAWSMaterial();
 		if (theMat != 0)
 			theMaterial = (UniaxialMaterial*)theMat;
 		else
