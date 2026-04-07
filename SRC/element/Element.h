@@ -147,6 +147,7 @@ protected:
 	double getDampingEnergy();
 	void computeEnergies();
 	double getHystereticEnergy();
+	double getStrainEnergy();
 #endif
    bool is_this_element_active;
   private:
@@ -155,6 +156,7 @@ protected:
 	  Vector prevResistingForces;
 	  double dampingEnergy;
 	  double hystereticEnergy;
+	  double strainEnergy;
 #endif // _CSS
 
 };

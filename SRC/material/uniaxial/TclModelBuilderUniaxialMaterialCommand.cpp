@@ -54,7 +54,7 @@ extern "C" int OPS_ResetInputNoBuilder(ClientData clientData, Tcl_Interp* interp
 #include <AxialSpHD.h>
 
 
-// #include <SMAMaterial.h>     // Davide Fugazza
+ #include <SMAMaterial.h>     // Davide Fugazza
 // #include <Masonry.h>
 // #include <Trilinwp.h>
 // #include <Trilinwp2.h>
@@ -126,7 +126,7 @@ extern void* OPS_MinMaxMaterial(void);
 // extern void* OPS_SimpleFractureMaterial(void);
 // extern void* OPS_HoehlerStanton(void);
 // extern void* OPS_InitStrainMaterial(void);
-// extern void* OPS_InitStressMaterial(void);
+ extern void* OPS_InitStressMaterial(void);
 // extern void* OPS_pyUCLA(void);
 // extern void* OPS_Maxwell(void);
 extern void* OPS_ViscousDamper(void);
@@ -192,7 +192,7 @@ extern void* OPS_PySimple3(void);
 // extern void* OPS_DegradingPinchedBW(void);
 // extern void* OPS_BoucWenInfill(void);  // S. Sirotti  18-January-2022  e-mail: stefano.sirotti@unimore.it
 // extern void* OPS_SLModel(void);
-// extern void* OPS_SMAMaterial(void);
+ extern void* OPS_SMAMaterial(void);
 // extern void* OPS_HystereticPoly(void); // Salvatore Sessa 14-Jan-2021 Mail: salvatore.sessa2@unina.it
 // extern void* OPS_HystereticSmooth(void); // Salvatore Sessa 02-May-2022 Mail: salvatore.sessa2@unina.it
 // extern void* OPS_HystereticAsym(void); // Salvatore Sessa 02-May-2022 Mail: salvatore.sessa2@unina.it
@@ -748,14 +748,14 @@ TclModelBuilderUniaxialMaterialCommand(ClientData clientData, Tcl_Interp* interp
 	//		return TCL_ERROR;
 
 	//}
-	//if ((strcmp(argv[1], "InitStressMaterial") == 0) || (strcmp(argv[1], "InitStress") == 0)) {
-	//	void* theMat = OPS_InitStressMaterial();
-	//	if (theMat != 0)
-	//		theMaterial = (UniaxialMaterial*)theMat;
-	//	else
-	//		return TCL_ERROR;
+	if ((strcmp(argv[1], "InitStressMaterial") == 0) || (strcmp(argv[1], "InitStress") == 0)) {
+		void* theMat = OPS_InitStressMaterial();
+		if (theMat != 0)
+			theMaterial = (UniaxialMaterial*)theMat;
+		else
+			return TCL_ERROR;
 
-	//}
+	}
 	//if ((strcmp(argv[1], "pyUCLA") == 0) || (strcmp(argv[1], "PYUCLA") == 0)) {
 	//	void* theMat = OPS_pyUCLA();
 	//	if (theMat != 0)
@@ -2038,13 +2038,13 @@ TclModelBuilderUniaxialMaterialCommand(ClientData clientData, Tcl_Interp* interp
 	//	else
 	//		return TCL_ERROR;
 	//}
-	//if (strcmp(argv[1], "SMA") == 0) {
-	//	void* theMat = OPS_SMAMaterial();
-	//	if (theMat != 0)
-	//		theMaterial = (UniaxialMaterial*)theMat;
-	//	else
-	//		return TCL_ERROR;
-	//}
+	if (strcmp(argv[1], "SMA") == 0) {
+		void* theMat = OPS_SMAMaterial();
+		if (theMat != 0)
+			theMaterial = (UniaxialMaterial*)theMat;
+		else
+			return TCL_ERROR;
+	}
 	//if (strcmp(argv[1], "ECC01") == 0) {
 	//	void* theMat = OPS_ECC01();
 	//	if (theMat != 0)

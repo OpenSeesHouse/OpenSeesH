@@ -1058,7 +1058,9 @@ CorotTruss::Print(OPS_Stream &s, int flag)
 Response*
 CorotTruss::setResponse(const char** argv, int argc, OPS_Stream* output)
 {
-  Response* theResponse = 0;
+  Response* theResponse = Element::setResponse(argv, argc, output);
+  if (theResponse != 0)
+		return theResponse;
 
   if (output != 0)
   {
@@ -1152,7 +1154,9 @@ CorotTruss::setResponse(const char** argv, int argc, OPS_Stream* output)
 int 
 CorotTruss::getResponse(int responseID, Information &eleInfo)
 {
-    double strain;
+  if (Element::getResponse(responseID, eleInfo) == 0)
+    return 0;
+  double strain;
 
     switch (responseID) {
     case 1:

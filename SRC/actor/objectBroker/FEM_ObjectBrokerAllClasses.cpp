@@ -100,7 +100,7 @@
 #include "Steel02Thermal.h"
 // #include "SteelMPF.h"
 // #include "Steel2.h"
-// #include "Steel4.h"
+ #include "Steel4.h"
 #include "RambergOsgoodSteel.h"
 #include "AxialSp.h"
 #include "AxialSpHD.h"
@@ -140,7 +140,7 @@
 // #include "Cast.h"
 // #include "snap/Clough.h"
 // #include "limitState/LimitStateMaterial.h"
-// #include "InitStressMaterial.h"
+ #include "InitStressMaterial.h"
 // #include "InitStrainMaterial.h"
 // #include "Bond_SP01.h"
 // #include "FRCC.h"
@@ -1817,8 +1817,8 @@ FEM_ObjectBrokerAllClasses::getNewUniaxialMaterial(int classTag)
 		//case MAT_TAG_Steel2:  
 		//     return new Steel2();
 
-		//case MAT_TAG_Steel4:  
-		//     return new Steel4();
+		case MAT_TAG_Steel4:  
+		     return new Steel4();
 
 	case MAT_TAG_RambergOsgoodSteel:
 		return new RambergOsgoodSteel();
@@ -2036,8 +2036,8 @@ FEM_ObjectBrokerAllClasses::getNewUniaxialMaterial(int classTag)
 	//case MAT_TAG_InitStrain:
 	//	return new InitStrainMaterial();
 
-	//case MAT_TAG_InitStress:
-	//	return new InitStressMaterial();
+	case MAT_TAG_InitStress:
+		return new InitStressMaterial();
 
 	//case MAT_TAG_Bond_SP01:
 	//	return new Bond_SP01();

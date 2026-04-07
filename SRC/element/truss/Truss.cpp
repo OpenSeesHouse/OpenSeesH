@@ -1169,7 +1169,9 @@ Response*
 Truss::setResponse(const char** argv, int argc, OPS_Stream* output)
 {
 
-	Response* theResponse = 0;
+	Response* theResponse = Element::setResponse(argv, argc, output);
+	if (theResponse != 0)
+		return theResponse;
 
 	if (output != 0)
 	{
@@ -1278,6 +1280,8 @@ Truss::setResponse(const char** argv, int argc, OPS_Stream* output)
 int
 Truss::getResponse(int responseID, Information& eleInfo)
 {
+	if (Element::getResponse(responseID, eleInfo) == 0)
+		return 0;
 	double strain, force;
 	static Vector fVec(1);
 	static Matrix kVec(1, 1);

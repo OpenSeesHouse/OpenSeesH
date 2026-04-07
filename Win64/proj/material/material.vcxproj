@@ -263,6 +263,7 @@
     <ClCompile Include="..\..\..\SRC\material\uniaxial\IMKBilin.cpp" />
     <ClCompile Include="..\..\..\SRC\material\uniaxial\IMKPeakOriented.cpp" />
     <ClCompile Include="..\..\..\SRC\material\uniaxial\IMKPinching.cpp" />
+    <ClCompile Include="..\..\..\SRC\material\uniaxial\InitStressMaterial.cpp" />
     <ClCompile Include="..\..\..\SRC\material\uniaxial\KikuchiAikenHDR.cpp" />
     <ClCompile Include="..\..\..\SRC\material\uniaxial\KikuchiAikenLRB.cpp" />
     <ClCompile Include="..\..\..\SRC\material\uniaxial\MaterialState.cpp" />
@@ -283,6 +284,7 @@
     <ClCompile Include="..\..\..\SRC\material\uniaxial\SelfCenteringMaterial.cpp" />
     <ClCompile Include="..\..\..\SRC\material\uniaxial\SeriesMaterial.cpp" />
     <ClCompile Include="..\..\..\SRC\material\uniaxial\ShearPanelMaterial.cpp" />
+    <ClCompile Include="..\..\..\SRC\material\uniaxial\SMAMaterial.cpp" />
     <ClCompile Include="..\..\..\SRC\material\uniaxial\SmoothIMK.cpp" />
     <ClCompile Include="..\..\..\SRC\material\uniaxial\SPSW02.cpp" />
     <ClCompile Include="..\..\..\SRC\material\uniaxial\StainlessECThermal.cpp" />
@@ -291,6 +293,7 @@
     <ClCompile Include="..\..\..\SRC\material\uniaxial\Steel02.cpp" />
     <ClCompile Include="..\..\..\SRC\material\uniaxial\Steel02Thermal.cpp" />
     <ClCompile Include="..\..\..\SRC\material\uniaxial\Steel05.cpp" />
+    <ClCompile Include="..\..\..\SRC\material\uniaxial\Steel4.cpp" />
     <ClCompile Include="..\..\..\SRC\material\uniaxial\SteelECThermal.cpp" />
     <ClCompile Include="..\..\..\SRC\material\uniaxial\Steel_01.cpp" />
     <ClCompile Include="..\..\..\SRC\material\uniaxial\TzSandCPT.cpp" />
@@ -475,6 +478,7 @@
     <ClInclude Include="..\..\..\SRC\material\uniaxial\IMKBilin.h" />
     <ClInclude Include="..\..\..\SRC\material\uniaxial\IMKPeakOriented.h" />
     <ClInclude Include="..\..\..\SRC\material\uniaxial\IMKPinching.h" />
+    <ClInclude Include="..\..\..\SRC\material\uniaxial\InitStressMaterial.h" />
     <ClInclude Include="..\..\..\SRC\material\uniaxial\KikuchiAikenHDR.h" />
     <ClInclude Include="..\..\..\SRC\material\uniaxial\KikuchiAikenLRB.h" />
     <ClInclude Include="..\..\..\SRC\material\uniaxial\MaterialState.h" />
@@ -493,6 +497,7 @@
     <ClInclude Include="..\..\..\SRC\material\uniaxial\SelfCenteringMaterial.h" />
     <ClInclude Include="..\..\..\SRC\material\uniaxial\SeriesMaterial.h" />
     <ClInclude Include="..\..\..\SRC\material\uniaxial\ShearPanelMaterial.h" />
+    <ClInclude Include="..\..\..\SRC\material\uniaxial\SMAMaterial.h" />
     <ClInclude Include="..\..\..\SRC\material\uniaxial\SmoothIMK.h" />
     <ClInclude Include="..\..\..\SRC\material\uniaxial\SPSW02.h" />
     <ClInclude Include="..\..\..\SRC\material\uniaxial\StainlessECThermal.h" />
@@ -501,6 +506,7 @@
     <ClInclude Include="..\..\..\SRC\material\uniaxial\Steel02.h" />
     <ClInclude Include="..\..\..\SRC\material\uniaxial\Steel02Thermal.h" />
     <ClInclude Include="..\..\..\SRC\material\uniaxial\Steel05.h" />
+    <ClInclude Include="..\..\..\SRC\material\uniaxial\Steel4.h" />
     <ClInclude Include="..\..\..\SRC\material\uniaxial\SteelECThermal.h" />
     <ClInclude Include="..\..\..\SRC\material\uniaxial\Steel_01.h" />
     <ClInclude Include="..\..\..\SRC\material\uniaxial\TzSandCPT.h" />

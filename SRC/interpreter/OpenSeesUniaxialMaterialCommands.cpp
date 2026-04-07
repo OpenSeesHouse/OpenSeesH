@@ -96,7 +96,7 @@ void* OPS_Steel02();
 //void* OPS_Steel03();
 void* OPS_SPSW02();
 void* OPS_Concrete01();
-//void* OPS_Steel4();
+void* OPS_Steel4();
 void* OPS_HystereticMaterial();
 //void* OPS_HystereticSMMaterial();
 void* OPS_ReinforcingSteel();
@@ -142,7 +142,7 @@ void* OPS_ElasticMultiLinear();
 //void* OPS_MultiLinear();
 //void* OPS_ContinuumUniaxialMaterial();
 //void* OPS_InitStrainMaterial();
-//void* OPS_InitStressMaterial();
+void* OPS_InitStressMaterial();
 void* OPS_PathIndependentMaterial();
 //void* OPS_MultiplierMaterial();
 void* OPS_Pinching4Material();
@@ -208,7 +208,7 @@ void* OPS_IMKBilin();
 void* OPS_IMKPinching();
 void* OPS_IMKPeakOriented();
 //void* OPS_SLModel();
-//void* OPS_SMAMaterial();
+void* OPS_SMAMaterial();
 //void* OPS_FRCC();
 //void* OPS_ConcreteZBH_original();
 //void* OPS_ConcreteZBH_fitted();
@@ -336,8 +336,8 @@ static int setUpUniaxialMaterials(void) {
       std::make_pair("SPSW02", &OPS_SPSW02));
   uniaxialMaterialsMap.insert(
       std::make_pair("Concrete01", &OPS_Concrete01));
-  //uniaxialMaterialsMap.insert(
-  //    std::make_pair("Steel4", &OPS_Steel4));
+  uniaxialMaterialsMap.insert(
+      std::make_pair("Steel4", &OPS_Steel4));
   uniaxialMaterialsMap.insert(
       std::make_pair("Hysteretic", &OPS_HystereticMaterial));
   //uniaxialMaterialsMap.insert(
@@ -457,10 +457,10 @@ static int setUpUniaxialMaterials(void) {
   //    "InitStrainMaterial", &OPS_InitStrainMaterial));
   //uniaxialMaterialsMap.insert(
   //    std::make_pair("InitStrain", &OPS_InitStrainMaterial));
-  //uniaxialMaterialsMap.insert(std::make_pair(
-  //    "InitStressMaterial", &OPS_InitStressMaterial));
-  //uniaxialMaterialsMap.insert(
-  //    std::make_pair("InitStress", &OPS_InitStressMaterial));
+  uniaxialMaterialsMap.insert(std::make_pair(
+      "InitStressMaterial", &OPS_InitStressMaterial));
+  uniaxialMaterialsMap.insert(
+      std::make_pair("InitStress", &OPS_InitStressMaterial));
   uniaxialMaterialsMap.insert(std::make_pair(
       "PathIndependent", &OPS_PathIndependentMaterial));
   //uniaxialMaterialsMap.insert(
@@ -603,8 +603,8 @@ static int setUpUniaxialMaterials(void) {
       std::make_pair("IMKPeakOriented", &OPS_IMKPeakOriented));
   //uniaxialMaterialsMap.insert(
   //    std::make_pair("SLModel", &OPS_SLModel));
-  //uniaxialMaterialsMap.insert(
-  //    std::make_pair("SMA", &OPS_SMAMaterial));
+  uniaxialMaterialsMap.insert(
+      std::make_pair("SMA", &OPS_SMAMaterial));
   //uniaxialMaterialsMap.insert(
   //    std::make_pair("FRCC", &OPS_FRCC));
   //uniaxialMaterialsMap.insert(

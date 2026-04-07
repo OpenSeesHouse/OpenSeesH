@@ -1529,7 +1529,9 @@ Response*
 DispBeamColumn2dThermal::setResponse(const char** argv, int argc,
 	OPS_Stream* output)
 {
-	Response* theResponse = 0;
+	Response* theResponse = Element::setResponse(argv, argc, output);
+	if (theResponse != 0)
+		return theResponse;
 
 	if (output != 0)
 	{
@@ -1705,6 +1707,8 @@ DispBeamColumn2dThermal::setResponse(const char** argv, int argc,
 int
 DispBeamColumn2dThermal::getResponse(int responseID, Information& eleInfo)
 {
+	if (Element::getResponse(responseID, eleInfo) == 0)
+		return 0;
 	double V;
 	double L = crdTransf->getInitialLength();
 

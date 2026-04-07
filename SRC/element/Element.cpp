@@ -17,12 +17,12 @@
 **   Filip C. Filippou (filippou@ce.berkeley.edu)                     **
 **                                                                    **
 ** ****************************************************************** */
-                                                                        
+
 // $Revision: 1.26 $
 // $Date: 2010-05-08 00:16:43 $
 // $Source: /usr/local/cvs/OpenSees/SRC/element/Element.cpp,v $
-                                                                        
-                                                                        
+
+
 // Written: fmk 11/95
 //
 // Purpose: This file contains the class definition for Element.
@@ -44,589 +44,596 @@
 #include <Node.h>
 #include <Domain.h>
 
-Element  *ops_TheActiveElement = 0;
+Element* ops_TheActiveElement = 0;
 
-Matrix **Element::theMatrices; 
-Vector **Element::theVectors1; 
-Vector **Element::theVectors2; 
+Matrix** Element::theMatrices;
+Vector** Element::theVectors1;
+Vector** Element::theVectors2;
 int  Element::numMatrices(0);
 
 // Element(int tag, int noExtNodes);
 // 	constructor that takes the element's unique tag and the number
 //	of external nodes for the element.
 
-Element::Element(int tag, int cTag) 
-  :DomainComponent(tag, cTag), alphaM(0.0), 
-  betaK(0.0), betaK0(0.0), betaKc(0.0), 
-      Kc(0), previousK(0), numPreviousK(0), index(-1), nodeIndex(-1),
-      is_this_element_active(true)
+Element::Element(int tag, int cTag)
+	:DomainComponent(tag, cTag), alphaM(0.0),
+	betaK(0.0), betaK0(0.0), betaKc(0.0),
+	Kc(0), previousK(0), numPreviousK(0), index(-1), nodeIndex(-1),
+	is_this_element_active(true)
 #ifdef _CSS
-    , dampingEnergy(0), prevDampingForces(0), hystereticEnergy(0), prevResistingForces(0)
+	, strainEnergy(0), dampingEnergy(0), prevDampingForces(0), hystereticEnergy(0), prevResistingForces(0)
 #endif // _CSS
 {
-  // does nothing
-  ops_TheActiveElement = this;
+	// does nothing
+	ops_TheActiveElement = this;
 }
 
-Element::~Element() 
+Element::~Element()
 {
-  if (Kc != 0)
-    delete Kc;
+	if (Kc != 0)
+		delete Kc;
 
-  if (previousK != 0) {
-    for (int i=0; i<numPreviousK; i++)
-      delete previousK[i];
-    delete [] previousK;
-  }
+	if (previousK != 0) {
+		for (int i = 0; i < numPreviousK; i++)
+			delete previousK[i];
+		delete[] previousK;
+	}
 }
 
 int
 Element::commitState(void)
 {
-  if (Kc != 0)
-    *Kc = this->getTangentStiff();
+	if (Kc != 0)
+		*Kc = this->getTangentStiff();
 #ifdef _CSS
-  computeEnergies();
+	computeEnergies();
 #endif // _CSS
-  double t = this->getDomain()->getCurrentTime();
-  return 0;
+	return 0;
 }
 
 int
 Element::update(void)
 {
-    return 0;
+	return 0;
 }
 
 int
 Element::revertToStart(void)
 {
-  return 0;
+	return 0;
 }
 
 
-void 
+void
 Element::zeroLoad(void)
 {
 
 }
 
-int 
-Element::addInertiaLoadToUnbalance(const Vector &accel)
+int
+Element::addInertiaLoadToUnbalance(const Vector& accel)
 {
-  return -1;
+	return -1;
 }
 
 
 int
 Element::setRayleighDampingFactors(double alpham, double betak, double betak0, double betakc)
 {
-  alphaM = alpham;
-  betaK  = betak;
-  betaK0 = betak0;
-  betaKc = betakc;
+	alphaM = alpham;
+	betaK = betak;
+	betaK0 = betak0;
+	betaKc = betakc;
 
-  // check that memory has been allocated to store compute/return
-  // damping matrix & residual force calculations
-  if (index == -1) {
-    int numDOF = this->getNumDOF();
+	// check that memory has been allocated to store compute/return
+	// damping matrix & residual force calculations
+	if (index == -1) {
+		int numDOF = this->getNumDOF();
 
-    for (int i=0; i<numMatrices; i++) {
-      Matrix *aMatrix = theMatrices[i];
-      if (aMatrix->noRows() == numDOF) {
-	index = i;
-	i = numMatrices;
-      }
-    }
-    if (index == -1) {
-      Matrix **nextMatrices = new Matrix *[numMatrices+1];
-      if (nextMatrices == 0) {
-	opserr << "Element::getTheMatrix - out of memory\n";
-      }
-	  int j;
-      for (j=0; j<numMatrices; j++)
-	nextMatrices[j] = theMatrices[j];
-      Matrix *theMatrix = new Matrix(numDOF, numDOF);
-      if (theMatrix == 0) {
-	opserr << "Element::getTheMatrix - out of memory\n";
-	exit(-1);
-      }
-      nextMatrices[numMatrices] = theMatrix;
+		for (int i = 0; i < numMatrices; i++) {
+			Matrix* aMatrix = theMatrices[i];
+			if (aMatrix->noRows() == numDOF) {
+				index = i;
+				i = numMatrices;
+			}
+		}
+		if (index == -1) {
+			Matrix** nextMatrices = new Matrix * [numMatrices + 1];
+			if (nextMatrices == 0) {
+				opserr << "Element::getTheMatrix - out of memory\n";
+			}
+			int j;
+			for (j = 0; j < numMatrices; j++)
+				nextMatrices[j] = theMatrices[j];
+			Matrix* theMatrix = new Matrix(numDOF, numDOF);
+			if (theMatrix == 0) {
+				opserr << "Element::getTheMatrix - out of memory\n";
+				exit(-1);
+			}
+			nextMatrices[numMatrices] = theMatrix;
 
-      Vector **nextVectors1 = new Vector *[numMatrices+1];
-      Vector **nextVectors2 = new Vector *[numMatrices+1];
-      if (nextVectors1 == 0 || nextVectors2 == 0) {
-	opserr << "Element::getTheVector - out of memory\n";
-	exit(-1);
-      }
+			Vector** nextVectors1 = new Vector * [numMatrices + 1];
+			Vector** nextVectors2 = new Vector * [numMatrices + 1];
+			if (nextVectors1 == 0 || nextVectors2 == 0) {
+				opserr << "Element::getTheVector - out of memory\n";
+				exit(-1);
+			}
 
-      for (j=0; j<numMatrices; j++) {
-	nextVectors1[j] = theVectors1[j];
-	nextVectors2[j] = theVectors2[j];
-      }
-	
-      Vector *theVector1 = new Vector(numDOF);
-      Vector *theVector2 = new Vector(numDOF);
-      if (theVector1 == 0 || theVector2 == 0) {
-	opserr << "Element::getTheVector - out of memory\n";
-	exit(-1);
-      }
+			for (j = 0; j < numMatrices; j++) {
+				nextVectors1[j] = theVectors1[j];
+				nextVectors2[j] = theVectors2[j];
+			}
 
-      nextVectors1[numMatrices] = theVector1;
-      nextVectors2[numMatrices] = theVector2;
+			Vector* theVector1 = new Vector(numDOF);
+			Vector* theVector2 = new Vector(numDOF);
+			if (theVector1 == 0 || theVector2 == 0) {
+				opserr << "Element::getTheVector - out of memory\n";
+				exit(-1);
+			}
 
-      if (numMatrices != 0) {
-	delete [] theMatrices;
-	delete [] theVectors1;
-	delete [] theVectors2;
-      }
-      index = numMatrices;
-      numMatrices++;
-      theMatrices = nextMatrices;
-      theVectors1 = nextVectors1;
-      theVectors2 = nextVectors2;
-    }
-  }
+			nextVectors1[numMatrices] = theVector1;
+			nextVectors2[numMatrices] = theVector2;
 
-  // if need storage for Kc go get it
-  if (betaKc != 0.0) {  
-    if (Kc == 0) 
-      Kc = new Matrix(this->getTangentStiff());
-    if (Kc == 0) {
-      opserr << "WARNING - ELEMENT::setRayleighDampingFactors - out of memory\n";
-      betaKc = 0.0;
-    }
+			if (numMatrices != 0) {
+				delete[] theMatrices;
+				delete[] theVectors1;
+				delete[] theVectors2;
+			}
+			index = numMatrices;
+			numMatrices++;
+			theMatrices = nextMatrices;
+			theVectors1 = nextVectors1;
+			theVectors2 = nextVectors2;
+		}
+	}
 
-    // if don't need storage for Kc & have allocated some for it, free the memory
-  } else if (Kc != 0) { 
-      delete Kc;
-      Kc = 0;
-  }
+	// if need storage for Kc go get it
+	if (betaKc != 0.0) {
+		if (Kc == 0)
+			Kc = new Matrix(this->getTangentStiff());
+		if (Kc == 0) {
+			opserr << "WARNING - ELEMENT::setRayleighDampingFactors - out of memory\n";
+			betaKc = 0.0;
+		}
 
-  return 0;
+		// if don't need storage for Kc & have allocated some for it, free the memory
+	}
+	else if (Kc != 0) {
+		delete Kc;
+		Kc = 0;
+	}
+
+	return 0;
 }
 
 int
-Element::setDamping(Domain *theDomain, Damping *theDamping)
+Element::setDamping(Domain* theDomain, Damping* theDamping)
 {
-  opserr << "Element::setDamping - Damping is yet to be implemented for " << this->getClassType() << " Element #" << this->getTag() << endln;
-  return 0;
+	opserr << "Element::setDamping - Damping is yet to be implemented for " << this->getClassType() << " Element #" << this->getTag() << endln;
+	return 0;
 }
 
-const Matrix &
-Element::getDamp(void) 
+const Matrix&
+Element::getDamp(void)
 {
-  if (index  == -1) {
-    this->setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
-  }
+	if (index == -1) {
+		this->setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
+	}
 
-  // now compute the damping matrix
-  Matrix *theMatrix = theMatrices[index]; 
-  theMatrix->Zero();
-  if (alphaM != 0.0)
-    theMatrix->addMatrix(0.0, this->getMass(), alphaM);
-  if (betaK != 0.0)
-    theMatrix->addMatrix(1.0, this->getTangentStiff(), betaK);      
-  if (betaK0 != 0.0)
-    theMatrix->addMatrix(1.0, this->getInitialStiff(), betaK0);      
-  if (betaKc != 0.0)
-    theMatrix->addMatrix(1.0, *Kc, betaKc);      
+	// now compute the damping matrix
+	Matrix* theMatrix = theMatrices[index];
+	theMatrix->Zero();
+	if (alphaM != 0.0)
+		theMatrix->addMatrix(0.0, this->getMass(), alphaM);
+	if (betaK != 0.0)
+		theMatrix->addMatrix(1.0, this->getTangentStiff(), betaK);
+	if (betaK0 != 0.0)
+		theMatrix->addMatrix(1.0, this->getInitialStiff(), betaK0);
+	if (betaKc != 0.0)
+		theMatrix->addMatrix(1.0, *Kc, betaKc);
 
-  // return the computed matrix
-  return *theMatrix;
+	// return the computed matrix
+	return *theMatrix;
 }
 
 
 
-const Matrix &
+const Matrix&
 Element::getMass(void)
 {
-  if (index  == -1) {
-    this->setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
-  }
+	if (index == -1) {
+		this->setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
+	}
 
-  // zero the matrix & return it
-  Matrix *theMatrix = theMatrices[index]; 
-  theMatrix->Zero();
-  return *theMatrix;
+	// zero the matrix & return it
+	Matrix* theMatrix = theMatrices[index];
+	theMatrix->Zero();
+	return *theMatrix;
 }
 
-const Vector &
-Element::getResistingForceIncInertia(void) 
+const Vector&
+Element::getResistingForceIncInertia(void)
 {
-  if (index == -1) {
-    this->setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
-  }
+	if (index == -1) {
+		this->setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
+	}
 
-  Matrix *theMatrix = theMatrices[index]; 
-  Vector *theVector = theVectors2[index];
-  Vector *theVector2 = theVectors1[index];
+	Matrix* theMatrix = theMatrices[index];
+	Vector* theVector = theVectors2[index];
+	Vector* theVector2 = theVectors1[index];
 
-  //
-  // perform: R = P(U) - Pext(t);
-  //
+	//
+	// perform: R = P(U) - Pext(t);
+	//
 
-  (*theVector) = this->getResistingForce();
+	(*theVector) = this->getResistingForce();
 
-  //
-  // perform: R = R - M * a
-  //
+	//
+	// perform: R = R - M * a
+	//
 
-  int loc = 0;
-  Node **theNodes = this->getNodePtrs();
-  int numNodes = this->getNumExternalNodes();
+	int loc = 0;
+	Node** theNodes = this->getNodePtrs();
+	int numNodes = this->getNumExternalNodes();
 
-  int i;
-  for (i=0; i<numNodes; i++) {
-    const Vector &acc = theNodes[i]->getAccel();
-    for (int i=0; i<acc.Size(); i++) {
-      (*theVector2)(loc++) = acc(i);
-    }
-  }
-  theVector->addMatrixVector(1.0, this->getMass(), *theVector2, +1.0);
+	int i;
+	for (i = 0; i < numNodes; i++) {
+		const Vector& acc = theNodes[i]->getAccel();
+		for (int i = 0; i < acc.Size(); i++) {
+			(*theVector2)(loc++) = acc(i);
+		}
+	}
+	theVector->addMatrixVector(1.0, this->getMass(), *theVector2, +1.0);
 
-  //
-  // perform: R = R + (alphaM * M + betaK0 * K0 + betaK * K) * v
-  //            = R + D * v
-  //
+	//
+	// perform: R = R + (alphaM * M + betaK0 * K0 + betaK * K) * v
+	//            = R + D * v
+	//
 
-  // determine the vel vector from ele nodes
-  loc = 0;
-  for (i=0; i<numNodes; i++) {
-    const Vector &vel = theNodes[i]->getTrialVel();
-    for (int i=0; i<vel.Size(); i++) {
-      (*theVector2)(loc++) = vel[i];
-    }
-  }
+	// determine the vel vector from ele nodes
+	loc = 0;
+	for (i = 0; i < numNodes; i++) {
+		const Vector& vel = theNodes[i]->getTrialVel();
+		for (int i = 0; i < vel.Size(); i++) {
+			(*theVector2)(loc++) = vel[i];
+		}
+	}
 
-  // now compute the damping matrix
-  theMatrix->Zero();
-  if (alphaM != 0.0)
-    theMatrix->addMatrix(0.0, this->getMass(), alphaM);
-  if (betaK != 0.0)
-    theMatrix->addMatrix(1.0, this->getTangentStiff(), betaK);      
-  if (betaK0 != 0.0)
-    theMatrix->addMatrix(1.0, this->getInitialStiff(), betaK0);      
-  if (betaKc != 0.0)
-    theMatrix->addMatrix(1.0, *Kc, betaKc);      
+	// now compute the damping matrix
+	theMatrix->Zero();
+	if (alphaM != 0.0)
+		theMatrix->addMatrix(0.0, this->getMass(), alphaM);
+	if (betaK != 0.0)
+		theMatrix->addMatrix(1.0, this->getTangentStiff(), betaK);
+	if (betaK0 != 0.0)
+		theMatrix->addMatrix(1.0, this->getInitialStiff(), betaK0);
+	if (betaKc != 0.0)
+		theMatrix->addMatrix(1.0, *Kc, betaKc);
 
-  // finally the D * v
-  theVector->addMatrixVector(1.0, *theMatrix, *theVector2, 1.0);
+	// finally the D * v
+	theVector->addMatrixVector(1.0, *theMatrix, *theVector2, 1.0);
 
-  return *theVector;
+	return *theVector;
 }
 
 
-const Vector &
-Element::getRayleighDampingForces(void) 
+const Vector&
+Element::getRayleighDampingForces(void)
 {
 
-  if (index == -1) {
-    this->setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
-  }
+	if (index == -1) {
+		this->setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
+	}
 
-  Matrix *theMatrix = theMatrices[index]; 
-  Vector *theVector = theVectors2[index];
-  Vector *theVector2 = theVectors1[index];
+	Matrix* theMatrix = theMatrices[index];
+	Vector* theVector = theVectors2[index];
+	Vector* theVector2 = theVectors1[index];
 
-  //
-  // perform: R = (alphaM * M + betaK0 * K0 + betaK * K) * v
-  //            = D * v
-  //
+	//
+	// perform: R = (alphaM * M + betaK0 * K0 + betaK * K) * v
+	//            = D * v
+	//
 
-  // determine the vel vector from ele nodes
-  Node **theNodes = this->getNodePtrs();
-  int numNodes = this->getNumExternalNodes();
-  int loc = 0;
-  for (int i=0; i<numNodes; i++) {
-    const Vector &vel = theNodes[i]->getTrialVel();
-    for (int i=0; i<vel.Size(); i++) {
-      (*theVector2)(loc++) = vel[i];
-    }
-  }
+	// determine the vel vector from ele nodes
+	Node** theNodes = this->getNodePtrs();
+	int numNodes = this->getNumExternalNodes();
+	int loc = 0;
+	for (int i = 0; i < numNodes; i++) {
+		const Vector& vel = theNodes[i]->getTrialVel();
+		for (int i = 0; i < vel.Size(); i++) {
+			(*theVector2)(loc++) = vel[i];
+		}
+	}
 
-  // now compute the damping matrix
-  theMatrix->Zero();
-  if (alphaM != 0.0)
-    theMatrix->addMatrix(0.0, this->getMass(), alphaM);
-  if (betaK != 0.0)
-    theMatrix->addMatrix(1.0, this->getTangentStiff(), betaK);      
-  if (betaK0 != 0.0)
-    theMatrix->addMatrix(1.0, this->getInitialStiff(), betaK0);      
-  if (betaKc != 0.0)
-    theMatrix->addMatrix(1.0, *Kc, betaKc);      
+	// now compute the damping matrix
+	theMatrix->Zero();
+	if (alphaM != 0.0)
+		theMatrix->addMatrix(0.0, this->getMass(), alphaM);
+	if (betaK != 0.0)
+		theMatrix->addMatrix(1.0, this->getTangentStiff(), betaK);
+	if (betaK0 != 0.0)
+		theMatrix->addMatrix(1.0, this->getInitialStiff(), betaK0);
+	if (betaKc != 0.0)
+		theMatrix->addMatrix(1.0, *Kc, betaKc);
 
-  // finally the D * v
-  theVector->addMatrixVector(0.0, *theMatrix, *theVector2, 1.0);
+	// finally the D * v
+	theVector->addMatrixVector(0.0, *theMatrix, *theVector2, 1.0);
 
-  return *theVector;
+	return *theVector;
 }
 
-int 
-Element::addLoad(ElementalLoad *theLoad, double loadFactor) {
-  return 0;
+int
+Element::addLoad(ElementalLoad* theLoad, double loadFactor) {
+	return 0;
 }
 
-int 
-Element::addLoad(ElementalLoad *theLoad, const Vector &loadFactors) {
-  return 0;
+int
+Element::addLoad(ElementalLoad* theLoad, const Vector& loadFactors) {
+	return 0;
 }
 
 /*
-int 
+int
 Element::addInertiaLoadToUnbalance(const Vector &accel)
 {
-  // some vectors to hold the load increment and RV
-  int ndof = this->getNumDOF();
-  Vector load(ndof);
-  Vector RV(ndof);
+	// some vectors to hold the load increment and RV
+	int ndof = this->getNumDOF();
+	Vector load(ndof);
+	Vector RV(ndof);
 
-  // 
-  // for each node we will add it's R*accel contribution to RV
-  //
+	//
+	// for each node we will add it's R*accel contribution to RV
+	//
 
-  const ID &theNodes = this->getExternalNodes();
-  int numNodes = theNodes.Size();
-  int loc = 0;
-  Domain *theDomain = this->getDomain();
-  for (int i=0; i<numNodes; i++) {
-    Node *theNode = theDomain->getNode(theNodes(i));
-    if (theNode == 0)
-      return -1;
-    else {
-      int numNodeDOF = theNode->getNumberDOF();
-      const Vector &nodeRV = theNode->getRV(accel);
-      for (int j=0; j<numNodeDOF; j++)
+	const ID &theNodes = this->getExternalNodes();
+	int numNodes = theNodes.Size();
+	int loc = 0;
+	Domain *theDomain = this->getDomain();
+	for (int i=0; i<numNodes; i++) {
+		Node *theNode = theDomain->getNode(theNodes(i));
+		if (theNode == 0)
+			return -1;
+		else {
+			int numNodeDOF = theNode->getNumberDOF();
+			const Vector &nodeRV = theNode->getRV(accel);
+			for (int j=0; j<numNodeDOF; j++)
 #ifdef _G3DEBUG
- 	if (loc<ndof)
+	if (loc<ndof)
 #endif
-	  RV(loc++) = nodeRV(j);
-    }
-  }
+		RV(loc++) = nodeRV(j);
+		}
+	}
 
-  //
-  // now we determine - M * R * accel
-  //
-  const Matrix &mass = this->getMass();
-  load = mass * RV;
-  load *= -1.0;
+	//
+	// now we determine - M * R * accel
+	//
+	const Matrix &mass = this->getMass();
+	load = mass * RV;
+	load *= -1.0;
 
-  return this->addLoad(load);
+	return this->addLoad(load);
 }
 */
 
 bool
 Element::isSubdomain(void)
 {
-    return false;
+	return false;
 }
 
 Response*
 Element::setResponse(const char** argv, int argc, OPS_Stream* output)
 {
-  Response* theResponse = 0;
-  if (output != 0)
-  {
-    output->tag("ElementOutput");
-    output->attr("eleType", this->getClassType());
-    output->attr("eleTag", this->getTag());
-  }
-  int numNodes = this->getNumExternalNodes();
-  const ID& nodes = this->getExternalNodes();
-  static char nodeData[32];
+	Response* theResponse = 0;
+	if (output != 0)
+	{
+		output->tag("ElementOutput");
+		output->attr("eleType", this->getClassType());
+		output->attr("eleTag", this->getTag());
+	}
+	int numNodes = this->getNumExternalNodes();
+	const ID& nodes = this->getExternalNodes();
+	static char nodeData[32];
 
-  for (int i = 0; i < numNodes; i++) {
-    sprintf(nodeData, "node%d", i + 1);
-    if (output != 0)
-      output->attr(nodeData, nodes(i));
-  }
+	for (int i = 0; i < numNodes; i++) {
+		sprintf(nodeData, "node%d", i + 1);
+		if (output != 0)
+			output->attr(nodeData, nodes(i));
+	}
 
-  if (strcmp(argv[0], "force") == 0 || strcmp(argv[0], "forces") == 0 ||
-    strcmp(argv[0], "globalForce") == 0 || strcmp(argv[0], "globalForces") == 0) {
-    if (output != 0)
-    {
-      const Vector& force = this->getResistingForce();
-      int size = force.Size();
-      for (int i = 0; i < size; i++) {
-        sprintf(nodeData, "P%d", i + 1);
-        output->tag("ResponseType", nodeData);
-      }
-    }
-    // Using "strange" numbers to avoid conflicts with Element subclasses
-    theResponse = new ElementResponse(this, 111111, this->getResistingForce());
-  }
+	if (strcmp(argv[0], "force") == 0 || strcmp(argv[0], "forces") == 0 ||
+		strcmp(argv[0], "globalForce") == 0 || strcmp(argv[0], "globalForces") == 0) {
+		if (output != 0)
+		{
+			const Vector& force = this->getResistingForce();
+			int size = force.Size();
+			for (int i = 0; i < size; i++) {
+				sprintf(nodeData, "P%d", i + 1);
+				output->tag("ResponseType", nodeData);
+			}
+		}
+		// Using "strange" numbers to avoid conflicts with Element subclasses
+		theResponse = new ElementResponse(this, 111111, this->getResistingForce());
+	}
 
-  else if (strcmp(argv[0], "dampingForce") == 0 || strcmp(argv[0], "dampingForces") == 0) {
-    if (output != 0)
-    {
-      const Vector& force = this->getResistingForce();
-      int size = force.Size();
-      for (int i = 0; i < size; i++) {
-        sprintf(nodeData, "P%d", i + 1);
-        output->tag("ResponseType", nodeData);
-      }
-    }
-    theResponse = new ElementResponse(this, 222222, this->getResistingForce());
-  }
+	else if (strcmp(argv[0], "dampingForce") == 0 || strcmp(argv[0], "dampingForces") == 0) {
+		if (output != 0)
+		{
+			const Vector& force = this->getResistingForce();
+			int size = force.Size();
+			for (int i = 0; i < size; i++) {
+				sprintf(nodeData, "P%d", i + 1);
+				output->tag("ResponseType", nodeData);
+			}
+		}
+		theResponse = new ElementResponse(this, 222222, this->getResistingForce());
+	}
 
-  else if (strcmp(argv[0], "dynamicForce") == 0 || strcmp(argv[0], "dynamicForces") == 0) {
-    if (output != 0)
-    {
-      const Vector& force = this->getResistingForce();
-      int size = force.Size();
-      for (int i = 0; i < size; i++) {
-        sprintf(nodeData, "P%d", i + 1);
-        output->tag("ResponseType", nodeData);
-      }
-    }
-    theResponse = new ElementResponse(this, 333333, this->getResistingForce());
-  }
+	else if (strcmp(argv[0], "dynamicForce") == 0 || strcmp(argv[0], "dynamicForces") == 0) {
+		if (output != 0)
+		{
+			const Vector& force = this->getResistingForce();
+			int size = force.Size();
+			for (int i = 0; i < size; i++) {
+				sprintf(nodeData, "P%d", i + 1);
+				output->tag("ResponseType", nodeData);
+			}
+		}
+		theResponse = new ElementResponse(this, 333333, this->getResistingForce());
+	}
 
-  else if (strcmp(argv[0], "inertialForce") == 0 || strcmp(argv[0], "inertialForces") == 0) {
-    if (output != 0)
-    {
-      const Vector& force = this->getResistingForce();
-      int size = force.Size();
-      for (int i = 0; i < size; i++) {
-        sprintf(nodeData, "P%d", i + 1);
-        output->tag("ResponseType", nodeData);
-      }
-    }
-    theResponse = new ElementResponse(this, 444444, this->getResistingForce());
-  }
+	else if (strcmp(argv[0], "inertialForce") == 0 || strcmp(argv[0], "inertialForces") == 0) {
+		if (output != 0)
+		{
+			const Vector& force = this->getResistingForce();
+			int size = force.Size();
+			for (int i = 0; i < size; i++) {
+				sprintf(nodeData, "P%d", i + 1);
+				output->tag("ResponseType", nodeData);
+			}
+		}
+		theResponse = new ElementResponse(this, 444444, this->getResistingForce());
+	}
 #ifdef _CSS
-  else if (strcmp(argv[0], "dampingEnergy") == 0 || strcmp(argv[0], "DampingEnergy") == 0) {
-    if (output != 0)
-      output->tag("ResponseType", "dampingEnergy");
-    theResponse = new ElementResponse(this, 555555, 0.0);
-  }
-  else if (strcmp(argv[0], "energy") == 0 || strcmp(argv[0], "Energy") == 0) {
-    if (output != 0)
-      output->tag("ResponseType", "hystereticEnergy");
-    theResponse = new ElementResponse(this, 666666, 0.0);
-  }
+	else if (strcmp(argv[0], "strainEnergy") == 0 || strcmp(argv[0], "StrainEnergy") == 0) {
+		if (output != 0)
+			output->tag("ResponseType", "strainEnergy");
+		theResponse = new ElementResponse(this, 777777, 0.0);
+	}
+	else if (strcmp(argv[0], "dampingEnergy") == 0 || strcmp(argv[0], "DampingEnergy") == 0) {
+		if (output != 0)
+			output->tag("ResponseType", "dampingEnergy");
+		theResponse = new ElementResponse(this, 555555, 0.0);
+	}
+	else if (strcmp(argv[0], "energy") == 0 || strcmp(argv[0], "Energy") == 0) {
+		if (output != 0)
+			output->tag("ResponseType", "hystereticEnergy");
+		theResponse = new ElementResponse(this, 666666, 0.0);
+	}
 
 #endif // _CSS
 
 
-  if (output != 0)
-    output->endTag();
-  return theResponse;
+	if (output != 0)
+		output->endTag();
+	return theResponse;
 }
 
 int
-Element::getResponse(int responseID, Information &eleInfo)
+Element::getResponse(int responseID, Information& eleInfo)
 {
-  switch (responseID) {
-  case 111111: // global forces
-    return eleInfo.setVector(this->getResistingForce());
-  case 222222:
-    return eleInfo.setVector(this->getRayleighDampingForces());
-  case 333333:
-    return eleInfo.setVector(this->getResistingForceIncInertia());
-  case 444444:
-    return eleInfo.setVector(this->getResistingForceIncInertia()-this->getRayleighDampingForces()-this->getResistingForce());
+	switch (responseID) {
+	case 111111: // global forces
+		return eleInfo.setVector(this->getResistingForce());
+	case 222222:
+		return eleInfo.setVector(this->getRayleighDampingForces());
+	case 333333:
+		return eleInfo.setVector(this->getResistingForceIncInertia());
+	case 444444:
+		return eleInfo.setVector(this->getResistingForceIncInertia() - this->getRayleighDampingForces() - this->getResistingForce());
 #ifdef _CSS
-  case 555555:
-    return eleInfo.setDouble(this->getDampingEnergy());
-  case 666666:
-    return eleInfo.setDouble(this->getHystereticEnergy());
+	case 555555:
+		return eleInfo.setDouble(this->getDampingEnergy());
+	case 666666:
+		return eleInfo.setDouble(this->getHystereticEnergy());
+	case 777777:
+		return eleInfo.setDouble(this->getStrainEnergy());
 #endif
-  default:
-    return -1;
-  }
+	default:
+		return -1;
+	}
 }
 
 int
 Element::getResponseSensitivity(int responseID, int gradIndex,
-				Information &eleInfo)
+	Information& eleInfo)
 {
-  return -1;
+	return -1;
 }
 
 // AddingSensitivity:BEGIN //////////////////////////////////////////
-const Vector &
+const Vector&
 Element::getResistingForceSensitivity(int gradIndex)
 {
-  if (index == -1) {
-    this->setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
-  }
+	if (index == -1) {
+		this->setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
+	}
 
-  Vector *theVector = theVectors1[index];
-  theVector->Zero();
+	Vector* theVector = theVectors1[index];
+	theVector->Zero();
 
-  return *theVector;
+	return *theVector;
 }
 
-const Matrix &
+const Matrix&
 Element::getTangentStiffSensitivity(int gradIndex)
 {
-  if (index == -1) {
-    this->setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
-  }
+	if (index == -1) {
+		this->setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
+	}
 
-  static bool warningShown = false;
-  if (!warningShown) {
-    opserr << "Rayleigh damping with non-zero betaCurrentTangent is not implemented for DDM sensitivity analysis with this element" << endln;
-    warningShown = true;
-  }
+	static bool warningShown = false;
+	if (!warningShown) {
+		opserr << "Rayleigh damping with non-zero betaCurrentTangent is not implemented for DDM sensitivity analysis with this element" << endln;
+		warningShown = true;
+	}
 
-  Matrix *theMatrix = theMatrices[index];
-  theMatrix->Zero();
+	Matrix* theMatrix = theMatrices[index];
+	theMatrix->Zero();
 
-  return *theMatrix;
+	return *theMatrix;
 }
 
-const Matrix &
+const Matrix&
 
 Element::getInitialStiffSensitivity(int gradIndex)
 {
-  if (index == -1) {
-    this->setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
-  }
+	if (index == -1) {
+		this->setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
+	}
 
-  static bool warningShown = false;
-  if (!warningShown) {
-    opserr << "Rayleigh damping with non-zero betaInitialTangent is not implemented for DDM sensitivity analysis with this element" << endln;
-    warningShown = true;
-  }
+	static bool warningShown = false;
+	if (!warningShown) {
+		opserr << "Rayleigh damping with non-zero betaInitialTangent is not implemented for DDM sensitivity analysis with this element" << endln;
+		warningShown = true;
+	}
 
-  Matrix *theMatrix = theMatrices[index];
-  theMatrix->Zero();
+	Matrix* theMatrix = theMatrices[index];
+	theMatrix->Zero();
 
-  return *theMatrix;
+	return *theMatrix;
 }
 
-const Matrix &
+const Matrix&
 Element::getCommittedStiffSensitivity(int gradIndex)
 {
-  if (index == -1) {
-    this->setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
-  }
+	if (index == -1) {
+		this->setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
+	}
 
-  static bool warningShown = false;
-  if (!warningShown) {
-    opserr << "Rayleigh damping with non-zero betaCommittedTangent is not implemented for DDM sensitivity analysis with this element" << endln;
-    warningShown = true;
-  }
+	static bool warningShown = false;
+	if (!warningShown) {
+		opserr << "Rayleigh damping with non-zero betaCommittedTangent is not implemented for DDM sensitivity analysis with this element" << endln;
+		warningShown = true;
+	}
 
-  Matrix *theMatrix = theMatrices[index];
-  theMatrix->Zero();
+	Matrix* theMatrix = theMatrices[index];
+	theMatrix->Zero();
 
-  return *theMatrix;
+	return *theMatrix;
 }
 
-const Matrix &
+const Matrix&
 Element::getMassSensitivity(int gradIndex)
 {
-  if (index == -1) {
-    this->setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
-  }
+	if (index == -1) {
+		this->setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
+	}
 
-  Matrix *theMatrix = theMatrices[index];
-  theMatrix->Zero();
+	Matrix* theMatrix = theMatrices[index];
+	theMatrix->Zero();
 
-  return *theMatrix;
+	return *theMatrix;
 }
 
 int
@@ -636,7 +643,7 @@ Element::commitSensitivity(int gradIndex, int numGrads)
 }
 
 int
-Element::addInertiaLoadSensitivityToUnbalance(const Vector &accel, bool tag)
+Element::addInertiaLoadSensitivityToUnbalance(const Vector& accel, bool tag)
 {
 	return -1;
 }
@@ -646,261 +653,267 @@ Element::addInertiaLoadSensitivityToUnbalance(const Vector &accel, bool tag)
 // AddingSensitivity:END ///////////////////////////////////////////
 
 
-const Matrix &
-Element::getDampSensitivity(int gradIndex) 
+const Matrix&
+Element::getDampSensitivity(int gradIndex)
 {
-  if (index  == -1) {
-    this->setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
-  }
+	if (index == -1) {
+		this->setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
+	}
 
-  // now compute the damping matrix
-  Matrix *theMatrix = theMatrices[index]; 
-  theMatrix->Zero();
-  if (alphaM != 0.0) {
-    theMatrix->addMatrix(0.0, this->getMassSensitivity(gradIndex), alphaM);
-  }
-  if (betaK != 0.0) {
-    theMatrix->addMatrix(1.0, this->getTangentStiffSensitivity(gradIndex), betaK);
-  }
-  if (betaK0 != 0.0) {
-    theMatrix->addMatrix(1.0, this->getInitialStiffSensitivity(gradIndex), betaK0);      
-  }
-  if (betaKc != 0.0) {
-    theMatrix->addMatrix(1.0, this->getCommittedStiffSensitivity(gradIndex), betaKc);
-  }
+	// now compute the damping matrix
+	Matrix* theMatrix = theMatrices[index];
+	theMatrix->Zero();
+	if (alphaM != 0.0) {
+		theMatrix->addMatrix(0.0, this->getMassSensitivity(gradIndex), alphaM);
+	}
+	if (betaK != 0.0) {
+		theMatrix->addMatrix(1.0, this->getTangentStiffSensitivity(gradIndex), betaK);
+	}
+	if (betaK0 != 0.0) {
+		theMatrix->addMatrix(1.0, this->getInitialStiffSensitivity(gradIndex), betaK0);
+	}
+	if (betaKc != 0.0) {
+		theMatrix->addMatrix(1.0, this->getCommittedStiffSensitivity(gradIndex), betaKc);
+	}
 
-  // return the computed matrix
-  return *theMatrix;
+	// return the computed matrix
+	return *theMatrix;
 }
 
 
-int 
-Element::addResistingForceToNodalReaction(int flag) 
+int
+Element::addResistingForceToNodalReaction(int flag)
 {
-  int result = 0;
-  int numNodes = this->getNumExternalNodes();
-  Node **theNodes = this->getNodePtrs();
+	int result = 0;
+	int numNodes = this->getNumExternalNodes();
+	Node** theNodes = this->getNodePtrs();
 
-  static Vector theVector(48);
+	static Vector theVector(48);
 
-  //
-  // now determine the resisting force
-  //
+	//
+	// now determine the resisting force
+	//
 
-  const Vector *theResistingForce =0;
-  if (flag == 0)
-    theResistingForce = &(this->getResistingForce());
-  else if (flag == 1) {
-    theResistingForce = &(this->getResistingForceIncInertia());
-  }
-  else if (flag == 2)
-    theResistingForce = &(this->getRayleighDampingForces());
+	const Vector* theResistingForce = 0;
+	if (flag == 0)
+		theResistingForce = &(this->getResistingForce());
+	else if (flag == 1) {
+		theResistingForce = &(this->getResistingForceIncInertia());
+	}
+	else if (flag == 2)
+		theResistingForce = &(this->getRayleighDampingForces());
 
 
-  //
-  // iterate over the elements nodes; determine nodes contribution & add it
-  //
+	//
+	// iterate over the elements nodes; determine nodes contribution & add it
+	//
 
-  int nodalDOFCount = 0;
+	int nodalDOFCount = 0;
 
-  for (int i=0; i<numNodes; i++) {
-    Node *theNode = theNodes[i];
+	for (int i = 0; i < numNodes; i++) {
+		Node* theNode = theNodes[i];
 
-    int numNodalDOF = theNode->getNumberDOF();
-    theVector.resize(numNodalDOF);
+		int numNodalDOF = theNode->getNumberDOF();
+		theVector.resize(numNodalDOF);
 
-    for (int j=0; j<numNodalDOF; j++) {
-      (theVector)(j) = (*theResistingForce)(nodalDOFCount);
-      nodalDOFCount++;
-    }
-    result +=theNode->addReactionForce(theVector, 1.0);
-  }
+		for (int j = 0; j < numNodalDOF; j++) {
+			(theVector)(j) = (*theResistingForce)(nodalDOFCount);
+			nodalDOFCount++;
+		}
+		result += theNode->addReactionForce(theVector, 1.0);
+	}
 
-  return result;
+	return result;
 }
 
 double Element::getCharacteristicLength(void)
 {
-  int numNodes = this->getNumExternalNodes();
-  Node **theNodes = this->getNodePtrs();
-  double cLength = 0.0;
-  double minSize = 10e14; //Tesser
+	int numNodes = this->getNumExternalNodes();
+	Node** theNodes = this->getNodePtrs();
+	double cLength = 0.0;
+	double minSize = 10e14; //Tesser
 
-  for (int i=0; i<numNodes; i++) {
-    Node *nodeI = theNodes[i];
-    Vector iCoords = nodeI->getCrds();
-    int iDOF = iCoords.Size(); // nodeI->getNumberDOF(); // bugfix: Massimo Petracca 03/25/2020
-    for (int j=i+1; j<numNodes; j++) {
-      Node *nodeJ = theNodes[j];
-      Vector jCoords = nodeJ->getCrds();      
-      int jDOF = jCoords.Size(); // nodeI->getNumberDOF(); // bugfix: Massimo Petracca 03/25/2020
-      double ijLength = 0;
-      for (int k=0; k<iDOF && k<jDOF; k++) {
-	ijLength += (jCoords(k)-iCoords(k))*(jCoords(k)-iCoords(k)); //Tesser
-      }	
-      ijLength = sqrt(ijLength);
-      if (ijLength > cLength)
-	cLength = ijLength;
-      if (ijLength < minSize) 
-	minSize = ijLength;
-    }
-  }
-  return minSize;
+	for (int i = 0; i < numNodes; i++) {
+		Node* nodeI = theNodes[i];
+		Vector iCoords = nodeI->getCrds();
+		int iDOF = iCoords.Size(); // nodeI->getNumberDOF(); // bugfix: Massimo Petracca 03/25/2020
+		for (int j = i + 1; j < numNodes; j++) {
+			Node* nodeJ = theNodes[j];
+			Vector jCoords = nodeJ->getCrds();
+			int jDOF = jCoords.Size(); // nodeI->getNumberDOF(); // bugfix: Massimo Petracca 03/25/2020
+			double ijLength = 0;
+			for (int k = 0; k < iDOF && k < jDOF; k++) {
+				ijLength += (jCoords(k) - iCoords(k)) * (jCoords(k) - iCoords(k)); //Tesser
+			}
+			ijLength = sqrt(ijLength);
+			if (ijLength > cLength)
+				cLength = ijLength;
+			if (ijLength < minSize)
+				minSize = ijLength;
+		}
+	}
+	return minSize;
 }
-      
 
 
-int 
+
+int
 Element::storePreviousK(int numK) {
 
-  //
-  // set up pointer to matrices and create matrices
-  // copy old
-  //
+	//
+	// set up pointer to matrices and create matrices
+	// copy old
+	//
 
-  if (numPreviousK < numK) {
-    Matrix **theKMatrices = new Matrix *[numK];
+	if (numPreviousK < numK) {
+		Matrix** theKMatrices = new Matrix * [numK];
 
-    if (theKMatrices == 0) 
-      return -1;
-    
-    int numEleDOF = this->getNumDOF();
-    for (int i=0; i<numPreviousK; i++)
-      theKMatrices[i] = previousK[i];
+		if (theKMatrices == 0)
+			return -1;
 
-    for (int i=numPreviousK; i<numK; i++) {
-      theKMatrices[i] = new Matrix(numEleDOF, numEleDOF);
+		int numEleDOF = this->getNumDOF();
+		for (int i = 0; i < numPreviousK; i++)
+			theKMatrices[i] = previousK[i];
 
-      if (theKMatrices[i] == 0)
-	return -1;
-    }
-    
-    if (previousK != 0)
-      delete [] previousK;
-    previousK = theKMatrices;
+		for (int i = numPreviousK; i < numK; i++) {
+			theKMatrices[i] = new Matrix(numEleDOF, numEleDOF);
 
-    numPreviousK = numK;
-  }
+			if (theKMatrices[i] == 0)
+				return -1;
+		}
 
-  // now copy the matrices
-  for (int i=numPreviousK-1; i>0; i--)
-    *(previousK[i]) = *(previousK[i-1]);
+		if (previousK != 0)
+			delete[] previousK;
+		previousK = theKMatrices;
 
-  *(previousK[0]) = this->getTangentStiff();
-  
-  return 0;
+		numPreviousK = numK;
+	}
+
+	// now copy the matrices
+	for (int i = numPreviousK - 1; i > 0; i--)
+		*(previousK[i]) = *(previousK[i - 1]);
+
+	*(previousK[0]) = this->getTangentStiff();
+
+	return 0;
 }
 
-const Matrix *
+const Matrix*
 Element::getPreviousK(int num) {
-  if (num < numPreviousK)
-    return previousK[num];
-  else
-    return 0;
+	if (num < numPreviousK)
+		return previousK[num];
+	else
+		return 0;
 }
 
-int 
-Element::displaySelf(Renderer &, int mode, float fact, const char **displayModes, int numModes)
+int
+Element::displaySelf(Renderer&, int mode, float fact, const char** displayModes, int numModes)
 {
-  return 0;
+	return 0;
 }
 
 
-const Matrix &
+const Matrix&
 Element::getGeometricTangentStiff()
 {
-    if (index == -1) {
-	this->setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
-    }
-    
-    Matrix *theMatrix = theMatrices[index];
-    theMatrix->Zero();
-    
-    return *theMatrix;
+	if (index == -1) {
+		this->setRayleighDampingFactors(alphaM, betaK, betaK0, betaKc);
+	}
+
+	Matrix* theMatrix = theMatrices[index];
+	theMatrix->Zero();
+
+	return *theMatrix;
 }
 
 void Element::activate()
 {
-    // opserr << "Activating element # " << this->getTag() << endln;
-    is_this_element_active = true;
-    this->onActivate();
+	// opserr << "Activating element # " << this->getTag() << endln;
+	is_this_element_active = true;
+	this->onActivate();
 }
 
 void Element::deactivate()
 {
-    // opserr << "Deactivating element # " << this->getTag() << endln;
-    is_this_element_active = false;
-    this->onDeactivate();
+	// opserr << "Deactivating element # " << this->getTag() << endln;
+	is_this_element_active = false;
+	this->onDeactivate();
 }
 
 
 void Element::onActivate()
 {
-    static bool report_once = true;
-    if (report_once)
-    {
-        opserr << "onActivate not implemented for this element. classTag = " << this->getClassTag() << endln;
-        report_once = false;
-    }
+	static bool report_once = true;
+	if (report_once)
+	{
+		opserr << "onActivate not implemented for this element. classTag = " << this->getClassTag() << endln;
+		report_once = false;
+	}
 }
 
 void Element::onDeactivate()
-{   static bool report_once = true;
-    if (report_once)
-    {
-        opserr << "onDeactivate not implemented for this element. classTag = " << this->getClassTag() << endln;
-        report_once = false;
-    }
-}    
+{
+	static bool report_once = true;
+	if (report_once)
+	{
+		opserr << "onDeactivate not implemented for this element. classTag = " << this->getClassTag() << endln;
+		report_once = false;
+	}
+}
 
 
 bool  Element::isActive()
 {
-    // opserr << "Element::isActive() [tag = " << this->getTag() << "] = ";
-    // if (is_this_element_active)
-    // {
-    //     opserr << "TRUE" << endln;
-    // }
-    // else
-    // {
-    //     opserr << "FALSE" << endln;
-    // }
-    return is_this_element_active;
+	// opserr << "Element::isActive() [tag = " << this->getTag() << "] = ";
+	// if (is_this_element_active)
+	// {
+	//     opserr << "TRUE" << endln;
+	// }
+	// else
+	// {
+	//     opserr << "FALSE" << endln;
+	// }
+	return is_this_element_active;
 }
 
 #ifdef _CSS
 double Element::getDampingEnergy()
 {
-    return dampingEnergy;
+	return dampingEnergy;
 }
 double Element::getHystereticEnergy()
 {
-    return hystereticEnergy;
+	return hystereticEnergy;
+}
+double Element::getStrainEnergy()
+{
+	return strainEnergy;
 }
 void Element::computeEnergies()
 {
-    const Vector& thisDampF = getRayleighDampingForces();
-    const Vector& thisResF = getResistingForce();
-    int numDof = thisDampF.Size();
-    if (prevDampingForces.Size() == 0)
-    {
-        prevDampingForces = Vector(numDof);
-        prevResistingForces = Vector(numDof);
-    }
-    Node** theNodes = this->getNodePtrs();
-    int numNodes = this->getNumExternalNodes();
-    int loc = 0;
-    for (int i = 0; i < numNodes; i++) {
-        const Vector& prevDisp = theNodes[i]->getLastCommitDisp();
-        const Vector& thisDisp = theNodes[i]->getDisp();
-        for (int j = 0; j < prevDisp.Size(); j++) {
-            dampingEnergy += 0.5 * (prevDampingForces(loc) + thisDampF(loc)) * (thisDisp[j] - prevDisp[j]);
-            hystereticEnergy += 0.5 * (prevResistingForces(loc) + thisResF(loc)) * (thisDisp[j] - prevDisp[j]);
-            //opserr <<loc << " " << dampingEnergy << " " << prevDampingForces(loc) << " " << thisDampF(loc) << " " << thisDisp[j] << " " << prevDisp[j] << "\n";
-            loc++;
-        }
-    }
-    prevDampingForces = thisDampF;
-    prevResistingForces = thisResF;
+	const Vector thisDampF = getRayleighDampingForces();
+	const Vector thisResF = getResistingForce();
+	int numDof = thisDampF.Size();
+	if (prevDampingForces.Size() == 0)
+	{
+		prevDampingForces = Vector(numDof);
+		prevResistingForces = Vector(numDof);
+	}
+	Node** theNodes = this->getNodePtrs();
+	int numNodes = this->getNumExternalNodes();
+	int loc = 0;
+	strainEnergy = 0;
+	for (int i = 0; i < numNodes; i++) {
+		const Vector& prevDisp = theNodes[i]->getLastCommitDisp();
+		const Vector& thisDisp = theNodes[i]->getDisp();
+		for (int j = 0; j < prevDisp.Size(); j++) {
+			dampingEnergy += 0.5 * (prevDampingForces(loc) + thisDampF(loc)) * (thisDisp[j] - prevDisp[j]);
+			hystereticEnergy += 0.5 * (prevResistingForces(loc) + thisResF(loc)) * (thisDisp[j] - prevDisp[j]);
+			strainEnergy += 0.5 * thisResF(loc) * thisDisp[j];
+			loc++;
+		}
+	}
+	prevDampingForces = thisDampF;
+	prevResistingForces = thisResF;
 }
 #endif

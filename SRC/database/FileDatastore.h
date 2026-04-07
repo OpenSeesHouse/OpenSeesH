@@ -44,7 +44,6 @@
 using std::fstream;
 using std::map;
 
-
 #define STREAM_POSITION_TYPE int
 
 class FEM_ObjectBroker;
@@ -119,7 +118,8 @@ class FileDatastore: public FE_Datastore
 
     // the commitState method
     int commitState(int commitTag);        
-    void Flush();
+    void closeOpenFiles(void);
+
   protected:
 
   private:
@@ -127,7 +127,7 @@ class FileDatastore: public FE_Datastore
     int resizeInt(int newSize);
     int resizeDouble(int newSize);
     void resetFilePointers(void);
-    int openFile(char *fileName, FileDatastoreOutputFile *, int dataSize);
+    int openFile(char *fileName, FileDatastoreOutputFile *, int dataSize, bool forReading);
 
     // private attributes
     char *dataBase;

@@ -3345,7 +3345,6 @@ Domain::sendSelf(int cTag, Channel& theChannel)
 		}
 	}
 
-	theChannel.Flush();
 	// if get here we were successfull
 	return commitTag;
 }

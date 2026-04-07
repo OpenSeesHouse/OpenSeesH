@@ -161,7 +161,7 @@ int OPS_rayleighDamping() {
 				if (ele == 0) {
 					opserr << "WARNING: element " << tags[i]
 						<< " does not exist\n";
-						return -1;
+					return -1;
 				}
 				ele->setRayleighDampingFactors(data[0], data[1],
 					data[2], data[3]);
@@ -171,7 +171,7 @@ int OPS_rayleighDamping() {
 				if (node == 0) {
 					opserr << "WARNING: node " << tags[i]
 						<< " does not exist\n";
-						return -1;
+					return -1;
 				}
 				node->setRayleighDampingFactor(data[0]);
 			}
@@ -817,7 +817,8 @@ int OPS_MeshRegion()
 	}
 
 	// now continue until end of command
-	bool only = false;
+	bool nodeOnly = false;
+	bool eleOnly = false;
 	while (OPS_GetNumRemainingInputArgs() > 0) {
 
 		const char* flag = OPS_GetString();
@@ -848,7 +849,7 @@ int OPS_MeshRegion()
 			}
 
 			if (strcmp(flag, "-eleOnly") == 0) {
-				only = true;
+				eleOnly = true;
 			}
 
 		}
@@ -888,7 +889,7 @@ int OPS_MeshRegion()
 			}
 
 			if (strcmp(flag, "-eleOnlyRange") == 0) {
-				only = true;
+				eleOnly = true;
 			}
 
 		}
@@ -917,7 +918,7 @@ int OPS_MeshRegion()
 			}
 
 			if (strcmp(flag, "-nodeOnly") == 0) {
-				only = true;
+				nodeOnly = true;
 			}
 
 		}
@@ -954,7 +955,7 @@ int OPS_MeshRegion()
 			}
 
 			if (strcmp(flag, "-nodeOnlyRange") == 0) {
-				only = true;
+				nodeOnly = true;
 			}
 
 		}
@@ -1023,7 +1024,7 @@ int OPS_MeshRegion()
 
 	// if elements or nodes have been set, set them in the Region
 	if (theElements != 0) {
-		if (only) {
+		if (eleOnly) {
 			theRegion->setElementsOnly(*theElements);
 		}
 		else {
@@ -1032,18 +1033,13 @@ int OPS_MeshRegion()
 	}
 
 	if (theNodes != 0) {
-		if (theElements == 0) {
-			if (only) {
-				theRegion->setNodesOnly(*theNodes);
-			}
-			else {
-				theRegion->setNodes(*theNodes);
-			}
-
+		if (nodeOnly) {
+			theRegion->setNodesOnly(*theNodes);
 		}
 		else {
-			opserr << "WARNING region - both elements & nodes set, ONLY set using elements\n";
+			theRegion->setNodes(*theNodes);
 		}
+
 	}
 
 	// if damping has been specified set the damping factors
@@ -1217,7 +1213,7 @@ int OPS_recordSingle()
 	if (OPS_GetInt(&numData, &tag) < 0) {
 		opserr << "recordSingle - error reading recorder tag" << endln;
 		return -1;
-	}	
+	}
 	theDomain->recordSingle(tag);
 
 	return 0;
@@ -2339,7 +2335,7 @@ int OPS_partition() {
 				delete nload;
 			}
 			else {
-				// nodal load can only appear in one place
+				// nodal load can nodeOnly appear in one place
 				id = -id - 1;
 				if (npart[id] != pid) {
 					lp->removeNodalLoad(nload->getTag());

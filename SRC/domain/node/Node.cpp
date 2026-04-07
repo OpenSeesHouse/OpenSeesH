@@ -236,7 +236,7 @@ Node::Node(int theClassTag)
 	Crd(0), commitDisp(0), commitVel(0), commitAccel(0),
 	trialDisp(0), trialVel(0), trialAccel(0), unbalLoad(0), incrDisp(0),
 	incrDeltaDisp(0),
-	disp(0), vel(0), accel(0), dbTag1(0), dbTag2(0), dbTag3(0), dbTag4(0),
+	disp(0), vel(0), accel(0), dbTags(9),
 	R(0), mass(0), unbalLoadWithInertia(0), alphaM(0.0), theEigenvectors(0),
 	index(-1), reaction(0), displayLocation(0), temperature(0)
 #ifdef _CSS
@@ -263,7 +263,7 @@ Node::Node(int tag, int theClassTag)
 	Crd(0), commitDisp(0), commitVel(0), commitAccel(0),
 	trialDisp(0), trialVel(0), trialAccel(0), unbalLoad(0), incrDisp(0),
 	incrDeltaDisp(0),
-	disp(0), vel(0), accel(0), dbTag1(0), dbTag2(0), dbTag3(0), dbTag4(0),
+	disp(0), vel(0), accel(0), dbTags(9),
 	R(0), mass(0), unbalLoadWithInertia(0), alphaM(0.0), theEigenvectors(0),
 	index(-1), reaction(0), displayLocation(0), temperature(0)
 #ifdef _CSS
@@ -289,7 +289,7 @@ Node::Node(int tag, int ndof, double Crd1, Vector* dLoc)
 	Crd(0), commitDisp(0), commitVel(0), commitAccel(0),
 	trialDisp(0), trialVel(0), trialAccel(0), unbalLoad(0), incrDisp(0),
 	incrDeltaDisp(0),
-	disp(0), vel(0), accel(0), dbTag1(0), dbTag2(0), dbTag3(0), dbTag4(0),
+	disp(0), vel(0), accel(0), dbTags(9),
 	R(0), mass(0), unbalLoadWithInertia(0), alphaM(0.0), theEigenvectors(0),
 	index(-1), reaction(0), displayLocation(0), temperature(0)
 #ifdef _CSS
@@ -323,7 +323,7 @@ Node::Node(int tag, int ndof, double Crd1, double Crd2, Vector* dLoc)
 	Crd(0), commitDisp(0), commitVel(0), commitAccel(0),
 	trialDisp(0), trialVel(0), trialAccel(0), unbalLoad(0), incrDisp(0),
 	incrDeltaDisp(0),
-	disp(0), vel(0), accel(0), dbTag1(0), dbTag2(0), dbTag3(0), dbTag4(0),
+	disp(0), vel(0), accel(0), dbTags(9),
 	R(0), mass(0), unbalLoadWithInertia(0), alphaM(0.0), theEigenvectors(0),
 	reaction(0), displayLocation(0), temperature(0)
 #ifdef _CSS
@@ -360,7 +360,7 @@ Node::Node(int tag, int ndof, double Crd1, double Crd2, double Crd3, Vector* dLo
 	Crd(0), commitDisp(0), commitVel(0), commitAccel(0),
 	trialDisp(0), trialVel(0), trialAccel(0), unbalLoad(0), incrDisp(0),
 	incrDeltaDisp(0),
-	disp(0), vel(0), accel(0), dbTag1(0), dbTag2(0), dbTag3(0), dbTag4(0),
+	disp(0), vel(0), accel(0), dbTags(9),
 	R(0), mass(0), unbalLoadWithInertia(0), alphaM(0.0), theEigenvectors(0),
 	reaction(0), displayLocation(0), temperature(0)
 #ifdef _CSS
@@ -398,7 +398,7 @@ Node::Node(const Node& otherNode, bool copyMass)
 	Crd(0), commitDisp(0), commitVel(0), commitAccel(0),
 	trialDisp(0), trialVel(0), trialAccel(0), unbalLoad(0), incrDisp(0),
 	incrDeltaDisp(0),
-	disp(0), vel(0), accel(0), dbTag1(0), dbTag2(0), dbTag3(0), dbTag4(0),
+	disp(0), vel(0), accel(0), dbTags(9),
 	R(0), mass(0), unbalLoadWithInertia(0), alphaM(0.0), theEigenvectors(0),
 	reaction(0), displayLocation(0), temperature(0)
 #ifdef _CSS
@@ -1488,55 +1488,53 @@ Node::sendSelf(int cTag, Channel& theChannel)
 {
 	int dataTag = this->getDbTag();
 
-	ID data(14);
+	Vector data(12); // if data.size() == dbTags.size() we should use a distinct dbTag for sending dbTags
 	data(0) = this->getTag();
 	data(1) = numberDOF;
 
 	// indicate whether vector quantities have been formed
-	if (disp == 0)       data(2) = 1; else data(2) = 0;
-	if (vel == 0)        data(3) = 1; else data(3) = 0;
-	if (accel == 0)      data(4) = 1; else data(4) = 0;
-	if (mass == 0)       data(5) = 1; else data(5) = 0;
-	if (unbalLoad == 0) data(6) = 1; else data(6) = 0;
-	if (R == 0)
-		data(12) = 1;
-	else {
-		data(12) = 0;
-		data(13) = R->noCols();
+	data(2) = (disp == 0);
+	data(3) = (vel == 0);
+	data(4) = (accel == 0);
+	data(5) = (mass == 0);
+	data(6) = (unbalLoad == 0);
+	data(7) = (R == 0);
+	if (R != 0)
+	{
+		data(8) = R->noCols();
 	}
 
-	data(7) = Crd->Size();
+	data(9) = Crd->Size();
+	data(10) = alphaM;
+	data(11) = temperature;
 
-	if (dbTag1 == 0)
-		dbTag1 = theChannel.getDbTag();
-	if (dbTag2 == 0)
-		dbTag2 = theChannel.getDbTag();
-	if (dbTag3 == 0)
-		dbTag3 = theChannel.getDbTag();
-	if (dbTag4 == 0)
-		dbTag4 = theChannel.getDbTag();
+	if (dbTags[0] == 0)
+		for (int i = 0; i < 9; i++)
+			dbTags[i] = theChannel.getDbTag();
 
-	data(8) = dbTag1;
-	data(9) = dbTag2;
-	data(10) = dbTag3;
-	data(11) = dbTag4;
 
 	int res = 0;
 
-	res = theChannel.sendID(dataTag, cTag, data);
+	res = theChannel.sendVector(dataTag, cTag, data);
 	if (res < 0) {
-		opserr << " Node::sendSelf() - failed to send ID data\n";
+		opserr << " Node::sendSelf() - failed to send data\n";
 		return res;
 	}
 
-	res = theChannel.sendVector(dataTag, cTag, *Crd);
+	res = theChannel.sendID(dataTag, cTag, dbTags);
+	if (res < 0) {
+		opserr << " Node::sendSelf() - failed to send dbTags data\n";
+		return res;
+	}
+
+	res = theChannel.sendVector(dbTags[8], cTag, *Crd);
 	if (res < 0) {
 		opserr << " Node::sendSelf() - failed to send Vecor data\n";
 		return res;
 	}
 
 	if (commitDisp != 0) {
-		res = theChannel.sendVector(dbTag1, cTag, *commitDisp);
+		res = theChannel.sendVector(dbTags[0], cTag, *commitDisp);
 		if (res < 0) {
 			opserr << " Node::sendSelf() - failed to send Disp data\n";
 			return res;
@@ -1544,7 +1542,7 @@ Node::sendSelf(int cTag, Channel& theChannel)
 	}
 
 	if (commitVel != 0) {
-		res = theChannel.sendVector(dbTag2, cTag, *commitVel);
+		res = theChannel.sendVector(dbTags[1], cTag, *commitVel);
 		if (res < 0) {
 			opserr << " Node::sendSelf() - failed to send Vel data\n";
 			return res;
@@ -1552,7 +1550,7 @@ Node::sendSelf(int cTag, Channel& theChannel)
 	}
 
 	if (commitAccel != 0) {
-		res = theChannel.sendVector(dbTag3, cTag, *commitAccel);
+		res = theChannel.sendVector(dbTags[2], cTag, *commitAccel);
 		if (res < 0) {
 			opserr << " Node::sendSelf() - failed to send Accel data\n";
 			return res;
@@ -1568,7 +1566,7 @@ Node::sendSelf(int cTag, Channel& theChannel)
 	}
 
 	if (R != 0) {
-		res = theChannel.sendMatrix(dbTag2, cTag, *R);
+		res = theChannel.sendMatrix(dbTags[1], cTag, *R);
 		if (res < 0) {
 			opserr << " Node::sendSelf() - failed to send R data\n";
 			return res;
@@ -1576,36 +1574,33 @@ Node::sendSelf(int cTag, Channel& theChannel)
 	}
 
 	if (unbalLoad != 0) {
-		res = theChannel.sendVector(dbTag4, cTag, *unbalLoad);
+		res = theChannel.sendVector(dbTags[3], cTag, *unbalLoad);
 		if (res < 0) {
 			opserr << " Node::sendSelf() - failed to send Load data\n";
 			return res;
 		}
 	}
 
-#ifdef _CSS
 	Vector energy(3);
 	energy(0) = kineticEnergy;
 	energy(1) = dampEnergy;
 	energy(2) = motionEnergy;
-	res = theChannel.sendVector(dbTag4, cTag, energy);
+	res = theChannel.sendVector(dbTags[4], cTag, energy);
 	ID flags(3);
 	flags(0) = lastCommitAccel != 0;
 	flags(1) = lastCommitVel != 0;
 	flags(2) = lastCommitDisp != 0;
-	res += theChannel.sendID(dbTag4, cTag, flags);
+	res += theChannel.sendID(dataTag, cTag, flags);
 	if (flags(0))
-		res += theChannel.sendVector(dbTag4, cTag, lastCommitAccel);
+		res += theChannel.sendVector(dbTags[5], cTag, lastCommitAccel);
 	if (flags(1))
-		res += theChannel.sendVector(dbTag4, cTag, lastCommitVel);
+		res += theChannel.sendVector(dbTags[6], cTag, lastCommitVel);
 	if (flags(2))
-		res += theChannel.sendVector(dbTag4, cTag, lastCommitDisp);
+		res += theChannel.sendVector(dbTags[7], cTag, lastCommitDisp);
 	if (res < 0) {
 		opserr << " Node::sendSelf() - failed to send energy data\n";
 		return res;
 	}
-
-#endif // _CSS
 
 	// if get here succesfull
 	return 0;
@@ -1618,23 +1613,24 @@ Node::recvSelf(int cTag, Channel& theChannel,
 	int res = 0;
 	int dataTag = this->getDbTag();
 
-	ID data(14);
-	res = theChannel.recvID(dataTag, cTag, data);
+	Vector data(12);
+	res = theChannel.recvVector(dataTag, cTag, data);
 	if (res < 0) {
-		opserr << "Node::recvSelf() - failed to receive ID data\n";
+		opserr << "Node::recvSelf() - failed to receive Vec data\n";
+		return res;
+	}
+
+	res = theChannel.recvID(dataTag, cTag, dbTags);
+	if (res < 0) {
+		opserr << "Node::recvSelf() - failed to receive dbTags data\n";
 		return res;
 	}
 
 	this->setTag(data(0));
 	numberDOF = data(1);
-	int numberCrd = data(7);
-
-	dbTag1 = data(8);
-	dbTag2 = data(9);
-	dbTag3 = data(10);
-	dbTag4 = data(11);
-
-
+	alphaM = data(10);
+	temperature = data(11);
+	int numberCrd = data(9);
 	// create a Vector to hold coordinates IF one needed
 	if (Crd == 0) {
 		Crd = new Vector(numberCrd);
@@ -1646,7 +1642,7 @@ Node::recvSelf(int cTag, Channel& theChannel,
 		return -1;
 	}
 
-	if (theChannel.recvVector(dataTag, cTag, *Crd) < 0) {
+	if (theChannel.recvVector(dbTags[8], cTag, *Crd) < 0) {
 		opserr << "Node::recvSelf() - failed to receive the Coordinate vector\n";
 		return -2;
 	}
@@ -1657,7 +1653,7 @@ Node::recvSelf(int cTag, Channel& theChannel,
 			this->createDisp();
 
 		// recv the committed disp
-		if (theChannel.recvVector(dbTag1, cTag, *commitDisp) < 0) {
+		if (theChannel.recvVector(dbTags[0], cTag, *commitDisp) < 0) {
 			opserr << "Node::recvSelf - failed to receive Disp data\n";
 			return res;
 		}
@@ -1680,7 +1676,7 @@ Node::recvSelf(int cTag, Channel& theChannel,
 			this->createVel();
 
 		// recv the committed vel
-		if (theChannel.recvVector(dbTag2, cTag, *commitVel) < 0) {
+		if (theChannel.recvVector(dbTags[1], cTag, *commitVel) < 0) {
 			opserr << "Node::recvSelf - failed to receive Velocity data\n";
 			return -3;
 		}
@@ -1696,7 +1692,7 @@ Node::recvSelf(int cTag, Channel& theChannel,
 			this->createAccel();
 
 		// recv the committed accel
-		if (theChannel.recvVector(dbTag3, cTag, *commitAccel) < 0) {
+		if (theChannel.recvVector(dbTags[2], cTag, *commitAccel) < 0) {
 			opserr << "Node::recvSelf - failed to receive Acceleration data\n";
 			return -4;
 		}
@@ -1721,9 +1717,9 @@ Node::recvSelf(int cTag, Channel& theChannel,
 		}
 	}
 
-	if (data(12) == 0) {
+	if (data(7) == 0) {
 		// create a matrix for R
-		int noCols = data(13);
+		int noCols = data(8);
 		if (R == 0) {
 			R = new Matrix(numberDOF, noCols);
 			if (R == 0) {
@@ -1732,7 +1728,7 @@ Node::recvSelf(int cTag, Channel& theChannel,
 			}
 		}
 		// now recv the R matrix
-		if (theChannel.recvMatrix(dbTag2, cTag, *R) < 0) {
+		if (theChannel.recvMatrix(dbTags[1], cTag, *R) < 0) {
 			opserr << "Node::recvSelf() - failed to receive R data\n";
 			return res;
 		}
@@ -1748,7 +1744,7 @@ Node::recvSelf(int cTag, Channel& theChannel,
 				return -10;
 			}
 		}
-		if (theChannel.recvVector(dbTag4, cTag, *unbalLoad) < 0) {
+		if (theChannel.recvVector(dbTags[3], cTag, *unbalLoad) < 0) {
 			opserr << "Node::recvSelf() - failed to receive Load data\n";
 			return res;
 		}
@@ -1783,41 +1779,36 @@ Node::recvSelf(int cTag, Channel& theChannel,
 		numMatrices++;
 		theMatrices = nextMatrices;
 	}
-#ifdef _CSS
 
 	Vector energy(3);
-	res = theChannel.recvVector(dbTag4, cTag, energy);
+	res = theChannel.recvVector(dbTags[4], cTag, energy);
 	kineticEnergy = energy(0);
 	dampEnergy = energy(1);
 	motionEnergy = energy(2);
 	ID flags(3);
-	res = theChannel.recvID(dbTag4, cTag, flags);
+	res = theChannel.recvID(dataTag, cTag, flags);
 	if (flags(0))
 	{
 		lastCommitAccel = Vector(numberDOF);
-		res += theChannel.recvVector(dbTag4, cTag, lastCommitAccel);
+		res += theChannel.recvVector(dbTags[5], cTag, lastCommitAccel);
 	}
 	if (flags(1))
 	{
 		lastCommitVel = Vector(numberDOF);
-		res += theChannel.recvVector(dbTag4, cTag, lastCommitVel);
+		res += theChannel.recvVector(dbTags[6], cTag, lastCommitVel);
 	}
 	if (flags(2))
 	{
 		lastCommitDisp = Vector(numberDOF);
-		res += theChannel.recvVector(dbTag4, cTag, lastCommitDisp);
+		res += theChannel.recvVector(dbTags[7], cTag, lastCommitDisp);
 	}
 	if (res < 0) {
 		opserr << "Node::recvSelf() - failed to receive energy data\n";
 		return res;
 	}
 
-#endif // _CSS
-
 	return 0;
 }
-
-
 
 void
 Node::Print(OPS_Stream& s, int flag)
@@ -2534,6 +2525,7 @@ Node::setGlobalMatrices()
 #ifdef _CSS
 void Node::addEleConnect(Element* pEle)
 {
+	//TODO: manage database
 	numEleConnects++;
 	Element** oldCncts = theEleConnects;
 	theEleConnects = new Element * [numEleConnects];
@@ -2541,7 +2533,7 @@ void Node::addEleConnect(Element* pEle)
 		theEleConnects[i] = oldCncts[i];
 	theEleConnects[numEleConnects - 1] = pEle;
 	if (oldCncts != 0)
-		delete oldCncts;
+		delete[] oldCncts;
 }
 double Node::getKineticEnergy(TimeSeries** velocSeries)
 {

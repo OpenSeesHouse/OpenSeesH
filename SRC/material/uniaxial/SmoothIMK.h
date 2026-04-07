@@ -27,6 +27,7 @@
 #define SmoothIMK_h
 
 #include <UniaxialMaterial.h>
+#include <ID.h>
 class SmoothIMK : public UniaxialMaterial
 {
 public:
@@ -41,7 +42,7 @@ public:
 		double betaPinchPos, double epsPinchPos, double sigPenetFacPos, double bilinEndAmpPos, double unloadingStiffFacPos,
 		int cyclicRuleN, double gapN, double alphaPinchNeg, double pinchYNeg,
 		double betaPinchNeg, double epsPinchNeg, double sigPenetFacNeg, double bilinEndAmpNeg, double unloadingStiffFacNeg,
-		double sigInit);
+		double sigInit, int printFailure);
 
 	SmoothIMK(void);
 	virtual ~SmoothIMK();
@@ -81,6 +82,8 @@ public:
 protected:
 
 private:
+	ID dbTags; // for transferring equal-size vectors in database
+	int printFailure;
 	std::vector<double> pd, pf, nd, nf, gpd, gnd; //gpd: gapped pd
 	double r0, r1, r2;
 	double gapP, gapN;
@@ -88,7 +91,7 @@ private:
 	double sigPenetFacP, sigPenetFacN;
 	int cyclicRuleP, cyclicRuleN;  // 1:bilinear, 2:pinched, 3:peak-oriented
 	double FailEnergS, FailEnergUnloadE, cS, cUnloadE;			//damage parameters
-	double alphaPinchPos, alphaPinchNeg, betaPinchPos, epsPinchPos, pinchYPos, pinchYNeg, betaPinchNeg, epsPinchNeg;
+	double alphaPinchPos, betaPinchPos, epsPinchPos, pinchYPos, alphaPinchNeg, pinchYNeg, betaPinchNeg, epsPinchNeg;
 	//double FydP, FydN;		//Pos and Neg Fy's affected by damage
 	double ExcurEnergy;
 	double EnergyP; //by SAJalali
@@ -140,6 +143,7 @@ private:
 	int nextBranch(int branch, bool shouldPinch);
 	void getEnvelope(double eps, bool pSide, double& targStress, int& targBranch, double& k, double& limitEps);
 	void computeR0(double k1, double k2, double E1, double dy);
+	void setSideVars();
 };
 
 
