@@ -220,13 +220,13 @@ TclModelBuilderNDMaterialCommand(ClientData clientData, Tcl_Interp* interp, int 
 			return TCL_ERROR;
 	}
 
-	else if ((strcmp(argv[1], "InitStressMaterial") == 0) || (strcmp(argv[1], "InitStress") == 0)) {
+	/*else if ((strcmp(argv[1], "InitStressMaterial") == 0) || (strcmp(argv[1], "InitStress") == 0)) {
 		void* theMat = OPS_InitStressNDMaterial();
 		if (theMat != 0)
 			theMaterial = (NDMaterial*)theMat;
 		else
 			return TCL_ERROR;
-	}
+	}*/
 
 	//else if (strcmp(argv[1], "InitStrain") == 0) {
 	//	void* theMat = OPS_InitStrainNDMaterial();

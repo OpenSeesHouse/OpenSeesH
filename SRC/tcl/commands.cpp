@@ -222,6 +222,7 @@ extern void* OPS_AutoConstraintHandler(void);
 //SAJalali for logCommands
 int LOG_COMMANDS = 0;
 int ECHO_COMMANDS = 0;
+int LOG_AS_PYTHON = 0;
 FileStream CmdLogStream(0);
 FileStream* CmdStrmPtr = &CmdLogStream;
 #endif // _CSS
@@ -1750,6 +1751,7 @@ int OPS_LogCommandsCmd(ClientData clientData, Tcl_Interp* interp, int argc, TCL_
 		CmdLogStream.setFile(file.c_str());
 	}
 	int narg = 1;
+	bool isComment = false;
 	while (1) {
 		if (narg >= argc)
 			break;
@@ -1782,19 +1784,43 @@ int OPS_LogCommandsCmd(ClientData clientData, Tcl_Interp* interp, int argc, TCL_
 		else if (strcmp(argv[narg], "-comment") == 0)
 		{
 			narg++;
+			isComment = true;
 			if (argc > narg && LOG_COMMANDS)
 			{
 				CmdLogStream << argv[narg++];
 			}
 			narg++;
 		}
+		else if (strcmp(argv[narg], "-outPy") == 0)
+		{
+			narg++;
+			LOG_AS_PYTHON = 1;
+		}
 		else {
 			opserr << "WARNING LogCommands: unsupported option: " << argv[narg] << " omitted\n";
 			narg++;
 		}
 	}
-
+	if (!isComment && LOG_AS_PYTHON == 1)
+	{
+		if (LOG_COMMANDS == 0)
+		{
+			LOG_COMMANDS = 1;
+			CmdLogStream.setFile(file.c_str());
+		}
+		CmdLogStream << "from OpenSeesHpy import OpenSeesHpy as oph" << endln;
+	}
 	return 0;
+}
+
+bool isNumber(const char* s) {
+	if (s == nullptr || *s == '\0')
+		return false;
+
+	char* end;
+	std::strtod(s, &end);
+
+	return *end == '\0';
 }
 
 int printArgv(Tcl_Interp* interp, int argc, TCL_Char** argv, bool hasBlock)
@@ -1804,11 +1830,17 @@ int printArgv(Tcl_Interp* interp, int argc, TCL_Char** argv, bool hasBlock)
 		return 0;
 	if (hasBlock && BlockStarted)
 	{
-		CmdLogStream << "}";
+		if (LOG_AS_PYTHON == 1)
+			CmdLogStream << "#block_end";
+		else
+			CmdLogStream << "}";
 		CmdLogStream << endln;
 		if (ECHO_COMMANDS)
 		{
-			opserr << "}";
+			if (LOG_AS_PYTHON == 1)
+				CmdLogStream << "#block_end";
+			else
+				opserr << "}";
 			opserr << endln;
 		}
 		BlockStarted = false;
@@ -1818,28 +1850,85 @@ int printArgv(Tcl_Interp* interp, int argc, TCL_Char** argv, bool hasBlock)
 	{
 		if (i == argc - 1 && hasBlock)
 		{
-			CmdLogStream << " {";
+			if (LOG_AS_PYTHON == 1)
+			{
+				CmdLogStream << ")";
+				CmdLogStream << endln;
+				CmdLogStream << "#block_start";
+			}
+			else
+				CmdLogStream << " {";
 			CmdLogStream << endln;
 			if (ECHO_COMMANDS)
 			{
-				opserr << " {";
+				if (LOG_AS_PYTHON == 1)
+					CmdLogStream << "#block_start";
+				else
+					opserr << " {";
 				opserr << endln;
 			}
 			BlockStarted = true;
 			return 0;
 		}
-		else if (i != 0)
-		{
-			CmdLogStream << " ";
-			if (ECHO_COMMANDS)
+		else {
+			if (LOG_AS_PYTHON == 0)
 			{
-				opserr << " ";
+				if (i != 0)
+				{
+					CmdLogStream << " ";
+					if (ECHO_COMMANDS)
+					{
+						opserr << " ";
+					}
+				}
+			}
+			else {
+				if (i == 0)
+				{
+					CmdLogStream << "oph.";
+					if (ECHO_COMMANDS)
+					{
+						opserr << "oph.";
+					}
+				}
+				else if (i > 1)
+				{
+					CmdLogStream << ", ";
+					if (ECHO_COMMANDS)
+					{
+						CmdLogStream << ", ";
+					}
+				}
 			}
 		}
-		CmdLogStream << argv[i];
+		if (i == 0 || LOG_AS_PYTHON == 0 || isNumber(argv[i]))
+			CmdLogStream << argv[i];
+		else
+			CmdLogStream << '\'' << argv[i] << '\'';
 		if (ECHO_COMMANDS)
 		{
-			opserr << argv[i];
+			if (LOG_AS_PYTHON == 0 || isNumber(argv[i]))
+				CmdLogStream << argv[i];
+			else
+				CmdLogStream << '\'' << argv[i] << '\'';
+		}
+		if (LOG_AS_PYTHON == 1) {
+			if (i == 0)
+			{
+				CmdLogStream << "(";
+				if (ECHO_COMMANDS)
+				{
+					opserr << "(";
+				}
+			}
+			if (i == argc - 1)
+			{
+				CmdLogStream << ")";
+				if (ECHO_COMMANDS)
+				{
+					opserr << ")";
+				}
+			}
 		}
 	}
 	CmdLogStream << endln;
