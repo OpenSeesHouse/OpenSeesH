@@ -313,6 +313,8 @@ static int setUpUniaxialMaterials(void) {
   uniaxialMaterialsMap.insert(
       std::make_pair("SmoothIMK", &OPS_SmoothIMK));
   uniaxialMaterialsMap.insert(
+      std::make_pair("ConfinedConcrete", &OPS_ConfinedConcrete));
+  uniaxialMaterialsMap.insert(
       std::make_pair("Elastic", &OPS_ElasticMaterial));
   uniaxialMaterialsMap.insert(
       std::make_pair("ElasticPP", &OPS_ElasticPPMaterial));
