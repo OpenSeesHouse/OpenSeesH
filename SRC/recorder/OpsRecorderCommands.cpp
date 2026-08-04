@@ -148,8 +148,8 @@ void* OPS_NodeRecorder(const char* type)
 
 
 #ifdef _CSS
-	int procDataMethod = 0;
-	int nProcGrp = -1;
+	ID procDataMethods(0, 4);
+	ID procGrpNums(0, 4);
 	int cntrlRcrdrTag = 0;
 	outputMode eMode = No_Output;
 #else
@@ -355,28 +355,41 @@ void* OPS_NodeRecorder(const char* type)
 		}
 		else if (strcmp(option, "-process") == 0) {
 			const char* procType = OPS_GetString();
+			int method = 0;
 			if (strcmp(procType, "sum") == 0)
-				procDataMethod = 1;
+				method = 1;
 			else if (strcmp(procType, "max") == 0)
-				procDataMethod = 2;
+				method = 2;
 			else if (strcmp(procType, "min") == 0)
-				procDataMethod = 3;
+				method = 3;
 			else if (strcmp(procType, "maxAbs") == 0)
-				procDataMethod = 4;
+				method = 4;
 			else if (strcmp(procType, "minAbs") == 0)
-				procDataMethod = 5;
+				method = 5;
+			else if (_stricmp(procType, "SRSS") == 0)
+				method = 6;
 			else
 			{
 				opserr << "unrecognized element result process method: " << procType << endln;
 				return 0;
 			}
+			int i = procDataMethods.Size();
+			procDataMethods.resize(i + 1);
+			procGrpNums.resize(i + 1);
+			procDataMethods(i) = method;
+			procGrpNums(i) = (method == 6) ? 2 : -1;
 		}
 		else if (strcmp(option, "-procGrpNum") == 0) {
-			int num = 1;
-			if (OPS_GetIntInput(&numData, &nProcGrp) < 0) {
+			if (procDataMethods.Size() == 0) {
+				opserr << "WARNING -procGrpNum requires a preceding -process in recorder" << endln;
+				return 0;
+			}
+			int nGrp = -1;
+			if (OPS_GetIntInput(&numData, &nGrp) < 0) {
 				opserr << "Failed to read $nGrp after -procGrpNum option in recorder" << endln;
 				return 0;
 			}
+			procGrpNums(procDataMethods.Size() - 1) = nGrp;
 		}
 #endif // _CSS
 	}
@@ -405,16 +418,16 @@ void* OPS_NodeRecorder(const char* type)
 	Recorder* recorder = 0;
 	if (strcmp(type, "Node") == 0)
 		recorder = new NodeRecorder(dofs, &nodes, gradIndex, responseID, *domain, theOutputStream,
-			procDataMethod, nProcGrp, dT, echoTimeFlag, theTimeSeries);
+			procDataMethods, procGrpNums, dT, echoTimeFlag, theTimeSeries);
 	else if (strcmp(type, "EnvelopeNode") == 0)
 		recorder = new EnvelopeNodeRecorder(dofs, &nodes, responseID, *domain, theOutputStream,
-			procDataMethod, nProcGrp, echoTimeFlag, theTimeSeries);
+			procDataMethods, procGrpNums, echoTimeFlag, theTimeSeries);
 	else if (strcmp(type, "ResidNode") == 0)
 		recorder = new ResidNodeRecorder(dofs, &nodes, responseID, *domain, theOutputStream,
-			procDataMethod, nProcGrp, echoTimeFlag, theTimeSeries);
+			procDataMethods, procGrpNums, echoTimeFlag, theTimeSeries);
 	else if (strcmp(type, "ConditionalNode") == 0)
 		recorder = new ConditionalNodeRecorder(dofs, &nodes, responseID, *domain, theOutputStream,
-			cntrlRcrdrTag, procDataMethod, nProcGrp, echoTimeFlag, theTimeSeries);
+			cntrlRcrdrTag, procDataMethods, procGrpNums, echoTimeFlag, theTimeSeries);
 
 	return recorder;
 }
@@ -449,8 +462,8 @@ void* OPS_ElementRecorder(const char* type)
 
 	ID elements(0, 6);
 	ID dofs(0, 6);
-	int procDataMethod = 0;
-	int nProcGrp = -1;
+	ID procDataMethods(0, 4);
+	ID procGrpNums(0, 4);
 	int cntrlRcrdrTag = 0;
 
 	char** argv = 0;
@@ -621,25 +634,40 @@ void* OPS_ElementRecorder(const char* type)
 		}
 		else if (strcmp(option, "-process") == 0) {
 			const char* procType = OPS_GetString();
+			int method = 0;
 			if (strcmp(procType, "sum") == 0)
-				procDataMethod = 1;
+				method = 1;
 			else if (strcmp(procType, "max") == 0)
-				procDataMethod = 2;
+				method = 2;
 			else if (strcmp(procType, "min") == 0)
-				procDataMethod = 3;
+				method = 3;
 			else if (strcmp(procType, "maxAbs") == 0)
-				procDataMethod = 4;
+				method = 4;
 			else if (strcmp(procType, "minAbs") == 0)
-				procDataMethod = 5;
-			else
+				method = 5;
+			else if (_stricmp(procType, "SRSS") == 0)
+				method = 6;
+			else {
 				opserr << "unrecognized element result process method: " << procType << endln;
+				return 0;
+			}
+			int i = procDataMethods.Size();
+			procDataMethods.resize(i + 1);
+			procGrpNums.resize(i + 1);
+			procDataMethods(i) = method;
+			procGrpNums(i) = (method == 6) ? 2 : -1;
 		}
 		else if (strcmp(option, "-procGrpNum") == 0) {
-			int num = 0;
-			if (OPS_GetInt(&numData, &nProcGrp) != 0) {
+			if (procDataMethods.Size() == 0) {
+				opserr << "WARNING -procGrpNum requires a preceding -process in recorder" << option << endln;
+				return 0;
+			}
+			int nGrp = -1;
+			if (OPS_GetInt(&numData, &nGrp) != 0) {
 				opserr << "Failed to read $nGrp after -procGrpNum option in recorder" << option << endln;
 				return 0;
 			}
+			procGrpNums(procDataMethods.Size() - 1) = nGrp;
 		}
 		else {
 			// first unknown string then is assumed to start 
@@ -681,16 +709,16 @@ void* OPS_ElementRecorder(const char* type)
 	Recorder* recorder = 0;
 	if (strcmp(type, "Element") == 0)
 		recorder = new ElementRecorder(&elements, data, nargrem, echoTimeFlag, *domain,
-			theOutputStream, procDataMethod, nProcGrp, dT, &dofs);
+			theOutputStream, procDataMethods, procGrpNums, dT, &dofs);
 	if (strcmp(type, "EnvelopeElement") == 0)
 		recorder = new EnvelopeElementRecorder(&elements, data, nargrem, *domain,
-			theOutputStream, procDataMethod, nProcGrp, echoTimeFlag, &dofs);
+			theOutputStream, procDataMethods, procGrpNums, echoTimeFlag, &dofs);
 	if (strcmp(type, "ResidElement") == 0)
 		recorder = new ResidElementRecorder(&elements, data, nargrem, *domain,
-			theOutputStream, procDataMethod, nProcGrp, echoTimeFlag, &dofs);
+			theOutputStream, procDataMethods, procGrpNums, echoTimeFlag, &dofs);
 	if (strcmp(type, "ConditionalElement") == 0)
 		recorder = new ConditionalElementRecorder(&elements, data, nargrem, *domain,
-			theOutputStream, cntrlRcrdrTag, procDataMethod, nProcGrp, echoTimeFlag, &dofs);
+			theOutputStream, cntrlRcrdrTag, procDataMethods, procGrpNums, echoTimeFlag, &dofs);
 	if (data != 0) {
 		delete[] data;
 	}
@@ -714,8 +742,8 @@ void* OPS_DriftRecorder(const char* type)
 	bool doScientific = false;
 	bool closeOnWrite = false;
 	int cntrlRcrdrTag = 0;
-	int procDataMethod = 0;
-	int nProcGrp = -1;
+	ID procDataMethods(0, 4);
+	ID procGrpNums(0, 4);
 	const char* fileName;
 	int numData = 1;
 	while (OPS_GetNumRemainingInputArgs() > 0) {
@@ -745,26 +773,41 @@ void* OPS_DriftRecorder(const char* type)
 		}
 		else if (strcmp(option, "-process") == 0) {
 			const char* procType = OPS_GetString();
+			int method = 0;
 			if (strcmp(procType, "sum") == 0)
-				procDataMethod = 1;
+				method = 1;
 			else if (strcmp(procType, "max") == 0)
-				procDataMethod = 2;
+				method = 2;
 			else if (strcmp(procType, "min") == 0)
-				procDataMethod = 3;
+				method = 3;
 			else if (strcmp(procType, "maxAbs") == 0)
-				procDataMethod = 4;
+				method = 4;
 			else if (strcmp(procType, "minAbs") == 0)
-				procDataMethod = 5;
-			else
+				method = 5;
+			else if (_stricmp(procType, "SRSS") == 0)
+				method = 6;
+			else {
 				opserr << "unrecognized element result process method: " << procType << endln;
+				return 0;
+			}
+			int i = procDataMethods.Size();
+			procDataMethods.resize(i + 1);
+			procGrpNums.resize(i + 1);
+			procDataMethods(i) = method;
+			procGrpNums(i) = (method == 6) ? 2 : -1;
 			pos += 2;
 		}
 		else if (strcmp(option, "-procGrpNum") == 0) {
-			int num = 0;
-			if (OPS_GetInt(&numData, &nProcGrp) != 0) {
+			if (procDataMethods.Size() == 0) {
+				opserr << "WARNING -procGrpNum requires a preceding -process in recorder" << endln;
+				return 0;
+			}
+			int nGrp = -1;
+			if (OPS_GetInt(&numData, &nGrp) != 0) {
 				opserr << "Failed to read $nGrp after -procGrpNum option in recorder" << endln;
 				return 0;
 			}
+			procGrpNums(procDataMethods.Size() - 1) = nGrp;
 		}
 #endif // _CSS
 		else if (strcmp(option, "-fileCSV") == 0) {
@@ -890,16 +933,16 @@ theOutputStream = new DatabaseStream(theDatabase, tableName);
 	Domain* theDomain = OPS_GetDomain();
 	if (strcmp(type, "ResidDrift") == 0)
 		theRecorder = new ResidDriftRecorder(iNodes, jNodes, dof - 1, perpDirn - 1,
-			*theDomain, theOutputStream, procDataMethod, nProcGrp, echoTimeFlag);
+			*theDomain, theOutputStream, procDataMethods, procGrpNums, echoTimeFlag);
 	else if (strcmp(type, "ConditionalDrift") == 0)
 		theRecorder = new ConditionalDriftRecorder(iNodes, jNodes, dof - 1, perpDirn - 1,
-			*theDomain, theOutputStream, cntrlRcrdrTag, procDataMethod, nProcGrp, echoTimeFlag);
+			*theDomain, theOutputStream, cntrlRcrdrTag, procDataMethods, procGrpNums, echoTimeFlag);
 	else if (strcmp(type, "Drift") == 0)
 		theRecorder = new DriftRecorder(iNodes, jNodes, dof - 1, perpDirn - 1,
-			*theDomain, theOutputStream, procDataMethod, nProcGrp, echoTimeFlag, dT);
+			*theDomain, theOutputStream, procDataMethods, procGrpNums, echoTimeFlag, dT);
 	else if (strcmp(type, "EnvelopeDrift") == 0)
 		theRecorder = new EnvelopeDriftRecorder(iNodes, jNodes, dof - 1, perpDirn - 1,
-			*theDomain, theOutputStream, procDataMethod, nProcGrp, echoTimeFlag);
+			*theDomain, theOutputStream, procDataMethods, procGrpNums, echoTimeFlag);
 	else
 		opserr << "WARNING! Unrecognized Drift Recorder type: " << type << endln;
 	return theRecorder;

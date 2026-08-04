@@ -49,6 +49,7 @@ ConditionalElementRecorder::ConditionalElementRecorder()
 :Recorder(RECORDER_TAGS_ConditionalElementRecorder),
  numEle(0), numDOF(0), eleID(0), dof(0), theResponses(0), theDomain(0),
  theHandler(0), data(0), initializationDone(false), responseArgs(0), numArgs(0), echoTimeFlag(false), addColumnInfo(0)
+ , procDataMethods(0), procGrpNums(0)
 {
 
 }
@@ -60,14 +61,15 @@ ConditionalElementRecorder::ConditionalElementRecorder(const ID *ele,
 							 Domain &theDom, 
 							 OPS_Stream *theOutputHandler,
 							int rcrdrTag,
-							int procMethod, int procGrpN,
+							const ID& procDataMethods,
+							const ID& procGrpNums,
 							bool echoTime,
 							 const ID *indexValues)
  :Recorder(RECORDER_TAGS_ConditionalElementRecorder),
   numEle(0), eleID(0), numDOF(0), dof(0), theResponses(0), theDomain(&theDom),
   theHandler(theOutputHandler), data(0), 
   initializationDone(false), responseArgs(0), numArgs(0), echoTimeFlag(echoTime), addColumnInfo(0)
-  , procDataMethod(procMethod), procGrpNum(procGrpN), envRcrdrTag(rcrdrTag)
+  , procDataMethods(procDataMethods), procGrpNums(procGrpNums), envRcrdrTag(rcrdrTag)
 {
 
   if (ele != 0) {
@@ -184,7 +186,7 @@ ConditionalElementRecorder::record(int commitTag, double timeStamp)
         loc = 1;
         (*data)(0, 0) = timeStamp;
     }
-    if (procDataMethod != 0)
+    if (procDataMethods.Size() != 0)
     {
         int respSize = numDOF;
         for (int i = 0; i < numEle; i++) {
@@ -200,28 +202,12 @@ ConditionalElementRecorder::record(int commitTag, double timeStamp)
                     respSize = sz;
             }
         }
+        int nVals = numEle;
+        double* buf = new double[nVals];
         for (int j = 0; j < respSize; j++)
         {
-            int nProcOuts;
-            int nVals = numEle;
-            if (procGrpNum == -1)
-                if (procDataMethod != 0)
-                    nProcOuts = 1;
-                else
-                    nProcOuts = nVals;
-            else {
-                nProcOuts = nVals / procGrpNum;
-                if (nProcOuts * procGrpNum < nVals)
-                    nProcOuts++;
-            }
-            double* vals = 0, * val, val1 = 0;
-            vals = new double[nProcOuts];
-            for (int i = 0; i < nProcOuts; i++)
-                vals[i] = 0;
-            int iGrpN = 0;
-            int nextGrpN = procGrpNum;
-            val = &vals[iGrpN];
             for (int i = 0; i < numEle; i++) {
+                buf[i] = 0.0;
                 if (theResponses[i] == 0)
                     continue;
                 const Vector& eleData = theResponses[i]->getData();
@@ -230,34 +216,37 @@ ConditionalElementRecorder::record(int commitTag, double timeStamp)
                     index = (*dof)(j);
                 if (index >= eleData.Size())
                     continue;
-                val1 = eleData(index);
-                if (procGrpNum != -1 && i == nextGrpN)
-                {
-                    iGrpN++;
-                    nextGrpN += procGrpNum;
-                    val = &vals[iGrpN];
-                }
-
-                if (i == 0 && procDataMethod != 1)
-                    *val = fabs(val1);
-                if (procDataMethod == 1)
-                    *val += val1;
-                else if (procDataMethod == 2 && val1 > *val)
-                    *val = val1;
-                else if (procDataMethod == 3 && val1 < *val)
-                    *val = val1;
-                else if (procDataMethod == 4 && fabs(val1) > *val)
-                    *val = fabs(val1);
-                else if (procDataMethod == 5 && fabs(val1) < *val)
-                    *val = fabs(val1);
+                buf[i] = eleData(index);
             }
-            for (int i = 0; i < nProcOuts; i++)
+            int nOut = Recorder::applyProcDataChain(procDataMethods, procGrpNums, buf, nVals, false);
+            for (int i = 0; i < nOut; i++)
             {
-                loc = i * respSize + j + (echoTimeFlag? 1 : 0);
-                val = &vals[i];
-                (*data)(0, loc) = *val;
+                loc = j * nOut + i + (echoTimeFlag? 1 : 0);
+                (*data)(0, loc) = buf[i];
             }
-            delete[] vals;
+        }
+        delete[] buf;
+    }
+    else if (numDOF != 0)
+    {
+        for (int i = 0; i < numEle; i++) {
+            if (theResponses[i] == 0)
+                continue;
+            int res;
+            if ((res = theResponses[i]->getResponse()) < 0)
+                result += res;
+        }
+        for (int j = 0; j < numDOF; j++) {
+            int index = (*dof)(j);
+            for (int i = 0; i < numEle; i++) {
+                if (theResponses[i] == 0)
+                    continue;
+                const Vector& eleData = theResponses[i]->getData();
+                if (index >= 0 && index < eleData.Size())
+                    (*data)(0, loc++) = eleData(index);
+                else
+                    (*data)(0, loc++) = 0.0;
+            }
         }
     }
     else
@@ -628,7 +617,7 @@ ConditionalElementRecorder::initialize(void)
             return -1;
         }
 
-        if (procDataMethod != 0)
+        if (procDataMethods.Size() != 0)
         {
             int dataSize = 0;
             for (i = 0; i < numEle; i++) {
@@ -650,15 +639,9 @@ ConditionalElementRecorder::initialize(void)
                         dataSize = size;
                 }
             }
-            int nProcOuts;
             int nVals = numEle;
-            if (procGrpNum == -1)
-                nProcOuts = 1;
-            else {
-                nProcOuts = nVals / procGrpNum;
-                if (nProcOuts * procGrpNum < nVals)
-                    nProcOuts++;
-            }
+            int nProcOuts = (procDataMethods.Size() == 0) ? nVals
+                : Recorder::getFinalProcOuts(nVals, procDataMethods, procGrpNums);
             if (numDOF == 0)
                 numDbColumns = dataSize * nProcOuts;
             else
@@ -729,7 +712,7 @@ ConditionalElementRecorder::initialize(void)
 
     }
     else {
-        if (procDataMethod != 0)
+        if (procDataMethods.Size() != 0)
         {
             opserr << "Combining element responses is not currently supported for empty input elements" << endln;
             initializationDone = false;

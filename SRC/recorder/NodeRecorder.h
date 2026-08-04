@@ -51,7 +51,7 @@ class NodeRecorder: public Recorder
     NodeRecorder();
     NodeRecorder(const ID &theDof, const ID *theNodes, int pgradIndex,
 		 const char *dataToStore, Domain &theDomain, OPS_Stream *theOutputHandler,
-        int procDataMethod, int procGrpNum, double deltaT,
+        const ID& procDataMethods, const ID& procGrpNums, double deltaT,
 		 bool echoTimeFlag, TimeSeries **timeSeries);
 
     ~NodeRecorder();
@@ -78,13 +78,9 @@ class NodeRecorder: public Recorder
   private:	
 #ifdef _CSS
      int numDOF;
-     int procDataMethod;  //flag to indicate element group processing method:
-                          //0: no processing, print separate results
-                          //1: sum of results
-                          //2: maximum of results
-                          //3: minimum of results
-                          //4: maximum absolute of results
-   int procGrpNum;
+     ID procDataMethods;  // empty => no processing; else chained stages:
+                          // 1:sum 2:max 3:min 4:maxAbs 5:minAbs 6:SRSS
+   ID procGrpNums;      // parallel to procDataMethods; -1 => all columns
    Vector getResponse(Node* theNode);
 #endif // _CSS
 

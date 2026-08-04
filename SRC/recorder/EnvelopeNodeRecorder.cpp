@@ -61,6 +61,9 @@ EnvelopeNodeRecorder::EnvelopeNodeRecorder()
 	 theDomain(0), theHandler(0),
 	 first(true), initializationDone(false),
 	 numValidNodes(0), addColumnInfo(0), theTimeSeries(0), timeSeriesValues(0)
+#ifdef _CSS
+	 , procDataMethods(0), procGrpNums(0), Modified(0)
+#endif
 {
 
 }
@@ -70,7 +73,7 @@ EnvelopeNodeRecorder::EnvelopeNodeRecorder(const ID& dofs,
 	 const char* dataToStore,
 	 Domain& theDom,
 	 OPS_Stream* theOutputHandler,
-	 int procMethod, int procGrpN,
+	 const ID& procMethods, const ID& procGrpN,
 	 bool echoTime,
 	 TimeSeries** theSeries)
 	 :Recorder(RECORDER_TAGS_EnvelopeNodeRecorder),
@@ -79,7 +82,7 @@ EnvelopeNodeRecorder::EnvelopeNodeRecorder(const ID& dofs,
 	 theDomain(&theDom), theHandler(theOutputHandler),
 	 first(true), initializationDone(false), numValidNodes(0), echoTimeFlag(echoTime),
 	 addColumnInfo(0), theTimeSeries(theSeries), timeSeriesValues(0)
-	 , procDataMethod(procMethod), procGrpNum(procGrpN), Modified(0)
+	 , procDataMethods(procMethods), procGrpNums(procGrpN), Modified(0)
 {
 	 // verify dof are valid 
 #ifndef _CSS
@@ -483,81 +486,49 @@ EnvelopeNodeRecorder::record(int commitTag, double timeStamp)
 
 #ifdef _CSS
 	 Modified = 0;
-	 if (procDataMethod != 0)
+	 if (procDataMethods.Size() != 0)
 	 {
 		 Vector* respVecs = new Vector[numValidNodes];
 		 for (int i = 0; i < numValidNodes; i++)
-		 {
-			 Node* theNode = theNodes[i];
-			 respVecs[i] = getResponse(theNode);
+			 respVecs[i] = getResponse(theNodes[i]);
+
+		 double* buf = new double[numValidNodes];
+		 for (int j = 0; j < numDOF; j++) {
+			 for (int i = 0; i < numValidNodes; i++)
+				 buf[i] = respVecs[i][j];
+			 int nOut = Recorder::applyProcDataChain(procDataMethods, procGrpNums, buf, numValidNodes, false);
+			 for (int i = 0; i < nOut; i++) {
+				 int cnt = j * nOut + i;
+				 (*currentData)(cnt) = buf[i];
+			 }
 		 }
-		 int cnt = 0;
-		  for (int j = 0; j < numDOF; j++) {
-				int nProcOuts;
-				int nVals = numValidNodes;
-				if (procGrpNum == -1)
-					 if (procDataMethod != 0)
-						  nProcOuts = 1;
-					 else
-						  nProcOuts = nVals;
-				else {
-					 nProcOuts = nVals / procGrpNum;
-					 if (nProcOuts * procGrpNum < nVals)
-						  nProcOuts++;
-				}
-				double* vals = 0, * val, val1 = 0;
-				vals = new double[nProcOuts];
-				for (int i = 0; i < nProcOuts; i++)
-					 vals[i] = 0;
-				int iGrpN = 0;
-				int nextGrpN = procGrpNum;
-				val = &vals[iGrpN];
-				int dof = (*theDofs)(j);
-				for (int i = 0; i < numValidNodes; i++) {
-					 Node* theNode = theNodes[i];
-					 val1 = respVecs[i][j];
-					 if (procGrpNum != -1 && i == nextGrpN)
-					 {
-						  iGrpN++;
-						  nextGrpN += procGrpNum;
-						  val = &vals[iGrpN];
-					 }
-					 if (i == 0 && procDataMethod != 1)
-						  *val = fabs(val1);
-					 if (procDataMethod == 1)
-						  *val += val1;
-					 else if (procDataMethod == 2 && val1 > *val)
-						  *val = val1;
-					 else if (procDataMethod == 3 && val1 < *val)
-						  *val = val1;
-					 else if (procDataMethod == 4 && fabs(val1) > *val)
-						  *val = fabs(val1);
-					 else if (procDataMethod == 5 && fabs(val1) < *val)
-						  *val = fabs(val1);
-				}
-				for (int i = 0; i < nProcOuts; i++)
-				{
-					 cnt = i * numDOF + j;
-					 val = &vals[i];
-					 (*currentData)(cnt) = *val;
-				}
-				delete[] vals;
-		  }
-		  delete[] respVecs;
+		 delete[] buf;
+		 delete[] respVecs;
 	 }
 	 else
 #endif //_CSS
-		  for (int i = 0; i < numValidNodes; i++) {
-				int cnt = i * numDOF;
+	 {
+		  Vector* respVecs = new Vector[numValidNodes];
+		  for (int i = 0; i < numValidNodes; i++)
+				respVecs[i] = getResponse(theNodes[i]);
 
-				if (dataFlag == 10000)
-					 cnt = i;
-
-				Node* theNode = theNodes[i];
-				Vector resp = getResponse(theNode);
-				for (int j = 0; j < resp.Size(); j++)
-					(*currentData)(cnt++) = resp[j];
+		  if (dataFlag == 10000) {
+				for (int i = 0; i < numValidNodes; i++)
+					 (*currentData)(i) = respVecs[i][0];
 		  }
+		  else {
+				for (int j = 0; j < numDOF; j++) {
+					 for (int i = 0; i < numValidNodes; i++) {
+						  int cnt = j * numValidNodes + i;
+						  if (j < respVecs[i].Size())
+								(*currentData)(cnt) = respVecs[i][j];
+						  else
+								(*currentData)(cnt) = 0.0;
+					 }
+				}
+		  }
+		  delete[] respVecs;
+	 }
 
 	 // check if currentData modifies the saved data
 	 int sizeData = currentData->Size();
@@ -1007,18 +978,9 @@ EnvelopeNodeRecorder::initialize(void)
 	 //
 
 #ifdef _CSS
-	 int nProcOuts;
 	 int nVals = numValidNodes;
-	 if (procGrpNum == -1)
-		  if (procDataMethod != 0)
-				nProcOuts = 1;
-		  else
-				nProcOuts = nVals;
-	 else {
-		  nProcOuts = nVals / procGrpNum;
-		  if (nProcOuts * procGrpNum < nVals)
-				nProcOuts++;
-	 }
+	 int nProcOuts = (procDataMethods.Size() == 0) ? nVals
+		  : Recorder::getFinalProcOuts(nVals, procDataMethods, procGrpNums);
 	 int numValidResponse = nProcOuts * numDOF;
 #else
 	 int numDOF = theDofs->Size();
@@ -1045,15 +1007,23 @@ EnvelopeNodeRecorder::initialize(void)
 		  int nodeCount = 0;
 
 		  int numNode = theNodalTags->Size();
-		  for (int i = 0; i < numNode; i++) {
-				int nodeTag = (*theNodalTags)(i);
-				Node* theNode = theDomain->getNode(nodeTag);
-				if (theNode != 0) {
-					 xmlOrder(nodeCount++) = i + 1;
-					 for (int j = 0; j < numDOF; j++)
+		  for (int j = 0; j < numDOF; j++) {
+				for (int i = 0; i < numNode; i++) {
+					 int nodeTag = (*theNodalTags)(i);
+					 Node* theNode = theDomain->getNode(nodeTag);
+					 if (theNode != 0) {
+						  if (j == 0)
+								xmlOrder(nodeCount++) = i + 1;
 						  dataOrder(count++) = i + 1;
-					 if (echoTimeFlag == true) {
-						  for (int j = 0; j < numDOF; j++)
+					 }
+				}
+		  }
+		  if (echoTimeFlag == true) {
+				for (int j = 0; j < numDOF; j++) {
+					 for (int i = 0; i < numNode; i++) {
+						  int nodeTag = (*theNodalTags)(i);
+						  Node* theNode = theDomain->getNode(nodeTag);
+						  if (theNode != 0)
 								dataOrder(count++) = i + 1;
 					 }
 				}

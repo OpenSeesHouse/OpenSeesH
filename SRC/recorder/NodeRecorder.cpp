@@ -57,7 +57,7 @@ NodeRecorder::NodeRecorder()
 	deltaT(0.0), nextTimeStampToRecord(0.0),
 	gradIndex(-1),
 	initializationDone(false), numValidNodes(0), addColumnInfo(0), theTimeSeries(0), timeSeriesValues(0)
-	, procDataMethod(0), procGrpNum(-1)
+	, procDataMethods(0), procGrpNums(0)
 {
 
 }
@@ -69,7 +69,7 @@ NodeRecorder::NodeRecorder(const ID& dofs,
 	const char* dataToStore,
 	Domain& theDom,
 	OPS_Stream* theOutput,
-	int procMethod, int procGrpN,
+	const ID& procMethods, const ID& procGrpN,
 	double dT,
 	bool timeFlag,
 	TimeSeries** theSeries)
@@ -81,7 +81,7 @@ NodeRecorder::NodeRecorder(const ID& dofs,
 	initializationDone(false), numValidNodes(0), addColumnInfo(0),
 	gradIndex(pgradIndex),
 	theTimeSeries(theSeries), timeSeriesValues(0)
-	, procDataMethod(procMethod), procGrpNum(procGrpN)
+	, procDataMethods(procMethods), procGrpNums(procGrpN)
 
 {
 	//
@@ -694,98 +694,70 @@ NodeRecorder::record(int commitTag, double timeStamp)
 
 		for (int mode = 0; mode < numValidModes; mode++) {
 
-			for (int i = 0; i < numValidNodes; i++) {
-				int cnt = i * numDOF + timeOffset;
-				Node* theNode = theNodes[i];
-
-				const Matrix& theEigenvectors = *theNode->getEigenvectors();
-				if (theEigenvectors.noCols() > mode) {
-					int noRows = theEigenvectors.noRows();
-					for (int j = 0; j < numDOF; j++) {
-						int dof = (*theDofs)(j);
-						if (noRows > dof) {
+			for (int j = 0; j < numDOF; j++) {
+				int dof = (*theDofs)(j);
+				for (int i = 0; i < numValidNodes; i++) {
+					int cnt = j * numValidNodes + i + timeOffset;
+					Node* theNode = theNodes[i];
+					const Matrix& theEigenvectors = *theNode->getEigenvectors();
+					if (theEigenvectors.noCols() > mode) {
+						int noRows = theEigenvectors.noRows();
+						if (noRows > dof)
 							response(cnt) = theEigenvectors(dof, mode);
-						}
 						else
 							response(cnt) = 0.0;
-						cnt++;
 					}
+					else
+						response(cnt) = 0.0;
 				}
 			}
 		}
 	}
 
 #ifdef _CSS
-	else if (procDataMethod != 0)
+	else if (procDataMethods.Size() != 0)
 	{
 		Vector* respVecs = new Vector[numValidNodes];
 		for (int i = 0; i < numValidNodes; i++)
-		{
-			Node* theNode = theNodes[i];
-			respVecs[i] = getResponse(theNode);
-		}
-		int cnt = timeOffset;
+			respVecs[i] = getResponse(theNodes[i]);
+
+		double* buf = new double[numValidNodes];
 		for (int j = 0; j < numDOF; j++) {
-			int nProcOuts;
-			int nVals = numValidNodes;
-			if (procGrpNum == -1)
-				nProcOuts = 1;
-			else {
-				nProcOuts = nVals / procGrpNum;
-				if (nProcOuts * procGrpNum < nVals)
-					nProcOuts++;
+			for (int i = 0; i < numValidNodes; i++)
+				buf[i] = respVecs[i][j];
+			int nOut = Recorder::applyProcDataChain(procDataMethods, procGrpNums, buf, numValidNodes, false);
+			for (int i = 0; i < nOut; i++) {
+				int cnt = j * nOut + i + timeOffset;
+				response(cnt) = buf[i];
 			}
-			double* vals = 0, * val, val1 = 0;
-			vals = new double[nProcOuts];
-			for (int i = 0; i < nProcOuts; i++)
-				vals[i] = 0;
-			int iGrpN = 0;
-			int nextGrpN = procGrpNum;
-			val = &vals[iGrpN];
-			for (int i = 0; i < numValidNodes; i++) {
-				val1 = respVecs[i][j];
-				if (procGrpNum != -1 && i == nextGrpN)
-				{
-					iGrpN++;
-					nextGrpN += procGrpNum;
-					val = &vals[iGrpN];
-				}
-				if (i == 0 && procDataMethod != 1)
-					*val = fabs(val1);
-				if (procDataMethod == 1)
-					*val += val1;
-				else if (procDataMethod == 2 && val1 > *val)
-					*val = val1;
-				else if (procDataMethod == 3 && val1 < *val)
-					*val = val1;
-				else if (procDataMethod == 4 && fabs(val1) > *val)
-					*val = fabs(val1);
-				else if (procDataMethod == 5 && fabs(val1) < *val)
-					*val = fabs(val1);
-			}
-			for (int i = 0; i < nProcOuts; i++)
-			{
-				cnt = i * numDOF + j + timeOffset;
-				val = &vals[i];
-				response(cnt) = *val;
-			}
-			delete[] vals;
 		}
+		delete[] buf;
 		delete[] respVecs;
 	}
 	else
 #endif //_CSS
-		for (int i = 0; i < numValidNodes; i++) {
+	{
+		Vector* respVecs = new Vector[numValidNodes];
+		for (int i = 0; i < numValidNodes; i++)
+			respVecs[i] = getResponse(theNodes[i]);
 
-			int cnt = i * numDOF + timeOffset;
-			if (dataFlag == 10000 || dataFlag == 10002)
-				cnt = i + timeOffset;
-
-			Node* theNode = theNodes[i];
-			Vector resp = getResponse(theNode);
-			for (int j = 0; j < resp.Size(); j++)
-				response(cnt++) = resp[j];
+		if (dataFlag == 10000 || dataFlag == 10002) {
+			for (int i = 0; i < numValidNodes; i++)
+				response(i + timeOffset) = respVecs[i][0];
 		}
+		else {
+			for (int j = 0; j < numDOF; j++) {
+				for (int i = 0; i < numValidNodes; i++) {
+					int cnt = j * numValidNodes + i + timeOffset;
+					if (j < respVecs[i].Size())
+						response(cnt) = respVecs[i][j];
+					else
+						response(cnt) = 0.0;
+				}
+			}
+		}
+		delete[] respVecs;
+	}
 
 	// insert the data into the database
 	if (theOutputHandler != 0)
@@ -1111,18 +1083,9 @@ NodeRecorder::initialize(void)
 	if (echoTimeFlag == true)
 		timeOffset = 1;
 #ifdef _CSS
-	int nProcOuts;
 	int nVals = numValidNodes;
-	if (procGrpNum == -1)
-		if (procDataMethod != 0)
-			nProcOuts = 1;
-		else
-			nProcOuts = nVals;
-	else {
-		nProcOuts = nVals / procGrpNum;
-		if (nProcOuts * procGrpNum < nVals)
-			nProcOuts++;
-	}
+	int nProcOuts = (procDataMethods.Size() == 0) ? nVals
+		: Recorder::getFinalProcOuts(nVals, procDataMethods, procGrpNums);
 	int numValidResponse = nProcOuts * numDOF + timeOffset;
 #else
 	int numDOF = theDofs->Size();
@@ -1221,13 +1184,15 @@ NodeRecorder::initialize(void)
 			xmlOrder(nodeCount++) = 0;
 		}
 
-		for (int i = 0; i < numNode; i++) {
-			int nodeTag = (*theNodalTags)(i);
-			Node* theNode = theDomain->getNode(nodeTag);
-			if (theNode != 0) {
-				xmlOrder(nodeCount++) = i + 1;
-				for (int j = 0; j < numDOF; j++)
+		for (int j = 0; j < numDOF; j++) {
+			for (int i = 0; i < numNode; i++) {
+				int nodeTag = (*theNodalTags)(i);
+				Node* theNode = theDomain->getNode(nodeTag);
+				if (theNode != 0) {
+					if (j == 0)
+						xmlOrder(nodeCount++) = i + 1;
 					orderResponse(count++) = i + 1;
+				}
 			}
 		}
 

@@ -50,6 +50,9 @@ DriftRecorder::DriftRecorder()
 	 ndI(0), ndJ(0), dof(0), perpDirn(0), oneOverL(0), data(0),
 	 theDomain(0), theOutputHandler(0),
 	 initializationDone(false), numNodes(0), echoTimeFlag(false)
+#ifdef _CSS
+	 , procDataMethods(0), procGrpNums(0)
+#endif // _CSS
 {
 
 }
@@ -61,7 +64,7 @@ DriftRecorder::DriftRecorder(int ni,
 	 int dirn,
 	 Domain& theDom,
 	 OPS_Stream* theDataOutputHandler,
-	 int procMethod, int procGrpN,
+	 const ID& procMethods, const ID& procGrpN,
 	 bool timeFlag,
 	 double dT)
 	 :Recorder(RECORDER_TAGS_DriftRecorder),
@@ -69,7 +72,9 @@ DriftRecorder::DriftRecorder(int ni,
 	 theDomain(&theDom), theOutputHandler(theDataOutputHandler),
 	 initializationDone(false), numNodes(0), echoTimeFlag(timeFlag), deltaT(dT),
 	 nextTimeStampToRecord(0.0)
-	 , procDataMethod(procMethod), procGrpNum(procGrpN)
+#ifdef _CSS
+	 , procDataMethods(procMethods), procGrpNums(procGrpN)
+#endif // _CSS
 {
 	 ndI = new ID(1);
 	 ndJ = new ID(1);
@@ -87,14 +92,16 @@ DriftRecorder::DriftRecorder(const ID& nI,
 	 int dirn,
 	 Domain& theDom,
 	 OPS_Stream* theDataOutputHandler,
-	 int procMethod, int procGrpN,
+	 const ID& procMethods, const ID& procGrpN,
 	 bool timeFlag,
 	 double dT)
 	 :Recorder(RECORDER_TAGS_DriftRecorder),
 	 ndI(0), ndJ(0), theNodes(0), dof(df), perpDirn(dirn), oneOverL(0), data(0),
 	 theDomain(&theDom), theOutputHandler(theDataOutputHandler),
-	 initializationDone(false), numNodes(0), echoTimeFlag(timeFlag), deltaT(dT),
-	 procDataMethod(procMethod), procGrpNum(procGrpN)
+	 initializationDone(false), numNodes(0), echoTimeFlag(timeFlag), deltaT(dT)
+#ifdef _CSS
+	 , procDataMethods(procMethods), procGrpNums(procGrpN)
+#endif // _CSS
 {
 	 ndI = new ID(nI);
 	 ndJ = new ID(nJ);
@@ -162,31 +169,14 @@ DriftRecorder::record(int commitTag, double timeStamp)
 		timeOffset = 1;
 	}
 #ifdef _CSS
-	if (procDataMethod)
+	if (procDataMethods.Size() != 0)
 	{
-		int nProcOuts;
-		int nVals = numNodes;
-		if (procGrpNum == -1)
-			if (procDataMethod != 0)
-				nProcOuts = 1;
-			else
-				nProcOuts = nVals;
-		else {
-			nProcOuts = nVals / procGrpNum;
-			if (nProcOuts * procGrpNum < nVals)
-				nProcOuts++;
-		}
-		double* vals = 0, * val, val1 = 0;
-		vals = new double[nProcOuts];
-		for (int i = 0; i < nProcOuts; i++)
-			vals[i] = 0;
-		int iGrpN = 0;
-		int nextGrpN = procGrpNum;
-		val = &vals[iGrpN];
+		double* buf = new double[numNodes];
 		int loc = timeOffset;
 		for (int i = 0; i < numNodes; i++) {
 			Node* nodeI = theNodes[2 * i];
 			Node* nodeJ = theNodes[2 * i + 1];
+			double val1 = 0.0;
 
 			if ((*oneOverL)(i) != 0.0) {
 				const Vector& dispI = nodeI->getTrialDisp();
@@ -197,34 +187,12 @@ DriftRecorder::record(int commitTag, double timeStamp)
 				val1 = dx * (*oneOverL)(i);
 
 			}
-			else
-				val1 = 0.0;
-
-			if (procGrpNum != -1 && i == nextGrpN)
-			{
-				iGrpN++;
-				nextGrpN += procGrpNum;
-				val = &vals[iGrpN];
-			}
-			if (i == 0 && procDataMethod != 1)
-				*val = fabs(val1);
-			if (procDataMethod == 1)
-				*val += val1;
-			else if (procDataMethod == 2 && val1 > *val)
-				*val = val1;
-			else if (procDataMethod == 3 && val1 < *val)
-				*val = val1;
-			else if (procDataMethod == 4 && fabs(val1) > *val)
-				*val = fabs(val1);
-			else if (procDataMethod == 5 && fabs(val1) < *val)
-				*val = fabs(val1);
+			buf[i] = val1;
 		}
-		for (int i = 0; i < nProcOuts; i++)
-		{
-			val = &vals[i];
-			(*data)(loc++) = *val;
-		}
-		delete[] vals;
+		int nOut = Recorder::applyProcDataChain(procDataMethods, procGrpNums, buf, numNodes, false);
+		for (int i = 0; i < nOut; i++)
+			(*data)(loc++) = buf[i];
+		delete[] buf;
 	}
 	else
 #endif // _CSS
@@ -506,18 +474,9 @@ DriftRecorder::initialize(void)
 	 theNodes = new Node * [2 * numNodes];
 	 oneOverL = new Vector(numNodes);
 #ifdef _CSS
-	 int nProcOuts;
 	 int nVals = numNodes;
-	 if (procGrpNum == -1)
-		  if (procDataMethod != 0)
-				nProcOuts = 1;
-		  else
-				nProcOuts = nVals;
-	 else {
-		  nProcOuts = nVals / procGrpNum;
-		  if (nProcOuts * procGrpNum < nVals)
-				nProcOuts++;
-	 }
+	 int nProcOuts = (procDataMethods.Size() == 0) ? nVals
+		  : Recorder::getFinalProcOuts(nVals, procDataMethods, procGrpNums);
 	 data = new Vector(nProcOuts + timeOffset); // data(0) allocated for time
 #else
 	 data = new Vector(numNodes + timeOffset); // data(0) allocated for time

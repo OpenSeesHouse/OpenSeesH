@@ -37,6 +37,7 @@
 // What: "@(#) Recorder.h, revA"
 
 class Domain;
+class ID;
 #include <MovableObject.h>
 #include <TaggedObject.h>
 
@@ -56,6 +57,7 @@ class Recorder: public MovableObject, public TaggedObject
     virtual int sendSelf(int commitTag, Channel &theChannel);  
     virtual int recvSelf(int commitTag, Channel &theChannel, 
 			 FEM_ObjectBroker &theBroker);
+    static void resetLastTag();
 #if _NET
 	virtual OPS_Stream* getOutputHandler() {
 		return 0;
@@ -69,6 +71,12 @@ class Recorder: public MovableObject, public TaggedObject
 
 #ifdef _CSS
    virtual int getModified() { return 0; }
+
+   // chained -process / -procGrpNum helpers
+   static int getNumProcOuts(int nVals, int procGrpNum);
+   static int getFinalProcOuts(int nVals, const ID& methods, const ID& grpNums, bool warn = true);
+   static int applyProcDataStage(int method, int grpNum, const double* inVals, int nIn, double* outVals);
+   static int applyProcDataChain(const ID& methods, const ID& grpNums, double* vals, int nVals, bool warn = true);
 #endif // _CSS
 
   protected:

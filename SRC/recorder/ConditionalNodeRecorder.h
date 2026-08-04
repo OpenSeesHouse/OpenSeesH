@@ -58,7 +58,7 @@ class ConditionalNodeRecorder: public Recorder
 			 Domain &theDomain,
 			 OPS_Stream *theOutputHandler,
 			int rcrdrTag,
-			int procMethod, int procGrpNum,
+			const ID& procDataMethods, const ID& procGrpNums,
 			 bool echoTimeFlag,
 			 TimeSeries **theTimeSeries); 
     
@@ -78,12 +78,9 @@ class ConditionalNodeRecorder: public Recorder
 	  int envRcrdrTag;
 	  Recorder* envRcrdr;
       int numDOF;
-      int procDataMethod;  //flag to indicate element group processing method:
-                           //0: no processing, print separate results
-                           //1: summate results
-                           //2: maximize results
-                           //3: minimize results
-   int procGrpNum;
+      ID procDataMethods;  // empty => no processing; else chained stages:
+                           // 1:sum 2:max 3:min 4:maxAbs 5:minAbs 6:SRSS
+   ID procGrpNums;      // parallel to procDataMethods; -1 => all columns
       int initialize(void);
       Vector getResponse(Node* theNode);
 

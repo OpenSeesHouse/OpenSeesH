@@ -52,7 +52,7 @@ class ResidElementRecorder: public Recorder
 			    Domain &theDomain, 
 			    OPS_Stream *theOutputHandler,
 #ifdef _CSS
-          int procMethod, int procGrpNum,
+          const ID& procDataMethods, const ID& procGrpNums,
 #endif // _CSS
 			    bool echoTimeFlag,
 			    const ID *dof); 
@@ -69,12 +69,9 @@ class ResidElementRecorder: public Recorder
 		 FEM_ObjectBroker &theBroker);
 #ifdef _CSS
 	virtual int removeComponentResponse(int compTag);
-   int procDataMethod;  //flag to indicate element group processing method:
-                        //0: no processing, print separate results
-                        //1: summate results
-                        //2: maximize results
-                        //3: minimize results
-   int procGrpNum;
+   ID procDataMethods;  // empty => no processing; else chained stages:
+                        // 1:sum 2:max 3:min 4:maxAbs 5:minAbs 6:SRSS
+   ID procGrpNums;      // parallel to procDataMethods; -1 => all columns
 #endif // _CSS
 
   protected:

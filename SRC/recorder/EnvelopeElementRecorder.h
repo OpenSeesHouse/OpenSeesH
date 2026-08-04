@@ -51,7 +51,7 @@ class EnvelopeElementRecorder: public Recorder
 			    int argc,
 			    Domain &theDomain, 
 			    OPS_Stream *theOutputHandler,
-          int procMethod, int procGrpNum,
+          const ID& procDataMethods, const ID& procGrpNums,
 			    bool echoTimeFlag,
 			    const ID *dof); 
 
@@ -69,12 +69,9 @@ class EnvelopeElementRecorder: public Recorder
 	virtual double getRecordedValue(int clmnId, int rowOffset, bool reset); //added by SAJalali
 #ifdef _CSS
 	virtual int removeComponentResponse(int compTag);
-   int procDataMethod;  //flag to indicate element group processing method:
-                        //0: no processing, print separate results
-                        //1: summate results
-                        //2: maximize results
-                        //3: minimize results
-   int procGrpNum;
+   ID procDataMethods;  // empty => no processing; else chained stages:
+                        // 1:sum 2:max 3:min 4:maxAbs 5:minAbs 6:SRSS
+   ID procGrpNums;      // parallel to procDataMethods; -1 => all columns
    virtual int getModified() { return Modified; }
    int Modified;
 #endif // _CSS

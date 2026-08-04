@@ -59,6 +59,9 @@ EnvelopeDriftRecorder::EnvelopeDriftRecorder()
 	 ndI(0), ndJ(0), dof(0), perpDirn(0), oneOverL(0), currentData(0),
 	 theDomain(0), theOutputHandler(0),
 	 initializationDone(false), numNodes(0), echoTimeFlag(false)
+#ifdef _CSS
+	 , procDataMethods(0), procGrpNums(0), Modified(0)
+#endif // _CSS
 {
 
 }
@@ -70,14 +73,14 @@ EnvelopeDriftRecorder::EnvelopeDriftRecorder(int ni,
 	 int dirn,
 	 Domain& theDom,
 	 OPS_Stream* theCurrentDataOutputHandler,
-	 int procMethod, int procGrpN,
+	 const ID& procMethods, const ID& procGrpN,
 	 bool timeFlag)
 	 :Recorder(RECORDER_TAGS_EnvelopeDriftRecorder),
 	 ndI(0), ndJ(0), theNodes(0), dof(df), perpDirn(dirn), oneOverL(0), currentData(0),
 	 theDomain(&theDom), theOutputHandler(theCurrentDataOutputHandler),
 	 initializationDone(false), numNodes(0), echoTimeFlag(timeFlag)
 #ifdef _CSS
-	 , procDataMethod(procMethod), procGrpNum(procGrpN), Modified(0)
+	 , procDataMethods(procMethods), procGrpNums(procGrpN), Modified(0)
 #endif // _CSS
 {
 	 ndI = new ID(1);
@@ -96,14 +99,14 @@ EnvelopeDriftRecorder::EnvelopeDriftRecorder(const ID& nI,
 	 int dirn,
 	 Domain& theDom,
 	 OPS_Stream* theDataOutputHandler,
-	 int procMethod, int procGrpN,
+	 const ID& procMethods, const ID& procGrpN,
 	 bool timeFlag)
 	 :Recorder(RECORDER_TAGS_EnvelopeDriftRecorder),
 	 ndI(0), ndJ(0), theNodes(0), dof(df), perpDirn(dirn), oneOverL(0), currentData(0),
 	 theDomain(&theDom), theOutputHandler(theDataOutputHandler),
 	 initializationDone(false), numNodes(0), echoTimeFlag(timeFlag)
 #ifdef _CSS
-	 , procDataMethod(procMethod), procGrpNum(procGrpN), Modified(0)
+	 , procDataMethods(procMethods), procGrpNums(procGrpN), Modified(0)
 #endif // _CSS
 {
 	 ndI = new ID(nI);
@@ -167,31 +170,14 @@ EnvelopeDriftRecorder::record(int commitTag, double timeStamp)
 
 #ifdef _CSS
 	 Modified = 0;
-	 if (procDataMethod)
+	 if (procDataMethods.Size() != 0)
 	 {
-		  int nProcOuts;
-		  int nVals = numNodes;
-		  if (procGrpNum == -1)
-				if (procDataMethod != 0)
-					 nProcOuts = 1;
-				else
-					 nProcOuts = nVals;
-		  else {
-				nProcOuts = nVals / procGrpNum;
-				if (nProcOuts * procGrpNum < nVals)
-					 nProcOuts++;
-		  }
-		  double* vals = 0, * val, val1 = 0;
-		  vals = new double[nProcOuts];
-		  for (int i = 0; i < nProcOuts; i++)
-				vals[i] = 0;
-		  int iGrpN = 0;
-		  int nextGrpN = procGrpNum;
-		  val = &vals[iGrpN];
+		  double* buf = new double[numNodes];
 		  int loc = 0;
 		  for (int i = 0; i < numNodes; i++) {
 				Node* nodeI = theNodes[2 * i];
 				Node* nodeJ = theNodes[2 * i + 1];
+				double val1 = 0.0;
 
 				if ((*oneOverL)(i) != 0.0) {
 					 const Vector& dispI = nodeI->getTrialDisp();
@@ -202,34 +188,12 @@ EnvelopeDriftRecorder::record(int commitTag, double timeStamp)
 					 val1 = dx * (*oneOverL)(i);
 
 				}
-				else
-					 val1 = 0.0;
-				if (procGrpNum != -1 && i == nextGrpN)
-				{
-					 iGrpN++;
-					 nextGrpN += procGrpNum;
-					 val = &vals[iGrpN];
-				}
-
-				if (i == 0 && procDataMethod != 1)
-					 *val = fabs(val1);
-				if (procDataMethod == 1)
-					 *val += val1;
-				else if (procDataMethod == 2 && val1 > *val)
-					 *val = val1;
-				else if (procDataMethod == 3 && val1 < *val)
-					 *val = val1;
-				else if (procDataMethod == 4 && fabs(val1) > *val)
-					 *val = fabs(val1);
-				else if (procDataMethod == 5 && fabs(val1) < *val)
-					 *val = fabs(val1);
+				buf[i] = val1;
 		  }
-		  for (int i = 0; i < nProcOuts; i++)
-		  {
-				val = &vals[i];
-				(*currentData)(loc++) = *val;
-		  }
-		  delete[] vals;
+		  int nOut = Recorder::applyProcDataChain(procDataMethods, procGrpNums, buf, numNodes, false);
+		  for (int i = 0; i < nOut; i++)
+				(*currentData)(loc++) = buf[i];
+		  delete[] buf;
 	 }
 	 else
 #endif // _CSS
@@ -563,18 +527,9 @@ EnvelopeDriftRecorder::initialize(void)
 	 // allocate memory
 	 //
 #ifdef _CSS
-	 int nProcOuts;
 	 int nVals = numNodes;
-	 if (procGrpNum == -1)
-		  if (procDataMethod != 0)
-				nProcOuts = 1;
-		  else
-				nProcOuts = nVals;
-	 else {
-		  nProcOuts = nVals / procGrpNum;
-		  if (nProcOuts * procGrpNum < nVals)
-				nProcOuts++;
-	 }
+	 int nProcOuts = (procDataMethods.Size() == 0) ? nVals
+		  : Recorder::getFinalProcOuts(nVals, procDataMethods, procGrpNums);
 	 if (echoTimeFlag == true) {
 		  currentData = new Vector(nProcOuts * 2); // additional data allocated for time  
 		  data = new Matrix(3, nProcOuts * 2);

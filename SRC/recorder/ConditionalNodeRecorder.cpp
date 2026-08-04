@@ -54,6 +54,7 @@ ConditionalNodeRecorder::ConditionalNodeRecorder()
 	 theDomain(0), theHandler(0),
 	 initializationDone(false),
 	 numValidNodes(0), addColumnInfo(0), theTimeSeries(0), timeSeriesValues(0)
+	 , procDataMethods(0), procGrpNums(0)
 {
 
 }
@@ -64,7 +65,7 @@ ConditionalNodeRecorder::ConditionalNodeRecorder(const ID& dofs,
 	 Domain& theDom,
 	 OPS_Stream* theOutputHandler,
 	 int rcrdrTag,
-	 int procMethod, int procGrpN,
+	 const ID& procMethods, const ID& procGrpN,
 	 bool echoTime,
 	 TimeSeries** theSeries)
 	 :Recorder(RECORDER_TAGS_ConditionalNodeRecorder),
@@ -73,7 +74,7 @@ ConditionalNodeRecorder::ConditionalNodeRecorder(const ID& dofs,
 	 theDomain(&theDom), theHandler(theOutputHandler),
 	 initializationDone(false), numValidNodes(0), echoTimeFlag(echoTime),
 	 addColumnInfo(0), theTimeSeries(theSeries), timeSeriesValues(0)
-	 , procDataMethod(procMethod), procGrpNum(procGrpN), envRcrdrTag(rcrdrTag)
+	 , procDataMethods(procMethods), procGrpNums(procGrpN), envRcrdrTag(rcrdrTag)
 {
 	 // verify dof are valid 
 	 numDOF = dofs.Size();
@@ -501,81 +502,48 @@ ConditionalNodeRecorder::record(int commitTag, double timeStamp)
 	 // before we iterate over the nodes
 	 //
 
-	 if (procDataMethod != 0)
+	 if (procDataMethods.Size() != 0)
 	 {
 		 Vector* respVecs = new Vector[numValidNodes];
 		 for (int i = 0; i < numValidNodes; i++)
-		 {
-			 Node* theNode = theNodes[i];
-			 respVecs[i] = getResponse(theNode);
+			 respVecs[i] = getResponse(theNodes[i]);
+
+		 double* buf = new double[numValidNodes];
+		 for (int j = 0; j < numDOF; j++) {
+			 for (int i = 0; i < numValidNodes; i++)
+				 buf[i] = respVecs[i][j];
+			 int nOut = Recorder::applyProcDataChain(procDataMethods, procGrpNums, buf, numValidNodes, false);
+			 for (int i = 0; i < nOut; i++) {
+				 int cnt = j * nOut + i + (echoTimeFlag ? 1 : 0);
+				 (*data)(0, cnt) = buf[i];
+			 }
 		 }
-		 double val = 0, val1 = 0;
-		  int cnt = iCnt;
-		  for (int j = 0; j < numDOF; j++) {
-				int nProcOuts;
-				int nVals = numValidNodes;
-				if (procGrpNum == -1)
-					 if (procDataMethod != 0)
-						  nProcOuts = 1;
-					 else
-						  nProcOuts = nVals;
-				else {
-					 nProcOuts = nVals / procGrpNum;
-					 if (nProcOuts * procGrpNum < nVals)
-						  nProcOuts++;
-				}
-				double* vals = 0, * val, val1 = 0;
-				vals = new double[nProcOuts];
-				for (int i = 0; i < nProcOuts; i++)
-					 vals[i] = 0;
-				int iGrpN = 0;
-				int nextGrpN = procGrpNum;
-				val = &vals[iGrpN];
-				int dof = (*theDofs)(j);
-				for (int i = 0; i < numValidNodes; i++) {
-					val1 = respVecs[i][j];
-					if (procGrpNum != -1 && i == nextGrpN)
-					 {
-						  iGrpN++;
-						  nextGrpN += procGrpNum;
-						  val = &vals[iGrpN];
+		 delete[] buf;
+		 delete[] respVecs;
+	 }
+	 else
+	 {
+		  Vector* respVecs = new Vector[numValidNodes];
+		  for (int i = 0; i < numValidNodes; i++)
+				respVecs[i] = getResponse(theNodes[i]);
+
+		  if (dataFlag == 10000) {
+				for (int i = 0; i < numValidNodes; i++)
+					 (*data)(0, i + iCnt) = respVecs[i][0];
+		  }
+		  else {
+				for (int j = 0; j < numDOF; j++) {
+					 for (int i = 0; i < numValidNodes; i++) {
+						  int cnt = j * numValidNodes + i + iCnt;
+						  if (j < respVecs[i].Size())
+								(*data)(0, cnt) = respVecs[i][j];
+						  else
+								(*data)(0, cnt) = 0.0;
 					 }
-					 if (i == 0 && procDataMethod != 1)
-						  *val = fabs(val1);
-					 if (procDataMethod == 1)
-						  *val += val1;
-					 else if (procDataMethod == 2 && val1 > *val)
-						  *val = val1;
-					 else if (procDataMethod == 3 && val1 < *val)
-						  *val = val1;
-					 else if (procDataMethod == 4 && fabs(val1) > *val)
-						  *val = fabs(val1);
-					 else if (procDataMethod == 5 && fabs(val1) < *val)
-						  *val = fabs(val1);
 				}
-				for (int i = 0; i < nProcOuts; i++)
-				{
-					 cnt = i * numDOF + j + (echoTimeFlag? 1 : 0);
-					 val = &vals[i];
-					 (*data)(0, cnt) = *val;
-				}
-				delete[] vals;
 		  }
 		  delete[] respVecs;
 	 }
-	 else
-
-		  for (int i = 0; i < numValidNodes; i++) {
-				int cnt = i * numDOF + iCnt;
-
-				if (dataFlag == 10000)
-					 cnt = i + iCnt;
-
-				Node* theNode = theNodes[i];
-				Vector resp = getResponse(theNode);
-				for (int j = 0; j < resp.Size(); j++)
-					(*data)(0,cnt++) = resp[j];
-		  }
 
 	 return 0;
 }
@@ -912,18 +880,9 @@ ConditionalNodeRecorder::initialize(void)
 	 // resize the output matrix
 	 //
 
-	 int nProcOuts;
 	 int nVals = numValidNodes;
-	 if (procGrpNum == -1)
-		  if (procDataMethod != 0)
-				nProcOuts = 1;
-		  else
-				nProcOuts = nVals;
-	 else {
-		  nProcOuts = nVals / procGrpNum;
-		  if (nProcOuts * procGrpNum < nVals)
-				nProcOuts++;
-	 }
+	 int nProcOuts = (procDataMethods.Size() == 0) ? nVals
+		  : Recorder::getFinalProcOuts(nVals, procDataMethods, procGrpNums);
 
 	 int numValidResponse = nProcOuts * numDOF;
 
@@ -947,16 +906,14 @@ ConditionalNodeRecorder::initialize(void)
 		  int nodeCount = 0;
 
 		  int numNode = theNodalTags->Size();
-		  for (int i = 0; i < numNode; i++) {
-				int nodeTag = (*theNodalTags)(i);
-				Node* theNode = theDomain->getNode(nodeTag);
-				if (theNode != 0) {
-					 xmlOrder(nodeCount++) = i + 1;
-					 for (int j = 0; j < numDOF; j++)
+		  for (int j = 0; j < numDOF; j++) {
+				for (int i = 0; i < numNode; i++) {
+					 int nodeTag = (*theNodalTags)(i);
+					 Node* theNode = theDomain->getNode(nodeTag);
+					 if (theNode != 0) {
+						  if (j == 0)
+								xmlOrder(nodeCount++) = i + 1;
 						  dataOrder(count++) = i + 1;
-					 if (echoTimeFlag == true) {
-						  for (int j = 0; j < numDOF; j++)
-								dataOrder(count++) = i + 1;
 					 }
 				}
 		  }

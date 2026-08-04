@@ -66,6 +66,9 @@ ElementRecorder::ElementRecorder()
 	 theDomain(0), theOutputHandler(0),
 	 echoTimeFlag(true), deltaT(0.0), nextTimeStampToRecord(0.0), data(0),
 	 initializationDone(false), responseArgs(0), numArgs(0), addColumnInfo(0)
+#ifdef _CSS
+	 , procDataMethods(0), procGrpNums(0)
+#endif // _CSS
 {
 
 }
@@ -76,7 +79,10 @@ ElementRecorder::ElementRecorder(const ID* ele,
 	 bool echoTime,
 	 Domain& theDom,
 	 OPS_Stream* theOutput,
-	 int procMethod, int procGrpN,
+#ifdef _CSS
+	 const ID& procDataMethods,
+	 const ID& procGrpNums,
+#endif // _CSS
 	 double dT,
 	 const ID* theDOFs)
 	 :Recorder(RECORDER_TAGS_ElementRecorder),
@@ -85,7 +91,7 @@ ElementRecorder::ElementRecorder(const ID* ele,
 	 echoTimeFlag(echoTime), deltaT(dT), nextTimeStampToRecord(0.0), data(0),
 	 initializationDone(false), responseArgs(0), numArgs(0), addColumnInfo(0)
 #ifdef _CSS
-	 , procDataMethod(procMethod), procGrpNum(procGrpN)
+	 , procDataMethods(procDataMethods), procGrpNums(procGrpNums)
 #endif // _CSS
 {
 
@@ -198,7 +204,7 @@ ElementRecorder::record(int commitTag, double timeStamp)
 		  (*data)(loc++) = timeStamp;
 	 }
 #ifdef _CSS
-	 if (procDataMethod != 0)
+	 if (procDataMethods.Size() != 0)
 	 {
 		  int respSize = numDOF;
 		  for (int i = 0; i < numEle; i++) {
@@ -214,60 +220,52 @@ ElementRecorder::record(int commitTag, double timeStamp)
 						  respSize = sz;
 				}
 		  }
+		  int nVals = numEle;
+		  double* buf = new double[nVals];
 		  for (int j = 0; j < respSize; j++)
 		  {
 				int index = j;
 				if (numDOF != 0)
 					 index = (*dof)(j);
-				int nProcOuts;
-				int nVals = numEle;
-				if (procGrpNum == -1)
-						  nProcOuts = 1;
-				else {
-					 nProcOuts = nVals / procGrpNum;
-					 if (nProcOuts * procGrpNum < nVals)
-						  nProcOuts++;
-				}
-				double* vals = 0, * val, val1 = 0;
-				vals = new double[nProcOuts];
-				for (int i = 0; i < nProcOuts; i++)
-					 vals[i] = 0;
-				int iGrpN = 0;
-				int nextGrpN = procGrpNum;
-				val = &vals[iGrpN];
 				for (int i = 0; i < numEle; i++) {
+					 buf[i] = 0.0;
 					 if (theResponses[i] == 0)
 						  continue;
 					 const Vector& eleData = theResponses[i]->getData();
 					 if (index >= eleData.Size())
 						  continue;
-					 val1 = eleData(index);
-					 if (procGrpNum != -1 && i == nextGrpN)
-					 {
-						  iGrpN++;
-						  nextGrpN += procGrpNum;
-						  val = &vals[iGrpN];
-					 }
-
-					 if (i == 0 && procDataMethod != 1)
-						  *val = fabs(val1);
-					 if (procDataMethod == 1)
-						  *val += val1;
-					 else if (procDataMethod == 2 && val1 > *val)
-						  *val = val1;
-					 else if (procDataMethod == 3 && val1 < *val)
-						  *val = val1;
-					 else if (procDataMethod == 4 && fabs(val1) > *val)
-						  *val = fabs(val1);
-					 else if (procDataMethod == 5 && fabs(val1) < *val)
-						  *val = fabs(val1);
+					 buf[i] = eleData(index);
 				}
-				for (int i = 0; i < nProcOuts; i++)
+				int nOut = Recorder::applyProcDataChain(procDataMethods, procGrpNums, buf, nVals, false);
+				for (int i = 0; i < nOut; i++)
 				{
-					 loc = i * respSize + j + (echoTimeFlag ? 1 : 0);
-					 (*data)(loc) = vals[i];
+					 loc = j * nOut + i + (echoTimeFlag ? 1 : 0);
+					 (*data)(loc) = buf[i];
 				}
-				delete[] vals;
+		  }
+		  delete[] buf;
+	 }
+	 else if (numDOF != 0)
+	 {
+		  // DOF-major: all elements for dof 0, then dof 1, ...
+		  for (int i = 0; i < numEle; i++) {
+				if (theResponses[i] != 0) {
+					 int res;
+					 if ((res = theResponses[i]->getResponse()) < 0)
+						  result += res;
+				}
+		  }
+		  for (int j = 0; j < numDOF; j++) {
+				int index = (*dof)(j);
+				for (int i = 0; i < numEle; i++) {
+					 if (theResponses[i] == 0)
+						  continue;
+					 const Vector& eleData = theResponses[i]->getData();
+					 if (index >= 0 && index < eleData.Size())
+						  (*data)(loc++) = eleData(index);
+					 else
+						  (*data)(loc++) = 0.0;
+				}
 		  }
 	 }
 	 else
@@ -302,9 +300,9 @@ ElementRecorder::record(int commitTag, double timeStamp)
 										  (*data)(loc++) = 0.0;
 								}
 						  }
+					 }
 				}
 		  }
-}
 
 	 //
 	 // send the response vector to the output handler for o/p
@@ -709,7 +707,7 @@ ElementRecorder::initialize(void)
 
 		// loop over ele & set Reponses
 #ifdef _CSS
-		if (procDataMethod != 0)
+		if (procDataMethods.Size() != 0)
 		{
 			int dataSize = 0;
 			for (i = 0; i < numEle; i++) {
@@ -742,15 +740,9 @@ ElementRecorder::initialize(void)
 						dataSize = size;
 				}
 			}
-			int nProcOuts;
 			int nVals = numEle;
-			if (procGrpNum == -1)
-				nProcOuts = 1;
-			else {
-				nProcOuts = nVals / procGrpNum;
-				if (nProcOuts * procGrpNum < nVals)
-					nProcOuts++;
-			}
+			int nProcOuts = (procDataMethods.Size() == 0) ? nVals
+				: Recorder::getFinalProcOuts(nVals, procDataMethods, procGrpNums);
 			if (numDOF == 0)
 				numDbColumns += dataSize * nProcOuts;
 			else
@@ -810,7 +802,7 @@ ElementRecorder::initialize(void)
 	}
 	else {
 #ifdef _CSS
-		if (procDataMethod != 0)
+		if (procDataMethods.Size() != 0)
 		{
 			opserr << "Combining element responses is not currently supported for empty input elements" << endln;
 			initializationDone = false;
