@@ -1791,7 +1791,7 @@ int OPS_LogCommandsCmd(ClientData clientData, Tcl_Interp* interp, int argc, TCL_
 			}
 			narg++;
 		}
-		else if (strcmp(argv[narg], "-outPy") == 0)
+		else if (strcmp(argv[narg], "-py") == 0)
 		{
 			narg++;
 			LOG_AS_PYTHON = 1;
