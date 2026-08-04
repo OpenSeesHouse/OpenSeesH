@@ -1015,7 +1015,7 @@ Domain::clearAll(void) {
 		if (theRecorders[i] != 0)
 			delete theRecorders[i];
 	numRecorders = 0;
-
+	Recorder::resetLastTag();
 #endif // _CSS
 
 	theElements->clearAll();
