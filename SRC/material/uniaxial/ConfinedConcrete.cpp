@@ -144,7 +144,7 @@ OPS_ConfinedConcrete()
 	 }
 	 //column
 	 double dData[14];
-	 numData = 6;
+	 numData = 14;
 	 if (OPS_GetDoubleInput(&numData, dData) != 0)
 	 {
 		  opserr << "ConfinedConcrete:: Invalid -column props. tag = " << tag << "; wants:\n";
