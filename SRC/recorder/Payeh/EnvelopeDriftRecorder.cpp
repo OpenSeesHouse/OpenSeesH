@@ -7,7 +7,7 @@
 ** All Rights Reserved.                                               **
 **                                                                    **
 ** Commercial use of this program without express permission of the   **
-** University of California, Berkeley, is strictly prohibited.  See   **
+    10|** University of California, Berkeley, is strictly prohibited.  See   **
 ** file 'COPYRIGHT'  in main directory for information on usage and   **
 ** redistribution,  and for a DISCLAIMER OF ALL WARRANTIES.           **
 **                                                                    **
@@ -56,9 +56,9 @@ enum outputMode {
 
 EnvelopeDriftRecorder::EnvelopeDriftRecorder()
 	 :Recorder(RECORDER_TAGS_EnvelopeDriftRecorder),
-	 ndI(0), ndJ(0), dof(0), perpDirn(0), oneOverL(0), currentData(0),
+	 ndI(0), ndJ(0), theNodes(0), theDofs(0), numDOF(0), perpDirn(0), oneOverL(0), currentData(0),
 	 theDomain(0), theOutputHandler(0),
-	 initializationDone(false), numNodes(0), echoTimeFlag(false)
+	 initializationDone(false), numNodes(0), echoTimeFlag(false), dofsFirstFlag(false)
 #ifdef _CSS
 	 , procDataMethods(0), procGrpNums(0), Modified(0)
 #endif // _CSS
@@ -69,16 +69,17 @@ EnvelopeDriftRecorder::EnvelopeDriftRecorder()
 
 EnvelopeDriftRecorder::EnvelopeDriftRecorder(int ni,
 	 int nj,
-	 int df,
+	 const ID& dofs,
 	 int dirn,
 	 Domain& theDom,
 	 OPS_Stream* theCurrentDataOutputHandler,
 	 const ID& procMethods, const ID& procGrpN,
-	 bool timeFlag)
+	 bool timeFlag,
+	 bool dofsFirst)
 	 :Recorder(RECORDER_TAGS_EnvelopeDriftRecorder),
-	 ndI(0), ndJ(0), theNodes(0), dof(df), perpDirn(dirn), oneOverL(0), currentData(0),
+	 ndI(0), ndJ(0), theNodes(0), theDofs(0), numDOF(0), perpDirn(dirn), oneOverL(0), currentData(0),
 	 theDomain(&theDom), theOutputHandler(theCurrentDataOutputHandler),
-	 initializationDone(false), numNodes(0), echoTimeFlag(timeFlag)
+	 initializationDone(false), numNodes(0), echoTimeFlag(timeFlag), dofsFirstFlag(dofsFirst)
 #ifdef _CSS
 	 , procDataMethods(procMethods), procGrpNums(procGrpN), Modified(0)
 #endif // _CSS
@@ -90,27 +91,32 @@ EnvelopeDriftRecorder::EnvelopeDriftRecorder(int ni,
 		  (*ndI)(0) = ni;
 		  (*ndJ)(0) = nj;
 	 }
+	 theDofs = new ID(dofs);
+	 numDOF = theDofs->Size();
 }
 
 
 EnvelopeDriftRecorder::EnvelopeDriftRecorder(const ID& nI,
 	 const ID& nJ,
-	 int df,
+	 const ID& dofs,
 	 int dirn,
 	 Domain& theDom,
 	 OPS_Stream* theDataOutputHandler,
 	 const ID& procMethods, const ID& procGrpN,
-	 bool timeFlag)
+	 bool timeFlag,
+	 bool dofsFirst)
 	 :Recorder(RECORDER_TAGS_EnvelopeDriftRecorder),
-	 ndI(0), ndJ(0), theNodes(0), dof(df), perpDirn(dirn), oneOverL(0), currentData(0),
+	 ndI(0), ndJ(0), theNodes(0), theDofs(0), numDOF(0), perpDirn(dirn), oneOverL(0), currentData(0),
 	 theDomain(&theDom), theOutputHandler(theDataOutputHandler),
-	 initializationDone(false), numNodes(0), echoTimeFlag(timeFlag)
+	 initializationDone(false), numNodes(0), echoTimeFlag(timeFlag), dofsFirstFlag(dofsFirst)
 #ifdef _CSS
 	 , procDataMethods(procMethods), procGrpNums(procGrpN), Modified(0)
 #endif // _CSS
 {
 	 ndI = new ID(nI);
 	 ndJ = new ID(nJ);
+	 theDofs = new ID(dofs);
+	 numDOF = theDofs->Size();
 }
 
 EnvelopeDriftRecorder::~EnvelopeDriftRecorder()
@@ -139,6 +145,9 @@ EnvelopeDriftRecorder::~EnvelopeDriftRecorder()
 	 if (ndJ != 0)
 		  delete ndJ;
 
+	 if (theDofs != 0)
+		  delete theDofs;
+
 	 if (oneOverL != 0)
 		  delete oneOverL;
 
@@ -150,6 +159,21 @@ EnvelopeDriftRecorder::~EnvelopeDriftRecorder()
 
 	 if (theOutputHandler != 0)
 		  delete theOutputHandler;
+}
+
+double
+EnvelopeDriftRecorder::computeDrift(int pairIndex, int dofIndex) const
+{
+	 if ((*oneOverL)(pairIndex) == 0.0)
+		  return 0.0;
+	 Node* nodeI = theNodes[2 * pairIndex];
+	 Node* nodeJ = theNodes[2 * pairIndex + 1];
+	 const Vector& dispI = nodeI->getTrialDisp();
+	 const Vector& dispJ = nodeJ->getTrialDisp();
+	 int d = (*theDofs)(dofIndex);
+	 if (d < 0 || d >= dispI.Size() || d >= dispJ.Size())
+		  return 0.0;
+	 return (dispJ(d) - dispI(d)) * (*oneOverL)(pairIndex);
 }
 
 int
@@ -172,47 +196,40 @@ EnvelopeDriftRecorder::record(int commitTag, double timeStamp)
 	 Modified = 0;
 	 if (procDataMethods.Size() != 0)
 	 {
-		  double* buf = new double[numNodes];
-		  int loc = 0;
-		  for (int i = 0; i < numNodes; i++) {
-				Node* nodeI = theNodes[2 * i];
-				Node* nodeJ = theNodes[2 * i + 1];
-				double val1 = 0.0;
-
-				if ((*oneOverL)(i) != 0.0) {
-					 const Vector& dispI = nodeI->getTrialDisp();
-					 const Vector& dispJ = nodeJ->getTrialDisp();
-
-					 double dx = dispJ(dof) - dispI(dof);
-
-					 val1 = dx * (*oneOverL)(i);
-
-				}
-				buf[i] = val1;
+		  // Materialize full raw layout, then reduce once
+		  int nDof = (numDOF > 0) ? numDOF : 1;
+		  int nRaw = numNodes * nDof;
+		  double* raw = new double[nRaw];
+		  if (dofsFirstFlag) {
+				for (int i = 0; i < numNodes; i++)
+					 for (int j = 0; j < nDof; j++)
+						  raw[i * nDof + j] = this->computeDrift(i, j);
 		  }
-		  int nOut = Recorder::applyProcDataChain(procDataMethods, procGrpNums, buf, numNodes, false);
+		  else {
+				for (int j = 0; j < nDof; j++)
+					 for (int i = 0; i < numNodes; i++)
+						  raw[j * numNodes + i] = this->computeDrift(i, j);
+		  }
+		  int nOut = Recorder::applyProcDataChain(procDataMethods, procGrpNums, raw, nRaw, false);
 		  for (int i = 0; i < nOut; i++)
-				(*currentData)(loc++) = buf[i];
-		  delete[] buf;
+				(*currentData)(i) = raw[i];
+		  delete[] raw;
 	 }
 	 else
 #endif // _CSS
-		  for (int i = 0; i < numNodes; i++) {
-				Node* nodeI = theNodes[2 * i];
-				Node* nodeJ = theNodes[2 * i + 1];
-
-				if ((*oneOverL)(i) != 0.0) {
-					 const Vector& dispI = nodeI->getTrialDisp();
-					 const Vector& dispJ = nodeJ->getTrialDisp();
-
-					 double dx = dispJ(dof) - dispI(dof);
-
-					 (*currentData)(i) = dx * (*oneOverL)(i);
-
-				}
-				else
-					 (*currentData)(i) = 0.0;
+	 {
+		  int nDof = (numDOF > 0) ? numDOF : 1;
+		  if (dofsFirstFlag) {
+				for (int i = 0; i < numNodes; i++)
+					 for (int j = 0; j < nDof; j++)
+						  (*currentData)(i * nDof + j) = this->computeDrift(i, j);
 		  }
+		  else {
+				for (int j = 0; j < nDof; j++)
+					 for (int i = 0; i < numNodes; i++)
+						  (*currentData)(j * numNodes + i) = this->computeDrift(i, j);
+		  }
+	 }
 
 	 // check if currentData modifies the saved data
 	 int sizeData = currentData->Size();
@@ -339,13 +356,13 @@ EnvelopeDriftRecorder::setDomain(Domain& theDom)
 int
 EnvelopeDriftRecorder::sendSelf(int commitTag, Channel& theChannel)
 {
-	 static ID idData(6);
+	 static ID idData(7);
 	 idData.Zero();
 	 if (ndI != 0 && ndI->Size() != 0)
 		  idData(0) = ndI->Size();
 	 if (ndJ != 0 && ndJ->Size() != 0)
 		  idData(1) = ndJ->Size();
-	 idData(2) = dof;
+	 idData(2) = numDOF;
 	 idData(3) = perpDirn;
 	 if (theOutputHandler != 0) {
 		  idData(4) = theOutputHandler->getClassTag();
@@ -356,6 +373,7 @@ EnvelopeDriftRecorder::sendSelf(int commitTag, Channel& theChannel)
 		  idData(5) = 0;
 	 else
 		  idData(5) = 1;
+	 idData(6) = dofsFirstFlag ? 1 : 0;
 
 	 if (theChannel.sendID(0, commitTag, idData) < 0) {
 		  opserr << "EnvelopeDriftRecorder::sendSelf() - failed to send idData\n";
@@ -374,6 +392,11 @@ EnvelopeDriftRecorder::sendSelf(int commitTag, Channel& theChannel)
 				return -1;
 		  }
 
+	 if (theDofs != 0)
+		  if (theChannel.sendID(0, commitTag, *theDofs) < 0) {
+				opserr << "EnvelopeDriftRecorder::sendSelf() - failed to send theDofs\n";
+				return -1;
+		  }
 
 	 if (theOutputHandler != 0)
 		  if (theOutputHandler->sendSelf(commitTag, theChannel) < 0) {
@@ -388,7 +411,7 @@ int
 EnvelopeDriftRecorder::recvSelf(int commitTag, Channel& theChannel,
 	 FEM_ObjectBroker& theBroker)
 {
-  static ID idData(6); 
+  static ID idData(7); 
   if (theChannel.recvID(0, commitTag, idData) < 0) {
     opserr << "EnvelopeDriftRecorder::sendSelf() - failed to send idData\n";
     return -1;
@@ -419,8 +442,17 @@ EnvelopeDriftRecorder::recvSelf(int commitTag, Channel& theChannel,
 		  }
 	 }
 
-	 dof = idData(2);
+	 numDOF = idData(2);
 	 perpDirn = idData(3);
+	 dofsFirstFlag = (idData(6) == 1);
+
+	 if (numDOF != 0) {
+		  theDofs = new ID(numDOF);
+		  if (theChannel.recvID(0, commitTag, *theDofs) < 0) {
+				opserr << "EnvelopeDriftRecorder::recvSelf() - failed to recv theDofs\n";
+				return -1;
+		  }
+	 }
 
 	 if (idData(5) == 0)
 		  echoTimeFlag = true;
@@ -526,10 +558,11 @@ EnvelopeDriftRecorder::initialize(void)
 	 //
 	 // allocate memory
 	 //
+	 int nDof = (numDOF > 0) ? numDOF : 1;
+	 int nRaw = numNodes * nDof;
 #ifdef _CSS
-	 int nVals = numNodes;
-	 int nProcOuts = (procDataMethods.Size() == 0) ? nVals
-		  : Recorder::getFinalProcOuts(nVals, procDataMethods, procGrpNums);
+	 int nProcOuts = (procDataMethods.Size() == 0) ? nRaw
+		  : Recorder::getFinalProcOuts(nRaw, procDataMethods, procGrpNums);
 	 if (echoTimeFlag == true) {
 		  currentData = new Vector(nProcOuts * 2); // additional data allocated for time  
 		  data = new Matrix(3, nProcOuts * 2);
@@ -541,12 +574,12 @@ EnvelopeDriftRecorder::initialize(void)
 	 }
 #else
 	 if (echoTimeFlag == true) {
-		  currentData = new Vector(numNodes * 2); // additional data allocated for time  
-		  data = new Matrix(3, numNodes * 2);
+		  currentData = new Vector(nRaw * 2); // additional data allocated for time  
+		  data = new Matrix(3, nRaw * 2);
 	 }
 	 else {
-		  currentData = new Vector(numNodes); // data(0) allocated for time  
-		  data = new Matrix(3, numNodes);
+		  currentData = new Vector(nRaw); // data(0) allocated for time  
+		  data = new Matrix(3, nRaw);
 	 }
 #endif // _CSS
 

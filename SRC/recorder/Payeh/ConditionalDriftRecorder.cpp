@@ -7,7 +7,7 @@
 ** All Rights Reserved.                                               **
 **                                                                    **
 ** Commercial use of this program without express permission of the   **
-** University of California, Berkeley, is strictly prohibited.  See   **
+    10|** University of California, Berkeley, is strictly prohibited.  See   **
 ** file 'COPYRIGHT'  in main directory for information on usage and   **
 ** redistribution,  and for a DISCLAIMER OF ALL WARRANTIES.           **
 **                                                                    **
@@ -44,9 +44,9 @@
 
 ConditionalDriftRecorder::ConditionalDriftRecorder()
 	 :Recorder(RECORDER_TAGS_ResidDriftRecorder),
-	 ndI(0), ndJ(0), dof(0), perpDirn(0), oneOverL(0),
+	 ndI(0), ndJ(0), theNodes(0), theDofs(0), numDOF(0), perpDirn(0), oneOverL(0),
 	 theDomain(0), theOutputHandler(0), data(0),
-	 initializationDone(false), numNodes(0), echoTimeFlag(false),
+	 initializationDone(false), numNodes(0), echoTimeFlag(false), dofsFirstFlag(false),
 	 procDataMethods(0), procGrpNums(0)
 {
 
@@ -55,16 +55,18 @@ ConditionalDriftRecorder::ConditionalDriftRecorder()
 
 ConditionalDriftRecorder::ConditionalDriftRecorder(int ni,
 	 int nj,
-	 int df,
+	 const ID& dofs,
 	 int dirn,
 	 Domain& theDom,
 	 OPS_Stream* theCurrentDataOutputHandler,
 	 int rcrdrTag, const ID& procMethods, const ID& procGrpN,
-	 bool timeFlag)
+	 bool timeFlag,
+	 bool dofsFirst)
 	 :Recorder(RECORDER_TAGS_ResidDriftRecorder),
-	 ndI(0), ndJ(0), theNodes(0), dof(df), perpDirn(dirn), oneOverL(0),
+	 ndI(0), ndJ(0), theNodes(0), theDofs(0), numDOF(0), perpDirn(dirn), oneOverL(0),
 	 theDomain(&theDom), theOutputHandler(theCurrentDataOutputHandler), data(0),
-	 initializationDone(false), numNodes(0), echoTimeFlag(timeFlag), envRcrdrTag(rcrdrTag),
+	 initializationDone(false), numNodes(0), echoTimeFlag(timeFlag), dofsFirstFlag(dofsFirst),
+	 envRcrdrTag(rcrdrTag),
 	 procDataMethods(procMethods), procGrpNums(procGrpN)
 {
 	 ndI = new ID(1);
@@ -74,25 +76,31 @@ ConditionalDriftRecorder::ConditionalDriftRecorder(int ni,
 		  (*ndI)(0) = ni;
 		  (*ndJ)(0) = nj;
 	 }
+	 theDofs = new ID(dofs);
+	 numDOF = theDofs->Size();
 }
 
 
 ConditionalDriftRecorder::ConditionalDriftRecorder(const ID& nI,
 	 const ID& nJ,
-	 int df,
+	 const ID& dofs,
 	 int dirn,
 	 Domain& theDom,
 	 OPS_Stream* theDataOutputHandler,
 	 int rcrdrTag, const ID& procMethods, const ID& procGrpN,
-	 bool timeFlag)
+	 bool timeFlag,
+	 bool dofsFirst)
 	 :Recorder(RECORDER_TAGS_ResidDriftRecorder),
-	 ndI(0), ndJ(0), theNodes(0), dof(df), perpDirn(dirn), oneOverL(0),
+	 ndI(0), ndJ(0), theNodes(0), theDofs(0), numDOF(0), perpDirn(dirn), oneOverL(0),
 	 theDomain(&theDom), theOutputHandler(theDataOutputHandler), data(0),
-	 initializationDone(false), numNodes(0), echoTimeFlag(timeFlag), envRcrdrTag(rcrdrTag),
+	 initializationDone(false), numNodes(0), echoTimeFlag(timeFlag), dofsFirstFlag(dofsFirst),
+	 envRcrdrTag(rcrdrTag),
 	 procDataMethods(procMethods), procGrpNums(procGrpN)
 {
 	 ndI = new ID(nI);
 	 ndJ = new ID(nJ);
+	 theDofs = new ID(dofs);
+	 numDOF = theDofs->Size();
 }
 
 ConditionalDriftRecorder::~ConditionalDriftRecorder()
@@ -120,6 +128,9 @@ ConditionalDriftRecorder::~ConditionalDriftRecorder()
 	 if (ndJ != 0)
 		  delete ndJ;
 
+	 if (theDofs != 0)
+		  delete theDofs;
+
 	 if (oneOverL != 0)
 		  delete oneOverL;
 
@@ -128,6 +139,21 @@ ConditionalDriftRecorder::~ConditionalDriftRecorder()
 
 	 if (theOutputHandler != 0)
 		  delete theOutputHandler;
+}
+
+double
+ConditionalDriftRecorder::computeDrift(int pairIndex, int dofIndex) const
+{
+	 if ((*oneOverL)(pairIndex) == 0.0)
+		  return 0.0;
+	 Node* nodeI = theNodes[2 * pairIndex];
+	 Node* nodeJ = theNodes[2 * pairIndex + 1];
+	 const Vector& dispI = nodeI->getTrialDisp();
+	 const Vector& dispJ = nodeJ->getTrialDisp();
+	 int d = (*theDofs)(dofIndex);
+	 if (d < 0 || d >= dispI.Size() || d >= dispJ.Size())
+		  return 0.0;
+	 return (dispJ(d) - dispI(d)) * (*oneOverL)(pairIndex);
 }
 
 int
@@ -145,60 +171,51 @@ ConditionalDriftRecorder::record(int commitTag, double timeStamp)
 				return -1;
 		  }
 
-	 if (numNodes == 0)
+	 if (numNodes == 0 || data == 0)
 		  return 0;
 	 if (envRcrdr->getModified() == 0)
 		  return 0;
-	 int  iStart = 0;
+	 int timeOffset = 0;
 	 if (echoTimeFlag)
 	 {
-		  iStart = 1;
+		  timeOffset = 1;
 		  (*data)(0, 0) = timeStamp;
 	 }
 
 	 if (procDataMethods.Size() != 0)
 	 {
-		  double* buf = new double[numNodes];
-		  int loc = iStart;
-		  for (int i = 0; i < numNodes; i++) {
-				Node* nodeI = theNodes[2 * i];
-				Node* nodeJ = theNodes[2 * i + 1];
-				double val1 = 0.0;
-
-				if ((*oneOverL)(i) != 0.0) {
-					 const Vector& dispI = nodeI->getTrialDisp();
-					 const Vector& dispJ = nodeJ->getTrialDisp();
-
-					 double dx = dispJ(dof) - dispI(dof);
-
-					 val1 = dx * (*oneOverL)(i);
-
-				}
-				buf[i] = val1;
+		  // Materialize full raw layout, then reduce once
+		  int nDof = (numDOF > 0) ? numDOF : 1;
+		  int nRaw = numNodes * nDof;
+		  double* raw = new double[nRaw];
+		  if (dofsFirstFlag) {
+				for (int i = 0; i < numNodes; i++)
+					 for (int j = 0; j < nDof; j++)
+						  raw[i * nDof + j] = this->computeDrift(i, j);
 		  }
-		  int nOut = Recorder::applyProcDataChain(procDataMethods, procGrpNums, buf, numNodes, false);
+		  else {
+				for (int j = 0; j < nDof; j++)
+					 for (int i = 0; i < numNodes; i++)
+						  raw[j * numNodes + i] = this->computeDrift(i, j);
+		  }
+		  int nOut = Recorder::applyProcDataChain(procDataMethods, procGrpNums, raw, nRaw, false);
 		  for (int i = 0; i < nOut; i++)
-				(*data)(0, loc++) = buf[i];
-		  delete[] buf;
+				(*data)(0, timeOffset + i) = raw[i];
+		  delete[] raw;
 	 }
-	 else
-
-		  for (int i = 0; i < numNodes; i++) {
-				Node* nodeI = theNodes[2 * i];
-				Node* nodeJ = theNodes[2 * i + 1];
-
-				if ((*oneOverL)(i) != 0.0) {
-					 const Vector& dispI = nodeI->getTrialDisp();
-					 const Vector& dispJ = nodeJ->getTrialDisp();
-
-					 double dx = dispJ(dof) - dispI(dof);
-
-					 (*data)(0, i + iStart) = dx * (*oneOverL)(i);
-
-				}
-				else
-					 (*data)(0, iStart) = 0.0;
+	 else {
+		  int nDof = (numDOF > 0) ? numDOF : 1;
+		  if (dofsFirstFlag) {
+				for (int i = 0; i < numNodes; i++)
+					 for (int j = 0; j < nDof; j++)
+						  (*data)(0, timeOffset + i * nDof + j) = this->computeDrift(i, j);
 		  }
+		  else {
+				for (int j = 0; j < nDof; j++)
+					 for (int i = 0; i < numNodes; i++)
+						  (*data)(0, timeOffset + j * numNodes + i) = this->computeDrift(i, j);
+		  }
+	 }
 
 	 return 0;
 }
@@ -221,13 +238,13 @@ ConditionalDriftRecorder::setDomain(Domain& theDom)
 int
 ConditionalDriftRecorder::sendSelf(int commitTag, Channel& theChannel)
 {
-	 static ID idData(6);
+	 static ID idData(7);
 	 idData.Zero();
 	 if (ndI != 0 && ndI->Size() != 0)
 		  idData(0) = ndI->Size();
 	 if (ndJ != 0 && ndJ->Size() != 0)
 		  idData(1) = ndJ->Size();
-	 idData(2) = dof;
+	 idData(2) = numDOF;
 	 idData(3) = perpDirn;
 	 if (theOutputHandler != 0)
 	 {
@@ -239,6 +256,7 @@ ConditionalDriftRecorder::sendSelf(int commitTag, Channel& theChannel)
 		  idData(5) = 0;
 	 else
 		  idData(5) = 1;
+	 idData(6) = dofsFirstFlag ? 1 : 0;
 
 	 if (theChannel.sendID(0, commitTag, idData) < 0) {
 		  opserr << "ConditionalDriftRecorder::sendSelf() - failed to send idData\n";
@@ -257,6 +275,12 @@ ConditionalDriftRecorder::sendSelf(int commitTag, Channel& theChannel)
 				return -1;
 		  }
 
+	 if (theDofs != 0)
+		  if (theChannel.sendID(0, commitTag, *theDofs) < 0) {
+				opserr << "ConditionalDriftRecorder::sendSelf() - failed to send theDofs\n";
+				return -1;
+		  }
+
 	 if (theOutputHandler != 0)
 
 		  if (theOutputHandler->sendSelf(commitTag, theChannel) < 0) {
@@ -271,7 +295,7 @@ int
 ConditionalDriftRecorder::recvSelf(int commitTag, Channel& theChannel,
 	 FEM_ObjectBroker& theBroker)
 {
-	 static ID idData(5);
+	 static ID idData(7);
 	 if (theChannel.recvID(0, commitTag, idData) < 0) {
 		  opserr << "ConditionalDriftRecorder::sendSelf() - failed to send idData\n";
 		  return -1;
@@ -302,8 +326,17 @@ ConditionalDriftRecorder::recvSelf(int commitTag, Channel& theChannel,
 		  }
 	 }
 
-	 dof = idData(2);
+	 numDOF = idData(2);
 	 perpDirn = idData(3);
+	 dofsFirstFlag = (idData(6) == 1);
+
+	 if (numDOF != 0) {
+		  theDofs = new ID(numDOF);
+		  if (theChannel.recvID(0, commitTag, *theDofs) < 0) {
+				opserr << "ConditionalDriftRecorder::recvSelf() - failed to recv theDofs\n";
+				return -1;
+		  }
+	 }
 
 	 if (idData(5) == 0)
 		  echoTimeFlag = true;
@@ -409,9 +442,10 @@ ConditionalDriftRecorder::initialize(void)
 	 if (echoTimeFlag == true)
 		  timeOffset = 1;
 
-	 int nVals = numNodes;
-	 int nProcOuts = (procDataMethods.Size() == 0) ? nVals
-		  : Recorder::getFinalProcOuts(nVals, procDataMethods, procGrpNums);
+	 int nDof = (numDOF > 0) ? numDOF : 1;
+	 int nRaw = numNodes * nDof;
+	 int nProcOuts = (procDataMethods.Size() == 0) ? nRaw
+		  : Recorder::getFinalProcOuts(nRaw, procDataMethods, procGrpNums);
 	 data = new Matrix(1, nProcOuts + timeOffset);
 	 data->Zero();
 	 theNodes = new Node * [2 * numNodes];

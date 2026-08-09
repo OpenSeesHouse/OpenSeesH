@@ -48,7 +48,7 @@
 ConditionalElementRecorder::ConditionalElementRecorder()
 :Recorder(RECORDER_TAGS_ConditionalElementRecorder),
  numEle(0), numDOF(0), eleID(0), dof(0), theResponses(0), theDomain(0),
- theHandler(0), data(0), initializationDone(false), responseArgs(0), numArgs(0), echoTimeFlag(false), addColumnInfo(0)
+ theHandler(0), data(0), initializationDone(false), responseArgs(0), numArgs(0), echoTimeFlag(false), dofsFirstFlag(false), addColumnInfo(0)
  , procDataMethods(0), procGrpNums(0)
 {
 
@@ -64,11 +64,12 @@ ConditionalElementRecorder::ConditionalElementRecorder(const ID *ele,
 							const ID& procDataMethods,
 							const ID& procGrpNums,
 							bool echoTime,
-							 const ID *indexValues)
+							 const ID *indexValues,
+							 bool dofsFirst)
  :Recorder(RECORDER_TAGS_ConditionalElementRecorder),
   numEle(0), eleID(0), numDOF(0), dof(0), theResponses(0), theDomain(&theDom),
   theHandler(theOutputHandler), data(0), 
-  initializationDone(false), responseArgs(0), numArgs(0), echoTimeFlag(echoTime), addColumnInfo(0)
+  initializationDone(false), responseArgs(0), numArgs(0), echoTimeFlag(echoTime), dofsFirstFlag(dofsFirst), addColumnInfo(0)
   , procDataMethods(procDataMethods), procGrpNums(procGrpNums), envRcrdrTag(rcrdrTag)
 {
 
@@ -188,47 +189,69 @@ ConditionalElementRecorder::record(int commitTag, double timeStamp)
     }
     if (procDataMethods.Size() != 0)
     {
+        // Materialize full raw layout, then reduce once
         int respSize = numDOF;
         for (int i = 0; i < numEle; i++) {
             if (theResponses[i] == 0)
                 continue;
-            // ask the element for the reponse
             result += theResponses[i]->getResponse();
-            if (numDOF == 0)
-            {
+            if (numDOF == 0) {
                 const Vector& eleData = theResponses[i]->getData();
                 int sz = eleData.Size();
                 if (sz > respSize)
                     respSize = sz;
             }
         }
-        int nVals = numEle;
-        double* buf = new double[nVals];
-        for (int j = 0; j < respSize; j++)
-        {
+        int nRaw = (numDOF != 0) ? (numEle * numDOF) : (numEle * respSize);
+        double* raw = new double[nRaw];
+        for (int k = 0; k < nRaw; k++)
+            raw[k] = 0.0;
+
+        if (numDOF != 0) {
+            if (dofsFirstFlag) {
+                for (int i = 0; i < numEle; i++) {
+                    if (theResponses[i] == 0)
+                        continue;
+                    const Vector& eleData = theResponses[i]->getData();
+                    for (int j = 0; j < numDOF; j++) {
+                        int index = (*dof)(j);
+                        if (index >= 0 && index < eleData.Size())
+                            raw[i * numDOF + j] = eleData(index);
+                    }
+                }
+            }
+            else {
+                for (int j = 0; j < numDOF; j++) {
+                    int index = (*dof)(j);
+                    for (int i = 0; i < numEle; i++) {
+                        if (theResponses[i] == 0)
+                            continue;
+                        const Vector& eleData = theResponses[i]->getData();
+                        if (index >= 0 && index < eleData.Size())
+                            raw[j * numEle + i] = eleData(index);
+                    }
+                }
+            }
+        }
+        else {
             for (int i = 0; i < numEle; i++) {
-                buf[i] = 0.0;
                 if (theResponses[i] == 0)
                     continue;
                 const Vector& eleData = theResponses[i]->getData();
-                int index = j;
-                if (numDOF != 0)
-                    index = (*dof)(j);
-                if (index >= eleData.Size())
-                    continue;
-                buf[i] = eleData(index);
-            }
-            int nOut = Recorder::applyProcDataChain(procDataMethods, procGrpNums, buf, nVals, false);
-            for (int i = 0; i < nOut; i++)
-            {
-                loc = j * nOut + i + (echoTimeFlag? 1 : 0);
-                (*data)(0, loc) = buf[i];
+                for (int j = 0; j < respSize; j++) {
+                    if (j < eleData.Size())
+                        raw[i * respSize + j] = eleData(j);
+                }
             }
         }
-        delete[] buf;
+        int nOut = Recorder::applyProcDataChain(procDataMethods, procGrpNums, raw, nRaw, false);
+        for (int i = 0; i < nOut; i++)
+            (*data)(0, loc++) = raw[i];
+        delete[] raw;
     }
     else if (numDOF != 0)
     {
+        // DOF-major by default; -dofsFirst => all dofs of each element first
         for (int i = 0; i < numEle; i++) {
             if (theResponses[i] == 0)
                 continue;
@@ -236,16 +259,32 @@ ConditionalElementRecorder::record(int commitTag, double timeStamp)
             if ((res = theResponses[i]->getResponse()) < 0)
                 result += res;
         }
-        for (int j = 0; j < numDOF; j++) {
-            int index = (*dof)(j);
+        if (dofsFirstFlag) {
             for (int i = 0; i < numEle; i++) {
                 if (theResponses[i] == 0)
                     continue;
                 const Vector& eleData = theResponses[i]->getData();
-                if (index >= 0 && index < eleData.Size())
-                    (*data)(0, loc++) = eleData(index);
-                else
-                    (*data)(0, loc++) = 0.0;
+                for (int j = 0; j < numDOF; j++) {
+                    int index = (*dof)(j);
+                    if (index >= 0 && index < eleData.Size())
+                        (*data)(0, loc++) = eleData(index);
+                    else
+                        (*data)(0, loc++) = 0.0;
+                }
+            }
+        }
+        else {
+            for (int j = 0; j < numDOF; j++) {
+                int index = (*dof)(j);
+                for (int i = 0; i < numEle; i++) {
+                    if (theResponses[i] == 0)
+                        continue;
+                    const Vector& eleData = theResponses[i]->getData();
+                    if (index >= 0 && index < eleData.Size())
+                        (*data)(0, loc++) = eleData(index);
+                    else
+                        (*data)(0, loc++) = 0.0;
+                }
             }
         }
     }
@@ -311,7 +350,7 @@ ConditionalElementRecorder::sendSelf(int commitTag, Channel& theChannel)
     // into an ID, place & send eleID size, numArgs and length of all responseArgs
     //
 
-    static ID idData(7);
+    static ID idData(8);
     if (eleID != 0)
         idData(0) = eleID->Size();
     else
@@ -321,6 +360,7 @@ ConditionalElementRecorder::sendSelf(int commitTag, Channel& theChannel)
 
     idData(5) = this->getTag();
     idData(6) = numDOF;
+    idData(7) = dofsFirstFlag ? 1 : 0;
 
     int msgLength = 0;
     for (int i = 0; i < numArgs; i++)
@@ -437,7 +477,7 @@ ConditionalElementRecorder::recvSelf(int commitTag, Channel &theChannel,
   // into an ID of size 2 recv eleID size and length of all responseArgs
   //
 
-  static ID idData(7);
+  static ID idData(8);
   if (theChannel.recvID(0, commitTag, idData) < 0) {
     opserr << "ConditionalElementRecorder::recvSelf() - failed to recv idData\n";
     return -1;
@@ -447,6 +487,7 @@ ConditionalElementRecorder::recvSelf(int commitTag, Channel &theChannel,
   numArgs = idData(1);
   int msgLength = idData(2);
   numDOF = idData(6);
+  dofsFirstFlag = (idData(7) == 1);
 
   this->setTag(idData(5));
 
@@ -639,15 +680,11 @@ ConditionalElementRecorder::initialize(void)
                         dataSize = size;
                 }
             }
-            int nVals = numEle;
-            int nProcOuts = (procDataMethods.Size() == 0) ? nVals
-                : Recorder::getFinalProcOuts(nVals, procDataMethods, procGrpNums);
-            if (numDOF == 0)
-                numDbColumns = dataSize * nProcOuts;
-            else
-                numDbColumns += numDOF * nProcOuts;
+            int nRaw = (numDOF == 0) ? (numEle * dataSize) : (numEle * numDOF);
+            int nProcOuts = Recorder::getFinalProcOuts(nRaw, procDataMethods, procGrpNums);
+            numDbColumns += nProcOuts;
             if (addColumnInfo == 1) {
-                for (int j = 0; j < numDbColumns; j++)
+                for (int j = 0; j < nProcOuts; j++)
                     responseOrder[responseCount++] = 1;
             }
         }
@@ -679,7 +716,7 @@ ConditionalElementRecorder::initialize(void)
                                 if (numDOF == 0)
                                     for (int j = 0; j < 2 * dataSize; j++)
                                         responseOrder[responseCount++] = i + 1;
-                                else
+                                else if (dofsFirstFlag)
                                     for (int j = 0; j < 2 * numDOF; j++)
                                         responseOrder[responseCount++] = i + 1;
                             }
@@ -687,7 +724,7 @@ ConditionalElementRecorder::initialize(void)
                                 if (numDOF == 0)
                                     for (int j = 0; j < dataSize; j++)
                                         responseOrder[responseCount++] = i + 1;
-                                else
+                                else if (dofsFirstFlag)
                                     for (int j = 0; j < numDOF; j++)
                                         responseOrder[responseCount++] = i + 1;
                             }
@@ -707,6 +744,17 @@ ConditionalElementRecorder::initialize(void)
                 }
             }
 
+        if (addColumnInfo == 1 && numDOF != 0 && !dofsFirstFlag) {
+            int mult = echoTimeFlag ? 2 : 1;
+            for (int k = 0; k < mult; k++) {
+                for (int j = 0; j < numDOF; j++) {
+                    for (int ii = 0; ii < numEle; ii++) {
+                        if (theResponses[ii] != 0)
+                            responseOrder[responseCount++] = ii + 1;
+                    }
+                }
+            }
+        }
         if (theHandler != 0)
             theHandler->setOrder(responseOrder);
 

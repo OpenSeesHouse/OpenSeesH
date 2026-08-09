@@ -21,12 +21,12 @@
 
 // $Revision: 1.11 $
 // $Date: 1395-12-08 22:25:03 $
-// $Source: /usr/local/cvs/OpenSees/SRC/recorder/ResidNodeRecorder.h,v $
+// $Source: /usr/local/cvs/OpenSees/SRC/recorder/ConditionalNodeRecorder.h,v $
                                                                         
 
                                                                         
-#ifndef ResidNodeRecorder_h
-#define ResidNodeRecorder_h
+#ifndef ConditionalNodeRecorder_h
+#define ConditionalNodeRecorder_h
 
 // Written: SAJalali 
 //
@@ -35,7 +35,7 @@
 // at a collection of nodes over an analysis. (between commitTag of 0 and
 // last commitTag).
 //
-// What: "@(#) ResidNodeRecorder.h, revA"
+// What: "@(#) ConditionalNodeRecorder.h, revA"
 
 
 #include <Recorder.h>
@@ -48,22 +48,22 @@ class Domain;
 class FE_Datastore;
 class Node;
 
-class ResidNodeRecorder: public Recorder
+class ConditionalNodeRecorder: public Recorder
 {
   public:
-    ResidNodeRecorder();
-    ResidNodeRecorder(const ID &theDof, 
+    ConditionalNodeRecorder();
+    ConditionalNodeRecorder(const ID &theDof, 
 			 const ID *theNodes, 
 			 const char *dataToStore,
 			 Domain &theDomain,
 			 OPS_Stream *theOutputHandler,
-#ifdef _CSS
-          const ID& procDataMethods, const ID& procGrpNums,
-#endif // _CSS
-			 bool echoTimeFlag ,
-			 TimeSeries **theTimeSeries); 
+			int rcrdrTag,
+			const ID& procDataMethods, const ID& procGrpNums,
+			 bool echoTimeFlag,
+			 TimeSeries **theTimeSeries,
+			 bool dofsFirst = false); 
     
-    ~ResidNodeRecorder();
+    ~ConditionalNodeRecorder();
 
     int record(int commitTag, double timeStamp);
     int restart(void);    
@@ -76,14 +76,14 @@ class ResidNodeRecorder: public Recorder
   protected:
     
   private:	
-#ifdef _CSS
+	  int envRcrdrTag;
+	  Recorder* envRcrdr;
       int numDOF;
       ID procDataMethods;  // empty => no processing; else chained stages:
                            // 1:sum 2:max 3:min 4:maxAbs 5:minAbs 6:SRSS
    ID procGrpNums;      // parallel to procDataMethods; -1 => all columns
-#endif // _CSS
-   Vector getResponse(Node* theNode);
-   int initialize(void);
+      int initialize(void);
+      Vector getResponse(Node* theNode);
 
     ID *theDofs;
     ID *theNodalTags;
@@ -100,6 +100,7 @@ class ResidNodeRecorder: public Recorder
     int numValidNodes;
 
     bool echoTimeFlag;   // flag indicating whether time to be included in o/p
+    bool dofsFirstFlag;  // true => all dofs of each node first; false => DOF-major
 
     int addColumnInfo;
     TimeSeries **theTimeSeries;

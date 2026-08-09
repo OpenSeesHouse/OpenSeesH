@@ -18,28 +18,22 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.14 $
-// $Date: 2009-04-14 21:14:22 $
-// $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.h,v $
+// $Revision: 1.10 $
+// $Date: 1395-12-08 22:25:03 $
+// $Source: /usr/local/cvs/OpenSees/SRC/recorder/ResidElementRecorder.h,v $
                                                                         
-                                                                        
-#ifndef ElementRecorder_h
-#define ElementRecorder_h
+#ifndef ResidElementRecorder_h
+#define ResidElementRecorder_h
 
-
-// Written: fmk 
-// Created: 09/99
-// Revision: A
+// Written: SAJalali 
 //
-// Description: This file contains the class definition for ElementRecorder.
-// A ElementRecorder is used to obtain a response from an element during 
-// the analysis.
-//
-// What: "@(#) ElementRecorder.h, revA"
+// What: "@(#) ResidElementRecorder.h, revA"
 
 #include <Recorder.h>
 #include <Information.h>
+#include <OPS_Globals.h>
 #include <ID.h>
+
 
 class Domain;
 class Vector;
@@ -48,41 +42,32 @@ class Element;
 class Response;
 class FE_Datastore;
 
-class ElementRecorder: public Recorder
+class ResidElementRecorder: public Recorder
 {
   public:
-    ElementRecorder();
-    ElementRecorder(const ID *eleID, 
-		    const char **argv, 
-		    int argc,
-		    bool echoTime, 
-		    Domain &theDomain, 
-		    OPS_Stream *theOutputHandler,
+    ResidElementRecorder();
+    ResidElementRecorder(const ID *eleID, 
+			    const char **argv, 
+			    int argc,
+			    Domain &theDomain, 
+			    OPS_Stream *theOutputHandler,
 #ifdef _CSS
           const ID& procDataMethods, const ID& procGrpNums,
 #endif // _CSS
-		    double deltaT,
-		    const ID *dof);
+			    bool echoTimeFlag,
+			    const ID *dof,
+			    bool dofsFirst = false); 
 
-    ~ElementRecorder();
 
-#if _NET
-	OPS_Stream* getOutputHandler() {
-		return theOutputHandler;
-	}
-	const char* getOutputHandlerFilename() {
-		return theOutputHandler->getOutputFilename();
-	}
-#endif
+    ~ResidElementRecorder();
+
     int record(int commitTag, double timeStamp);
     int restart(void);    
-    int flush(void);    
 
     int setDomain(Domain &theDomain);
     int sendSelf(int commitTag, Channel &theChannel);  
     int recvSelf(int commitTag, Channel &theChannel, 
 		 FEM_ObjectBroker &theBroker);
-	virtual double getRecordedValue(int clmnId, int rowOffset, bool reset); //added by SAJalali
 #ifdef _CSS
 	virtual int removeComponentResponse(int compTag);
    ID procDataMethods;  // empty => no processing; else chained stages:
@@ -91,31 +76,29 @@ class ElementRecorder: public Recorder
 #endif // _CSS
 
   protected:
-
     
   private:	
     int initialize(void);
 
     int numEle;
     int numDOF;
-
+    
     ID *eleID;
     ID *dof;
 
     Response **theResponses;
 
     Domain *theDomain;
-    OPS_Stream *theOutputHandler;
+    OPS_Stream *theHandler;
 
-    bool echoTimeFlag;             // flag indicating if pseudo time also printed
+    Matrix *data;
 
-    double deltaT;
-    double nextTimeStampToRecord;
-
-    Vector *data;
     bool initializationDone;
     char **responseArgs;
     int numArgs;
+
+    bool echoTimeFlag; 
+    bool dofsFirstFlag;  // true => all dofs of each element first; false => DOF-major
 
     int addColumnInfo;
 };

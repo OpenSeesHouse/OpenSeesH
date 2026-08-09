@@ -19,17 +19,16 @@
 ** ****************************************************************** */
                                                                         
 // $Revision: 1.1 $
-// $Date: 2006-08-17 22:25:03 $
-// $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeDriftRecorder.h,v $
+// $Date: 1399-07-03 22:25:03 $
+// $Source: /usr/local/cvs/OpenSees/SRC/recorder/ConditionalDriftRecorder.h,v $
                                                                         
-#ifndef EnvelopeDriftRecorder_h
-#define EnvelopeDriftRecorder_h
+#ifndef ConditionalDriftRecorder_h
+#define ConditionalDriftRecorder_h
 
-// Written: fmk
-// Created: 08/06
+// Written: SAJalali
 //
 // Description: This file contains the class definition for 
-// EnvelopeDriftRecorder. 
+// ConditionalDriftRecorder. 
 
 #include <Recorder.h>
 #include <ID.h>
@@ -38,63 +37,63 @@
 class Domain;
 class Node;
 
-class EnvelopeDriftRecorder: public Recorder
+class ConditionalDriftRecorder: public Recorder
 {
  public:
-  EnvelopeDriftRecorder();
-  EnvelopeDriftRecorder(int ndI, int ndJ, int dof, int perpDirn,
+  ConditionalDriftRecorder();
+  ConditionalDriftRecorder(int ndI, int ndJ, const ID& dofs, int perpDirn,
 			Domain &theDomain, 
 			OPS_Stream *theHandler,
-        const ID& procDataMethods, const ID& procGrpNums,
-			bool echoTime);
+			int rcrdrTag,
+			const ID& procDataMethods,  const ID& procGrpNums ,
+			bool echoTime,
+			bool dofsFirst = false);
   
-  EnvelopeDriftRecorder(const ID &ndI, const ID &ndJ, int dof, int perpDirn,
+  ConditionalDriftRecorder(const ID &ndI, const ID &ndJ, const ID& dofs, int perpDirn,
 			Domain &theDomain, 
 			OPS_Stream *theHandler,
-        const ID& procDataMethods, const ID& procGrpNums,
-			bool echoTime);
+			int rcrdrTag,
+			const ID& procDataMethods, const ID& procGrpNums,
+			bool echoTime,
+			bool dofsFirst = false);
   
-  ~EnvelopeDriftRecorder();
+  ~ConditionalDriftRecorder();
   
   int record(int commitTag, double timeStamp);
   int restart(void);    
-  int flush(void);    
   
   int setDomain(Domain &theDomain);
   int sendSelf(int commitTag, Channel &theChannel);  
   int recvSelf(int commitTag, Channel &theChannel, 
 	       FEM_ObjectBroker &theBroker);
-  virtual double getRecordedValue(int clmnId, int rowOffset, bool reset); //added by SAJalali
-
+  
  protected:
   
  private:	
-#ifdef _CSS
-	  ID procDataMethods;  // empty => no processing; else chained stages:
-								  // 1:sum 2:max 3:min 4:maxAbs 5:minAbs 6:SRSS
+	 ID procDataMethods;  // empty => no processing; else chained stages:
+								// 1:sum 2:max 3:min 4:maxAbs 5:minAbs 6:SRSS
    ID procGrpNums;      // parallel to procDataMethods; -1 => all columns
-	  virtual int getModified() { return Modified; }
-	  int Modified;
-#endif // _CSS
+	 int envRcrdrTag;
+  Recorder* envRcrdr;
   int initialize(void);
-
+  double computeDrift(int pairIndex, int dofIndex) const;
   ID *ndI;
   ID *ndJ;
   Node **theNodes; // i & j nodes
-  int dof;
+  ID *theDofs;
+  int numDOF;
   int perpDirn;
   Vector *oneOverL;
   
-  Vector *currentData;
   Matrix *data;
   
   Domain *theDomain;
   OPS_Stream *theOutputHandler;
 
-  bool first;  
   bool initializationDone;
   int numNodes;
   bool echoTimeFlag;   // flag indicating whether time to be included in o/p
+  bool dofsFirstFlag;
 };
 
 #endif

@@ -19,15 +19,15 @@
 ** ****************************************************************** */
                                                                         
 // $Revision: 1.10 $
-// $Date: 1395-12-08 22:25:03 $
-// $Source: /usr/local/cvs/OpenSees/SRC/recorder/ResidElementRecorder.h,v $
+// $Date: 2009-04-14 21:14:22 $
+// $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeElementRecorder.h,v $
                                                                         
-#ifndef ResidElementRecorder_h
-#define ResidElementRecorder_h
+#ifndef EnvelopeElementRecorder_h
+#define EnvelopeElementRecorder_h
 
-// Written: SAJalali 
+// Written: fmk 
 //
-// What: "@(#) ResidElementRecorder.h, revA"
+// What: "@(#) EnvelopeElementRecorder.h, revA"
 
 #include <Recorder.h>
 #include <Information.h>
@@ -42,36 +42,39 @@ class Element;
 class Response;
 class FE_Datastore;
 
-class ResidElementRecorder: public Recorder
+class EnvelopeElementRecorder: public Recorder
 {
   public:
-    ResidElementRecorder();
-    ResidElementRecorder(const ID *eleID, 
+    EnvelopeElementRecorder();
+    EnvelopeElementRecorder(const ID *eleID, 
 			    const char **argv, 
 			    int argc,
 			    Domain &theDomain, 
 			    OPS_Stream *theOutputHandler,
-#ifdef _CSS
           const ID& procDataMethods, const ID& procGrpNums,
-#endif // _CSS
 			    bool echoTimeFlag,
-			    const ID *dof); 
+			    const ID *dof,
+			    bool dofsFirst = false); 
 
 
-    ~ResidElementRecorder();
+    ~EnvelopeElementRecorder();
 
     int record(int commitTag, double timeStamp);
     int restart(void);    
+    int flush(void);    
 
     int setDomain(Domain &theDomain);
     int sendSelf(int commitTag, Channel &theChannel);  
     int recvSelf(int commitTag, Channel &theChannel, 
 		 FEM_ObjectBroker &theBroker);
+	virtual double getRecordedValue(int clmnId, int rowOffset, bool reset); //added by SAJalali
 #ifdef _CSS
 	virtual int removeComponentResponse(int compTag);
    ID procDataMethods;  // empty => no processing; else chained stages:
                         // 1:sum 2:max 3:min 4:maxAbs 5:minAbs 6:SRSS
    ID procGrpNums;      // parallel to procDataMethods; -1 => all columns
+   virtual int getModified() { return Modified; }
+   int Modified;
 #endif // _CSS
 
   protected:
@@ -91,14 +94,18 @@ class ResidElementRecorder: public Recorder
     OPS_Stream *theHandler;
 
     Matrix *data;
+    Vector *currentData;
+    bool first;
 
     bool initializationDone;
     char **responseArgs;
     int numArgs;
 
     bool echoTimeFlag; 
+    bool dofsFirstFlag;  // true => all dofs of each element first; false => DOF-major
 
     int addColumnInfo;
+    bool closeOnWrite;
 };
 
 

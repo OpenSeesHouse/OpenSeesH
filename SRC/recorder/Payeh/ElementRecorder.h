@@ -18,91 +18,109 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-
-// $Revision: 1.11 $
-// $Date: 1395-12-08 22:25:03 $
-// $Source: /usr/local/cvs/OpenSees/SRC/recorder/ConditionalNodeRecorder.h,v $
+// $Revision: 1.14 $
+// $Date: 2009-04-14 21:14:22 $
+// $Source: /usr/local/cvs/OpenSees/SRC/recorder/ElementRecorder.h,v $
                                                                         
-
                                                                         
-#ifndef ConditionalNodeRecorder_h
-#define ConditionalNodeRecorder_h
+#ifndef ElementRecorder_h
+#define ElementRecorder_h
 
-// Written: SAJalali 
-//
-// Description: This file contains the class definition for EnvelopeRecorder.
-// A EnvelopeRecorder is used to record the envelop of specified dof responses 
-// at a collection of nodes over an analysis. (between commitTag of 0 and
-// last commitTag).
-//
-// What: "@(#) ConditionalNodeRecorder.h, revA"
 
+// Written: fmk 
+// Created: 09/99
+// Revision: A
+//
+// Description: This file contains the class definition for ElementRecorder.
+// A ElementRecorder is used to obtain a response from an element during 
+// the analysis.
+//
+// What: "@(#) ElementRecorder.h, revA"
 
 #include <Recorder.h>
+#include <Information.h>
 #include <ID.h>
-#include <Vector.h>
-#include <Matrix.h>
-#include <TimeSeries.h>
 
 class Domain;
+class Vector;
+class Matrix;
+class Element;
+class Response;
 class FE_Datastore;
-class Node;
 
-class ConditionalNodeRecorder: public Recorder
+class ElementRecorder: public Recorder
 {
   public:
-    ConditionalNodeRecorder();
-    ConditionalNodeRecorder(const ID &theDof, 
-			 const ID *theNodes, 
-			 const char *dataToStore,
-			 Domain &theDomain,
-			 OPS_Stream *theOutputHandler,
-			int rcrdrTag,
-			const ID& procDataMethods, const ID& procGrpNums,
-			 bool echoTimeFlag,
-			 TimeSeries **theTimeSeries); 
-    
-    ~ConditionalNodeRecorder();
+    ElementRecorder();
+    ElementRecorder(const ID *eleID, 
+		    const char **argv, 
+		    int argc,
+		    bool echoTime, 
+		    Domain &theDomain, 
+		    OPS_Stream *theOutputHandler,
+#ifdef _CSS
+          const ID& procDataMethods, const ID& procGrpNums,
+#endif // _CSS
+		    double deltaT,
+		    const ID *dof,
+		    bool dofsFirst = false);
 
+    ~ElementRecorder();
+
+#if _NET
+	OPS_Stream* getOutputHandler() {
+		return theOutputHandler;
+	}
+	const char* getOutputHandlerFilename() {
+		return theOutputHandler->getOutputFilename();
+	}
+#endif
     int record(int commitTag, double timeStamp);
     int restart(void);    
+    int flush(void);    
 
     int setDomain(Domain &theDomain);
     int sendSelf(int commitTag, Channel &theChannel);  
     int recvSelf(int commitTag, Channel &theChannel, 
 		 FEM_ObjectBroker &theBroker);
-    
+	virtual double getRecordedValue(int clmnId, int rowOffset, bool reset); //added by SAJalali
+#ifdef _CSS
+	virtual int removeComponentResponse(int compTag);
+   ID procDataMethods;  // empty => no processing; else chained stages:
+                        // 1:sum 2:max 3:min 4:maxAbs 5:minAbs 6:SRSS
+   ID procGrpNums;      // parallel to procDataMethods; -1 => all columns
+#endif // _CSS
+
   protected:
+
     
   private:	
-	  int envRcrdrTag;
-	  Recorder* envRcrdr;
-      int numDOF;
-      ID procDataMethods;  // empty => no processing; else chained stages:
-                           // 1:sum 2:max 3:min 4:maxAbs 5:minAbs 6:SRSS
-   ID procGrpNums;      // parallel to procDataMethods; -1 => all columns
-      int initialize(void);
-      Vector getResponse(Node* theNode);
+    int initialize(void);
 
-    ID *theDofs;
-    ID *theNodalTags;
-    Node **theNodes;
+    int numEle;
+    int numDOF;
 
-    Matrix *data;
+    ID *eleID;
+    ID *dof;
+
+    Response **theResponses;
 
     Domain *theDomain;
-    OPS_Stream *theHandler;
+    OPS_Stream *theOutputHandler;
 
-    int dataFlag; // flag indicating what it is to be stored in recorder
+    bool echoTimeFlag;             // flag indicating if pseudo time also printed
+    bool dofsFirstFlag;            // true => all dofs of each element first; false => DOF-major
 
+    double deltaT;
+    double nextTimeStampToRecord;
+
+    Vector *data;
     bool initializationDone;
-    int numValidNodes;
-
-    bool echoTimeFlag;   // flag indicating whether time to be included in o/p
+    char **responseArgs;
+    int numArgs;
 
     int addColumnInfo;
-    TimeSeries **theTimeSeries;
-    double *timeSeriesValues;
 };
+
 
 #endif

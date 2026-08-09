@@ -64,7 +64,7 @@ ElementRecorder::ElementRecorder()
 	 :Recorder(RECORDER_TAGS_ElementRecorder),
 	 numEle(0), numDOF(0), eleID(0), dof(0), theResponses(0),
 	 theDomain(0), theOutputHandler(0),
-	 echoTimeFlag(true), deltaT(0.0), nextTimeStampToRecord(0.0), data(0),
+	 echoTimeFlag(true), dofsFirstFlag(false), deltaT(0.0), nextTimeStampToRecord(0.0), data(0),
 	 initializationDone(false), responseArgs(0), numArgs(0), addColumnInfo(0)
 #ifdef _CSS
 	 , procDataMethods(0), procGrpNums(0)
@@ -84,11 +84,12 @@ ElementRecorder::ElementRecorder(const ID* ele,
 	 const ID& procGrpNums,
 #endif // _CSS
 	 double dT,
-	 const ID* theDOFs)
+	 const ID* theDOFs,
+	 bool dofsFirst)
 	 :Recorder(RECORDER_TAGS_ElementRecorder),
 	 numEle(0), numDOF(0), eleID(0), dof(0), theResponses(0),
 	 theDomain(&theDom), theOutputHandler(theOutput),
-	 echoTimeFlag(echoTime), deltaT(dT), nextTimeStampToRecord(0.0), data(0),
+	 echoTimeFlag(echoTime), dofsFirstFlag(dofsFirst), deltaT(dT), nextTimeStampToRecord(0.0), data(0),
 	 initializationDone(false), responseArgs(0), numArgs(0), addColumnInfo(0)
 #ifdef _CSS
 	 , procDataMethods(procDataMethods), procGrpNums(procGrpNums)
@@ -206,48 +207,70 @@ ElementRecorder::record(int commitTag, double timeStamp)
 #ifdef _CSS
 	 if (procDataMethods.Size() != 0)
 	 {
+		  // Materialize full raw layout (same order as non-process), then reduce once
 		  int respSize = numDOF;
 		  for (int i = 0; i < numEle; i++) {
 				if (theResponses[i] == 0)
 					 continue;
-				// ask the element for the reponse
 				result += theResponses[i]->getResponse();
-				if (numDOF == 0)
-				{
+				if (numDOF == 0) {
 					 const Vector& eleData = theResponses[i]->getData();
 					 int sz = eleData.Size();
 					 if (sz > respSize)
 						  respSize = sz;
 				}
 		  }
-		  int nVals = numEle;
-		  double* buf = new double[nVals];
-		  for (int j = 0; j < respSize; j++)
-		  {
-				int index = j;
-				if (numDOF != 0)
-					 index = (*dof)(j);
+		  int nRaw = (numDOF != 0) ? (numEle * numDOF) : (numEle * respSize);
+		  double* raw = new double[nRaw];
+		  for (int k = 0; k < nRaw; k++)
+				raw[k] = 0.0;
+
+		  if (numDOF != 0) {
+				if (dofsFirstFlag) {
+					 for (int i = 0; i < numEle; i++) {
+						  if (theResponses[i] == 0)
+								continue;
+						  const Vector& eleData = theResponses[i]->getData();
+						  for (int j = 0; j < numDOF; j++) {
+								int index = (*dof)(j);
+								if (index >= 0 && index < eleData.Size())
+									 raw[i * numDOF + j] = eleData(index);
+						  }
+					 }
+				}
+				else {
+					 for (int j = 0; j < numDOF; j++) {
+						  int index = (*dof)(j);
+						  for (int i = 0; i < numEle; i++) {
+								if (theResponses[i] == 0)
+									 continue;
+								const Vector& eleData = theResponses[i]->getData();
+								if (index >= 0 && index < eleData.Size())
+									 raw[j * numEle + i] = eleData(index);
+						  }
+					 }
+				}
+		  }
+		  else {
+				// element-major full response vectors (padded to respSize)
 				for (int i = 0; i < numEle; i++) {
-					 buf[i] = 0.0;
 					 if (theResponses[i] == 0)
 						  continue;
 					 const Vector& eleData = theResponses[i]->getData();
-					 if (index >= eleData.Size())
-						  continue;
-					 buf[i] = eleData(index);
-				}
-				int nOut = Recorder::applyProcDataChain(procDataMethods, procGrpNums, buf, nVals, false);
-				for (int i = 0; i < nOut; i++)
-				{
-					 loc = j * nOut + i + (echoTimeFlag ? 1 : 0);
-					 (*data)(loc) = buf[i];
+					 for (int j = 0; j < respSize; j++) {
+						  if (j < eleData.Size())
+								raw[i * respSize + j] = eleData(j);
+					 }
 				}
 		  }
-		  delete[] buf;
+		  int nOut = Recorder::applyProcDataChain(procDataMethods, procGrpNums, raw, nRaw, false);
+		  for (int i = 0; i < nOut; i++)
+				(*data)(loc++) = raw[i];
+		  delete[] raw;
 	 }
 	 else if (numDOF != 0)
 	 {
-		  // DOF-major: all elements for dof 0, then dof 1, ...
+		  // DOF-major by default; -dofsFirst => all dofs of each element first
 		  for (int i = 0; i < numEle; i++) {
 				if (theResponses[i] != 0) {
 					 int res;
@@ -255,16 +278,32 @@ ElementRecorder::record(int commitTag, double timeStamp)
 						  result += res;
 				}
 		  }
-		  for (int j = 0; j < numDOF; j++) {
-				int index = (*dof)(j);
+		  if (dofsFirstFlag) {
 				for (int i = 0; i < numEle; i++) {
 					 if (theResponses[i] == 0)
 						  continue;
 					 const Vector& eleData = theResponses[i]->getData();
-					 if (index >= 0 && index < eleData.Size())
-						  (*data)(loc++) = eleData(index);
-					 else
-						  (*data)(loc++) = 0.0;
+					 for (int j = 0; j < numDOF; j++) {
+						  int index = (*dof)(j);
+						  if (index >= 0 && index < eleData.Size())
+								(*data)(loc++) = eleData(index);
+						  else
+								(*data)(loc++) = 0.0;
+					 }
+				}
+		  }
+		  else {
+				for (int j = 0; j < numDOF; j++) {
+					 int index = (*dof)(j);
+					 for (int i = 0; i < numEle; i++) {
+						  if (theResponses[i] == 0)
+								continue;
+						  const Vector& eleData = theResponses[i]->getData();
+						  if (index >= 0 && index < eleData.Size())
+								(*data)(loc++) = eleData(index);
+						  else
+								(*data)(loc++) = 0.0;
+					 }
 				}
 		  }
 	 }
@@ -346,7 +385,7 @@ ElementRecorder::sendSelf(int commitTag, Channel& theChannel)
 	 // into an ID, place & send (*eleID) size, numArgs and length of all responseArgs
 	 //
 
-	 static ID idData(7);
+	 static ID idData(8);
 	 if (eleID != 0)
 		  idData(0) = eleID->Size();
 	 else
@@ -374,6 +413,7 @@ ElementRecorder::sendSelf(int commitTag, Channel& theChannel)
 
 	 idData(5) = this->getTag();
 	 idData(6) = numDOF;
+	 idData(7) = dofsFirstFlag ? 1 : 0;
 
 	 if (theChannel.sendID(0, commitTag, idData) < 0) {
 		  opserr << "ElementRecorder::sendSelf() - failed to send idData\n";
@@ -482,7 +522,7 @@ ElementRecorder::recvSelf(int commitTag, Channel& theChannel,
 	 // into an ID of size 2 recv eleID size and length of all responseArgs
 	 //
 
-	 static ID idData(7);
+	 static ID idData(8);
 	 if (theChannel.recvID(0, commitTag, idData) < 0) {
 		  opserr << "ElementRecorder::recvSelf() - failed to recv idData\n";
 		  return -1;
@@ -494,6 +534,7 @@ ElementRecorder::recvSelf(int commitTag, Channel& theChannel,
 
 	 this->setTag(idData(5));
 	 numDOF = idData(6);
+	 dofsFirstFlag = (idData(7) == 1);
 
 	 if (idData(4) == 1)
 		  echoTimeFlag = true;
@@ -740,15 +781,11 @@ ElementRecorder::initialize(void)
 						dataSize = size;
 				}
 			}
-			int nVals = numEle;
-			int nProcOuts = (procDataMethods.Size() == 0) ? nVals
-				: Recorder::getFinalProcOuts(nVals, procDataMethods, procGrpNums);
-			if (numDOF == 0)
-				numDbColumns += dataSize * nProcOuts;
-			else
-				numDbColumns += numDOF * nProcOuts;
+			int nRaw = (numDOF == 0) ? (numEle * dataSize) : (numEle * numDOF);
+			int nProcOuts = Recorder::getFinalProcOuts(nRaw, procDataMethods, procGrpNums);
+			numDbColumns += nProcOuts;
 			if (addColumnInfo == 1) {
-				for (int j = 0; j < numDbColumns; j++)
+				for (int j = 0; j < nProcOuts; j++)
 					responseOrder[responseCount++] = 1;
 			}
 		}
@@ -788,13 +825,22 @@ ElementRecorder::initialize(void)
 							if (numDOF == 0)
 								for (int j = 0; j < dataSize; j++)
 									responseOrder[responseCount++] = i + 1;
-							else
+							else if (dofsFirstFlag)
 								for (int j = 0; j < numDOF; j++)
 									responseOrder[responseCount++] = i + 1;
 						}
 					}
 				}
 			}
+
+		if (addColumnInfo == 1 && numDOF != 0 && !dofsFirstFlag) {
+			for (int j = 0; j < numDOF; j++) {
+				for (int i = 0; i < numEle; i++) {
+					if (theResponses[i] != 0)
+						responseOrder[responseCount++] = i + 1;
+				}
+			}
+		}
 
 		if (theOutputHandler != 0)
 			theOutputHandler->setOrder(responseOrder);

@@ -53,7 +53,7 @@ NodeRecorder::NodeRecorder()
 	:Recorder(RECORDER_TAGS_NodeRecorder),
 	theDofs(0), theNodalTags(0), theNodes(0), response(0),
 	theDomain(0), theOutputHandler(0),
-	echoTimeFlag(true), dataFlag(0),
+	echoTimeFlag(true), dofsFirstFlag(false), dataFlag(0),
 	deltaT(0.0), nextTimeStampToRecord(0.0),
 	gradIndex(-1),
 	initializationDone(false), numValidNodes(0), addColumnInfo(0), theTimeSeries(0), timeSeriesValues(0)
@@ -72,11 +72,12 @@ NodeRecorder::NodeRecorder(const ID& dofs,
 	const ID& procMethods, const ID& procGrpN,
 	double dT,
 	bool timeFlag,
-	TimeSeries** theSeries)
+	TimeSeries** theSeries,
+	bool dofsFirst)
 	:Recorder(RECORDER_TAGS_NodeRecorder),
 	theDofs(0), theNodalTags(0), theNodes(0), response(0),
 	theDomain(&theDom), theOutputHandler(theOutput),
-	echoTimeFlag(timeFlag), dataFlag(0),
+	echoTimeFlag(timeFlag), dofsFirstFlag(dofsFirst), dataFlag(0),
 	deltaT(dT), nextTimeStampToRecord(0.0),
 	initializationDone(false), numValidNodes(0), addColumnInfo(0),
 	gradIndex(pgradIndex),
@@ -694,21 +695,42 @@ NodeRecorder::record(int commitTag, double timeStamp)
 
 		for (int mode = 0; mode < numValidModes; mode++) {
 
-			for (int j = 0; j < numDOF; j++) {
-				int dof = (*theDofs)(j);
+			if (dofsFirstFlag) {
 				for (int i = 0; i < numValidNodes; i++) {
-					int cnt = j * numValidNodes + i + timeOffset;
-					Node* theNode = theNodes[i];
-					const Matrix& theEigenvectors = *theNode->getEigenvectors();
-					if (theEigenvectors.noCols() > mode) {
-						int noRows = theEigenvectors.noRows();
-						if (noRows > dof)
-							response(cnt) = theEigenvectors(dof, mode);
+					for (int j = 0; j < numDOF; j++) {
+						int dof = (*theDofs)(j);
+						int cnt = i * numDOF + j + timeOffset;
+						Node* theNode = theNodes[i];
+						const Matrix& theEigenvectors = *theNode->getEigenvectors();
+						if (theEigenvectors.noCols() > mode) {
+							int noRows = theEigenvectors.noRows();
+							if (noRows > dof)
+								response(cnt) = theEigenvectors(dof, mode);
+							else
+								response(cnt) = 0.0;
+						}
 						else
 							response(cnt) = 0.0;
 					}
-					else
-						response(cnt) = 0.0;
+				}
+			}
+			else {
+				for (int j = 0; j < numDOF; j++) {
+					int dof = (*theDofs)(j);
+					for (int i = 0; i < numValidNodes; i++) {
+						int cnt = j * numValidNodes + i + timeOffset;
+						Node* theNode = theNodes[i];
+						const Matrix& theEigenvectors = *theNode->getEigenvectors();
+						if (theEigenvectors.noCols() > mode) {
+							int noRows = theEigenvectors.noRows();
+							if (noRows > dof)
+								response(cnt) = theEigenvectors(dof, mode);
+							else
+								response(cnt) = 0.0;
+						}
+						else
+							response(cnt) = 0.0;
+					}
 				}
 			}
 		}
@@ -717,21 +739,49 @@ NodeRecorder::record(int commitTag, double timeStamp)
 #ifdef _CSS
 	else if (procDataMethods.Size() != 0)
 	{
+		// Materialize full raw layout (same order as non-process), then reduce once
 		Vector* respVecs = new Vector[numValidNodes];
 		for (int i = 0; i < numValidNodes; i++)
 			respVecs[i] = getResponse(theNodes[i]);
 
-		double* buf = new double[numValidNodes];
-		for (int j = 0; j < numDOF; j++) {
+		int nRaw;
+		double* raw;
+		if (dataFlag == 10000 || dataFlag == 10002) {
+			nRaw = numValidNodes;
+			raw = new double[nRaw];
 			for (int i = 0; i < numValidNodes; i++)
-				buf[i] = respVecs[i][j];
-			int nOut = Recorder::applyProcDataChain(procDataMethods, procGrpNums, buf, numValidNodes, false);
-			for (int i = 0; i < nOut; i++) {
-				int cnt = j * nOut + i + timeOffset;
-				response(cnt) = buf[i];
+				raw[i] = respVecs[i][0];
+		}
+		else {
+			nRaw = numValidNodes * numDOF;
+			raw = new double[nRaw];
+			if (dofsFirstFlag) {
+				for (int i = 0; i < numValidNodes; i++) {
+					for (int j = 0; j < numDOF; j++) {
+						int cnt = i * numDOF + j;
+						if (j < respVecs[i].Size())
+							raw[cnt] = respVecs[i][j];
+						else
+							raw[cnt] = 0.0;
+					}
+				}
+			}
+			else {
+				for (int j = 0; j < numDOF; j++) {
+					for (int i = 0; i < numValidNodes; i++) {
+						int cnt = j * numValidNodes + i;
+						if (j < respVecs[i].Size())
+							raw[cnt] = respVecs[i][j];
+						else
+							raw[cnt] = 0.0;
+					}
+				}
 			}
 		}
-		delete[] buf;
+		int nOut = Recorder::applyProcDataChain(procDataMethods, procGrpNums, raw, nRaw, false);
+		for (int i = 0; i < nOut; i++)
+			response(i + timeOffset) = raw[i];
+		delete[] raw;
 		delete[] respVecs;
 	}
 	else
@@ -746,13 +796,26 @@ NodeRecorder::record(int commitTag, double timeStamp)
 				response(i + timeOffset) = respVecs[i][0];
 		}
 		else {
-			for (int j = 0; j < numDOF; j++) {
+			if (dofsFirstFlag) {
 				for (int i = 0; i < numValidNodes; i++) {
-					int cnt = j * numValidNodes + i + timeOffset;
-					if (j < respVecs[i].Size())
-						response(cnt) = respVecs[i][j];
-					else
-						response(cnt) = 0.0;
+					for (int j = 0; j < numDOF; j++) {
+						int cnt = i * numDOF + j + timeOffset;
+						if (j < respVecs[i].Size())
+							response(cnt) = respVecs[i][j];
+						else
+							response(cnt) = 0.0;
+					}
+				}
+			}
+			else {
+				for (int j = 0; j < numDOF; j++) {
+					for (int i = 0; i < numValidNodes; i++) {
+						int cnt = j * numValidNodes + i + timeOffset;
+						if (j < respVecs[i].Size())
+							response(cnt) = respVecs[i][j];
+						else
+							response(cnt) = 0.0;
+					}
 				}
 			}
 		}
@@ -788,7 +851,7 @@ NodeRecorder::sendSelf(int commitTag, Channel& theChannel)
 
 	int numDOF = theDofs->Size();
 
-	static ID idData(8);
+	static ID idData(9);
 	idData.Zero();
 	if (theDofs != 0)
 		idData(0) = numDOF;
@@ -813,6 +876,7 @@ NodeRecorder::sendSelf(int commitTag, Channel& theChannel)
 		idData[7] = 0;
 	else
 		idData[7] = 1;
+	idData(8) = dofsFirstFlag ? 1 : 0;
 
 
 	if (theChannel.sendID(0, commitTag, idData) < 0) {
@@ -887,7 +951,7 @@ NodeRecorder::recvSelf(int commitTag, Channel& theChannel,
 		return -1;
 	}
 
-	static ID idData(8);
+	static ID idData(9);
 	if (theChannel.recvID(0, commitTag, idData) < 0) {
 		opserr << "NodeRecorder::recvSelf() - failed to send idData\n";
 		return -1;
@@ -906,6 +970,7 @@ NodeRecorder::recvSelf(int commitTag, Channel& theChannel,
 
 	dataFlag = idData(4);
 	gradIndex = idData(5);
+	dofsFirstFlag = (idData(8) == 1);
 
 	//
 	// get the DOF ID data
@@ -1083,16 +1148,18 @@ NodeRecorder::initialize(void)
 	if (echoTimeFlag == true)
 		timeOffset = 1;
 #ifdef _CSS
-	int nVals = numValidNodes;
-	int nProcOuts = (procDataMethods.Size() == 0) ? nVals
-		: Recorder::getFinalProcOuts(nVals, procDataMethods, procGrpNums);
-	int numValidResponse = nProcOuts * numDOF + timeOffset;
+	int nRaw = (dataFlag == 10000 || dataFlag == 10002) ? numValidNodes : (numValidNodes * numDOF);
+	int nProcOuts = (procDataMethods.Size() == 0) ? nRaw
+		: Recorder::getFinalProcOuts(nRaw, procDataMethods, procGrpNums);
+	int numValidResponse = nProcOuts + timeOffset;
 #else
 	int numDOF = theDofs->Size();
 	int numValidResponse = numValidNodes * numDOF + timeOffset;
 #endif // _CSS
 	if (dataFlag == 10000 || dataFlag == 10002) {
+#ifndef _CSS
 		numValidResponse = numValidNodes + timeOffset;
+#endif
 	}
 
 	response.resize(numValidResponse);
@@ -1184,14 +1251,27 @@ NodeRecorder::initialize(void)
 			xmlOrder(nodeCount++) = 0;
 		}
 
-		for (int j = 0; j < numDOF; j++) {
+		if (dofsFirstFlag) {
 			for (int i = 0; i < numNode; i++) {
 				int nodeTag = (*theNodalTags)(i);
 				Node* theNode = theDomain->getNode(nodeTag);
 				if (theNode != 0) {
-					if (j == 0)
-						xmlOrder(nodeCount++) = i + 1;
-					orderResponse(count++) = i + 1;
+					xmlOrder(nodeCount++) = i + 1;
+					for (int j = 0; j < numDOF; j++)
+						orderResponse(count++) = i + 1;
+				}
+			}
+		}
+		else {
+			for (int j = 0; j < numDOF; j++) {
+				for (int i = 0; i < numNode; i++) {
+					int nodeTag = (*theNodalTags)(i);
+					Node* theNode = theDomain->getNode(nodeTag);
+					if (theNode != 0) {
+						if (j == 0)
+							xmlOrder(nodeCount++) = i + 1;
+						orderResponse(count++) = i + 1;
+					}
 				}
 			}
 		}

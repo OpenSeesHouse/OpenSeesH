@@ -41,17 +41,19 @@ class ResidDriftRecorder: public Recorder
 {
  public:
   ResidDriftRecorder();
-  ResidDriftRecorder(int ndI, int ndJ, int dof, int perpDirn,
+  ResidDriftRecorder(int ndI, int ndJ, const ID& dofs, int perpDirn,
 			Domain &theDomain, 
 			OPS_Stream *theHandler,
 		  const ID& procDataMethods, const ID& procGrpNums,
-		bool echoTime);
+		bool echoTime,
+		bool dofsFirst = false);
   
-  ResidDriftRecorder(const ID &ndI, const ID &ndJ, int dof, int perpDirn,
+  ResidDriftRecorder(const ID &ndI, const ID &ndJ, const ID& dofs, int perpDirn,
 			Domain &theDomain, 
 			OPS_Stream *theHandler,
 		const ID& procDataMethods, const ID& procGrpNums,
-		bool echoTime);
+		bool echoTime,
+		bool dofsFirst = false);
   
   ~ResidDriftRecorder();
   
@@ -72,11 +74,13 @@ class ResidDriftRecorder: public Recorder
    ID procGrpNums;      // parallel to procDataMethods; -1 => all columns
 #endif // _CSS
 	  int initialize(void);
+	  double computeDrift(int pairIndex, int dofIndex) const;
 
   ID *ndI;
   ID *ndJ;
   Node **theNodes; // i & j nodes
-  int dof;
+  ID *theDofs;
+  int numDOF;
   int perpDirn;
   Vector *oneOverL;
   
@@ -88,6 +92,7 @@ class ResidDriftRecorder: public Recorder
   bool initializationDone;
   int numNodes;
   bool echoTimeFlag;   // flag indicating whether time to be included in o/p
+  bool dofsFirstFlag;
 };
 
 #endif

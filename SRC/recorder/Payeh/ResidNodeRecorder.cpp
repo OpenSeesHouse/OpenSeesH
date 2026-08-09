@@ -18,16 +18,23 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// Written: fmk 
+// Written: SAJalali 
 //
-// Description: This file contains the class definition for EnvelopeNodeRecorder.
-// A EnvelopeNodeRecorder is used to record the envelop of specified dof responses 
+// Description: This file contains the class definition for ResidNodeRecorder.
+// A ResidNodeRecorder is used to record the envelop of specified dof responses 
 // at a collection of nodes over an analysis. (between commitTag of 0 and
 // last commitTag).
 //
-// What: "@(#) EnvelopeNodeRecorder.C, revA"
+// What: "@(#) ResidNodeRecorder.C, revA"
 
-#include <EnvelopeNodeRecorder.h>
+#include <OPS_Globals.h>
+#ifdef _CSS
+
+
+#include <math.h>
+#include <stdlib.h>
+
+#include <ResidNodeRecorder.h>
 #include <Domain.h>
 #include <Node.h>
 #include <NodeIter.h>
@@ -36,53 +43,46 @@
 #include <Matrix.h>
 #include <FE_Datastore.h>
 #include <FEM_ObjectBroker.h>
-#include <MeshRegion.h>
 #include <TimeSeries.h>
 
-#include <StandardStream.h>
-#include <DataFileStream.h>
-#include <DataFileStreamAdd.h>
-#include <XmlFileStream.h>
-#include <BinaryFileStream.h>
-#include <DatabaseStream.h>
-#include <TCP_Stream.h>
-
-#include <elementAPI.h>
-
 #include <string.h>
-#include <stdlib.h>
-#include <math.h>
 
-
-EnvelopeNodeRecorder::EnvelopeNodeRecorder()
-	 :Recorder(RECORDER_TAGS_EnvelopeNodeRecorder),
+ResidNodeRecorder::ResidNodeRecorder()
+	 :Recorder(RECORDER_TAGS_ResidNodeRecorder),
 	 theDofs(0), theNodalTags(0), theNodes(0),
-	 currentData(0), data(0),
+	 data(0),
 	 theDomain(0), theHandler(0),
-	 first(true), initializationDone(false),
-	 numValidNodes(0), addColumnInfo(0), theTimeSeries(0), timeSeriesValues(0)
+	 initializationDone(false),
+	 numValidNodes(0), echoTimeFlag(false), dofsFirstFlag(false),
+	 addColumnInfo(0), theTimeSeries(0), timeSeriesValues(0)
 #ifdef _CSS
-	 , procDataMethods(0), procGrpNums(0), Modified(0)
+	 , procDataMethods(0), procGrpNums(0)
 #endif
 {
 
 }
 
-EnvelopeNodeRecorder::EnvelopeNodeRecorder(const ID& dofs,
+ResidNodeRecorder::ResidNodeRecorder(const ID& dofs,
 	 const ID* nodes,
 	 const char* dataToStore,
 	 Domain& theDom,
 	 OPS_Stream* theOutputHandler,
+#ifdef _CSS
 	 const ID& procMethods, const ID& procGrpN,
+#endif // _CSS
 	 bool echoTime,
-	 TimeSeries** theSeries)
-	 :Recorder(RECORDER_TAGS_EnvelopeNodeRecorder),
+	 TimeSeries** theSeries,
+	 bool dofsFirst)
+	 :Recorder(RECORDER_TAGS_ResidNodeRecorder),
 	 theDofs(0), theNodalTags(0), theNodes(0),
-	 currentData(0), data(0),
+	 data(0),
 	 theDomain(&theDom), theHandler(theOutputHandler),
-	 first(true), initializationDone(false), numValidNodes(0), echoTimeFlag(echoTime),
+	 initializationDone(false), numValidNodes(0), echoTimeFlag(echoTime),
+	 dofsFirstFlag(dofsFirst),
 	 addColumnInfo(0), theTimeSeries(theSeries), timeSeriesValues(0)
-	 , procDataMethods(procMethods), procGrpNums(procGrpN), Modified(0)
+#ifdef _CSS
+	 , procDataMethods(procMethods), procGrpNums(procGrpN)
+#endif // _CSS
 {
 	 // verify dof are valid 
 #ifndef _CSS
@@ -101,7 +101,7 @@ EnvelopeNodeRecorder::EnvelopeNodeRecorder(const ID& dofs,
 				count++;
 		  }
 		  else {
-				opserr << "EnvelopeNodeRecorder::EnvelopeNodeRecorder - invalid dof  " << dof;
+				opserr << "ResidNodeRecorder::ResidNodeRecorder - invalid dof  " << dof;
 				opserr << " will be ignored\n";
 		  }
 	 }
@@ -116,7 +116,7 @@ EnvelopeNodeRecorder::EnvelopeNodeRecorder(const ID& dofs,
 		  if (numNode != 0) {
 				theNodalTags = new ID(*nodes);
 				if (theNodalTags == 0 || theNodalTags->Size() != nodes->Size()) {
-					 opserr << "NodeRecorder::NodeRecorder - out of memory\n";
+					 opserr << "ResidNodeRecorder::ResidNodeRecorder - out of memory\n";
 				}
 		  }
 	 }
@@ -185,22 +185,13 @@ EnvelopeNodeRecorder::EnvelopeNodeRecorder(const ID& dofs,
 	 else if ((strcmp(dataToStore, "dampingEnergy") == 0) || (strcmp(dataToStore, "DampingEnergy") == 0)) {
 		  dataFlag = 999999;
 		  numDOF = 1;
-	 }
 #endif _CSS
+
+	 }
 	 else {
 		  dataFlag = 10;
-		  opserr << "EnvelopeNodeRecorder::EnvelopeNodeRecorder - dataToStore " << dataToStore;
+		  opserr << "ResidNodeRecorder::ResidNodeRecorder - dataToStore " << dataToStore;
 		  opserr << "not recognized (disp, vel, accel, incrDisp, incrDeltaDisp)\n";
-	 }
-
-	 if (theHandler != 0)
-	 {
-		  if (dataFlag == 7 || dataFlag == 8 || dataFlag == 9) {
-				if (echoTime == true)
-					 theHandler->setAddCommon(2);
-				else
-					 theHandler->setAddCommon(1);
-		  }
 	 }
 #ifdef _CSS
 	 if (theTimeSeries != 0) {
@@ -210,78 +201,7 @@ EnvelopeNodeRecorder::EnvelopeNodeRecorder(const ID& dofs,
 	 }
 #endif // !_CSS
 }
-
-
-EnvelopeNodeRecorder::~EnvelopeNodeRecorder()
-{
-	 //
-	 // write the data
-	 //
-
-	 if (theHandler != 0 && data != 0) {
-
-		  theHandler->tag("Data"); // Data
-
-		  int numResponse = data->noCols();
-
-		  for (int i = 0; i < 3; i++) {
-				for (int j = 0; j < numResponse; j++)
-					 (*currentData)(j) = (*data)(i, j);
-				theHandler->write(*currentData);
-		  }
-
-		  theHandler->endTag(); // Data
-	 }
-
-	 //
-	 // clean up the memory
-	 //
-
-#ifdef _CSS
-	 if (theDofs != 0) {
-		  delete theDofs;
-	 }
-	 if (theTimeSeries != 0 && theNodes != 0)
-	 {
-		  for (int i = 0; i < numValidNodes; i++)
-				theNodes[i]->resetTimeSeries();
-	 }
-	 if (dataFlag == 999997 || dataFlag == 999999)
-	 {
-		  for (int i = 0; i < numValidNodes; i++)
-				theNodes[i]->resetEnergies();
-	 }
-#else
-	 int numDOF;
-	 if (theDofs != 0) {
-		  numDOF = theDofs->Size();
-		  delete theDofs;
-	 }
-#endif // _CSS
-
-	 if (theNodalTags != 0)
-		  delete theNodalTags;
-
-	 if (theHandler != 0)
-		  delete theHandler;
-
-	 if (currentData != 0)
-		  delete currentData;
-
-	 if (data != 0)
-		  delete data;
-
-	 if (theNodes != 0)
-		  delete[] theNodes;
-
-	 if (theTimeSeries != 0) {
-		  for (int i = 0; i < numDOF; i++)
-				delete theTimeSeries[i];
-		  delete[] theTimeSeries;
-	 }
-}
-
-Vector EnvelopeNodeRecorder::getResponse(Node* theNode)
+Vector ResidNodeRecorder::getResponse(Node* theNode)
 {
 	//
 	// if need nodal reactions get the domain to calculate them
@@ -463,17 +383,111 @@ Vector EnvelopeNodeRecorder::getResponse(Node* theNode)
 }
 
 
-int
-EnvelopeNodeRecorder::record(int commitTag, double timeStamp)
+ResidNodeRecorder::~ResidNodeRecorder()
 {
+	 //
+	 // write the data
+	 //
+
+	 if (theHandler != 0 && data != 0) {
+
+		  theHandler->tag("Data"); // Data
+
+		  int numResponse = data->noCols();
+		  Vector currentData(numResponse);
+		  for (int j = 0; j < numResponse; j++)
+				currentData(j) = (*data)(0, j);
+		  theHandler->write(currentData);
+
+
+		  theHandler->endTag(); // Data
+	 }
+
+	 //
+	 // clean up the memory
+	 //
+
+#ifdef _CSS
+	 if (theDofs != 0) {
+		  delete theDofs;
+	 }
+	 if (theTimeSeries != 0 && theNodes != 0)
+	 {
+		  for (int i = 0; i < numValidNodes; i++)
+				theNodes[i]->resetTimeSeries();
+	 }
+	 if (dataFlag == 999997 || dataFlag == 999999)
+	 {
+		  for (int i = 0; i < numValidNodes; i++)
+				theNodes[i]->resetEnergies();
+	 }
+#else
+	 int numDOF;
+	 if (theDofs != 0) {
+		  numDOF = theDofs->Size();
+		  delete theDofs;
+	 }
+#endif // _CSS
+
+	 if (theNodalTags != 0)
+		  delete theNodalTags;
+
+	 if (theHandler != 0)
+		  delete theHandler;
+
+	 if (data != 0)
+		  delete data;
+
+	 if (theNodes != 0)
+		  delete[] theNodes;
+
+	 if (theTimeSeries != 0) {
+		  for (int i = 0; i < numDOF; i++)
+				delete theTimeSeries[i];
+		  delete[] theTimeSeries;
+	 }
+}
+
+int
+ResidNodeRecorder::record(int commitTag, double timeStamp)
+{
+#ifdef _CSS
 	 if (theDomain == 0) {
 		  return 0;
 	 }
-	 if (initializationDone != true)
+#else
+	 if (theDomain == 0 || theDofs == 0) {
+		  return 0;
+	 }
+#endif // _CSS
+
+	 // 
+	 // check that initialization has been done
+	 //
+
+	 if (initializationDone == false) {
 		  if (this->initialize() != 0) {
-				opserr << "EnvelopeNodeRecorder::record() - failed in initialize()\n";
+				opserr << "ResidNodeRecorder::record() - failed to initialize\n";
 				return -1;
 		  }
+	 }
+
+	 int iCnt = 0;
+	 if (echoTimeFlag)
+	 {
+		  iCnt = 1;
+		  (*data)(0, 0) = timeStamp;
+	 }
+	 if (initializationDone != true)
+		  if (this->initialize() != 0) {
+				opserr << "ResidNodeRecorder::record() - failed in initialize()\n";
+				return -1;
+		  }
+
+
+#ifndef _CSS
+	 int numDOF = theDofs->Size();
+#endif // !_CSS
 
 	 double timeSeriesTerm = 0.0;
 
@@ -485,24 +499,51 @@ EnvelopeNodeRecorder::record(int commitTag, double timeStamp)
 	 }
 
 #ifdef _CSS
-	 Modified = 0;
 	 if (procDataMethods.Size() != 0)
 	 {
+		 // Materialize full raw layout, then reduce once
 		 Vector* respVecs = new Vector[numValidNodes];
 		 for (int i = 0; i < numValidNodes; i++)
 			 respVecs[i] = getResponse(theNodes[i]);
 
-		 double* buf = new double[numValidNodes];
-		 for (int j = 0; j < numDOF; j++) {
+		 int nRaw;
+		 double* raw;
+		 if (dataFlag == 10000) {
+			 nRaw = numValidNodes;
+			 raw = new double[nRaw];
 			 for (int i = 0; i < numValidNodes; i++)
-				 buf[i] = respVecs[i][j];
-			 int nOut = Recorder::applyProcDataChain(procDataMethods, procGrpNums, buf, numValidNodes, false);
-			 for (int i = 0; i < nOut; i++) {
-				 int cnt = j * nOut + i;
-				 (*currentData)(cnt) = buf[i];
+				 raw[i] = respVecs[i][0];
+		 }
+		 else {
+			 nRaw = numValidNodes * numDOF;
+			 raw = new double[nRaw];
+			 if (dofsFirstFlag) {
+				 for (int i = 0; i < numValidNodes; i++) {
+					 for (int j = 0; j < numDOF; j++) {
+						 int cnt = i * numDOF + j;
+						 if (j < respVecs[i].Size())
+							 raw[cnt] = respVecs[i][j];
+						 else
+							 raw[cnt] = 0.0;
+					 }
+				 }
+			 }
+			 else {
+				 for (int j = 0; j < numDOF; j++) {
+					 for (int i = 0; i < numValidNodes; i++) {
+						 int cnt = j * numValidNodes + i;
+						 if (j < respVecs[i].Size())
+							 raw[cnt] = respVecs[i][j];
+						 else
+							 raw[cnt] = 0.0;
+					 }
+				 }
 			 }
 		 }
-		 delete[] buf;
+		 int nOut = Recorder::applyProcDataChain(procDataMethods, procGrpNums, raw, nRaw, false);
+		 for (int i = 0; i < nOut; i++)
+			 (*data)(0, i + iCnt) = raw[i];
+		 delete[] raw;
 		 delete[] respVecs;
 	 }
 	 else
@@ -514,140 +555,49 @@ EnvelopeNodeRecorder::record(int commitTag, double timeStamp)
 
 		  if (dataFlag == 10000) {
 				for (int i = 0; i < numValidNodes; i++)
-					 (*currentData)(i) = respVecs[i][0];
+					 (*data)(0, i + iCnt) = respVecs[i][0];
 		  }
 		  else {
-				for (int j = 0; j < numDOF; j++) {
+				if (dofsFirstFlag) {
 					 for (int i = 0; i < numValidNodes; i++) {
-						  int cnt = j * numValidNodes + i;
-						  if (j < respVecs[i].Size())
-								(*currentData)(cnt) = respVecs[i][j];
-						  else
-								(*currentData)(cnt) = 0.0;
+						  for (int j = 0; j < numDOF; j++) {
+								int cnt = i * numDOF + j + iCnt;
+								if (j < respVecs[i].Size())
+									 (*data)(0, cnt) = respVecs[i][j];
+								else
+									 (*data)(0, cnt) = 0.0;
+						  }
+					 }
+				}
+				else {
+					 for (int j = 0; j < numDOF; j++) {
+						  for (int i = 0; i < numValidNodes; i++) {
+								int cnt = j * numValidNodes + i + iCnt;
+								if (j < respVecs[i].Size())
+									 (*data)(0, cnt) = respVecs[i][j];
+								else
+									 (*data)(0, cnt) = 0.0;
+						  }
 					 }
 				}
 		  }
 		  delete[] respVecs;
 	 }
 
-	 // check if currentData modifies the saved data
-	 int sizeData = currentData->Size();
-	 if (echoTimeFlag == false) {
-
-		  bool writeIt = false;
-		  if (first == true) {
-				for (int i = 0; i < sizeData; i++) {
-					 (*data)(0, i) = (*currentData)(i);
-					 (*data)(1, i) = (*currentData)(i);
-					 (*data)(2, i) = fabs((*currentData)(i));
-					 first = false;
-					 writeIt = true;
-#ifdef _CSS
-					 Modified = 1;
-#endif // _CSS
-				}
-		  }
-		  else {
-				for (int i = 0; i < sizeData; i++) {
-					 double value = (*currentData)(i);
-					 if ((*data)(0, i) > value) {
-						  (*data)(0, i) = value;
-						  double absValue = fabs(value);
-						  if ((*data)(2, i) < absValue)
-#ifdef _CSS
-						  {
-								Modified = 1;
-								(*data)(2, i) = absValue;
-						  }
-#else
-								(*data)(2, i) = absValue;
-#endif // _CSS
-						  writeIt = true;
-					 }
-					 else if ((*data)(1, i) < value) {
-						  (*data)(1, i) = value;
-						  double absValue = fabs(value);
-						  if ((*data)(2, i) < absValue)
-#ifdef _CSS
-						  {
-								Modified = 1;
-								(*data)(2, i) = absValue;
-						  }
-#else
-								(*data)(2, i) = absValue;
-#endif // _CSS
-						  writeIt = true;
-					 }
-				}
-		  }
-	 }
-	 else {
-		  sizeData /= 2;
-		  bool writeIt = false;
-		  if (first == true) {
-				for (int i = 0; i < sizeData; i++) {
-
-					 (*data)(0, i * 2) = timeStamp;
-					 (*data)(1, i * 2) = timeStamp;
-					 (*data)(2, i * 2) = timeStamp;
-					 (*data)(0, i * 2 + 1) = (*currentData)(i);
-					 (*data)(1, i * 2 + 1) = (*currentData)(i);
-					 (*data)(2, i * 2 + 1) = fabs((*currentData)(i));
-					 first = false;
-					 writeIt = true;
-#ifdef _CSS
-					 Modified = 1;
-#endif // _CSS
-				}
-		  }
-		  else {
-				for (int i = 0; i < sizeData; i++) {
-					 double value = (*currentData)(i);
-					 if ((*data)(0, 2 * i + 1) > value) {
-						  (*data)(0, i * 2) = timeStamp;
-						  (*data)(0, i * 2 + 1) = value;
-						  double absValue = fabs(value);
-						  if ((*data)(2, i * 2 + 1) < absValue) {
-								(*data)(2, i * 2 + 1) = absValue;
-								(*data)(2, i * 2) = timeStamp;
-#ifdef _CSS
-								Modified = 1;
-#endif // _CSS
-						  }
-						  writeIt = true;
-					 }
-					 else if ((*data)(1, i * 2 + 1) < value) {
-						  (*data)(1, i * 2) = timeStamp;
-						  (*data)(1, i * 2 + 1) = value;
-						  double absValue = fabs(value);
-						  if ((*data)(2, i * 2 + 1) < absValue) {
-								(*data)(2, i * 2) = timeStamp;
-								(*data)(2, i * 2 + 1) = absValue;
-#ifdef _CSS
-								Modified = 1;
-#endif // _CSS
-						  }
-						  writeIt = true;
-					 }
-				}
-		  }
-	 }
-
 	 return 0;
 }
 
 
 int
-EnvelopeNodeRecorder::restart(void)
+ResidNodeRecorder::restart(void)
 {
 	 data->Zero();
-	 first = true;
 	 return 0;
 }
 
 
 int
-EnvelopeNodeRecorder::setDomain(Domain& theDom)
+ResidNodeRecorder::setDomain(Domain& theDom)
 {
 	 theDomain = &theDom;
 	 initializationDone = false;
@@ -656,19 +606,19 @@ EnvelopeNodeRecorder::setDomain(Domain& theDom)
 
 
 int
-EnvelopeNodeRecorder::sendSelf(int commitTag, Channel& theChannel)
+ResidNodeRecorder::sendSelf(int commitTag, Channel& theChannel)
 {
 	 addColumnInfo = 1;
 
 	 int numDOF = theDofs->Size();
 
 	 if (theChannel.isDatastore() == 1) {
-		  opserr << "EnvelopeNodeRecorder::sendSelf() - does not send data to a datastore\n";
+		  opserr << "ResidNodeRecorder::sendSelf() - does not send data to a datastore\n";
 		  return -1;
 	 }
 
 	 initializationDone = false;
-	 static ID idData(7);
+	 static ID idData(8);
 	 idData.Zero();
 
 	 if (theDofs != 0)
@@ -694,28 +644,28 @@ EnvelopeNodeRecorder::sendSelf(int commitTag, Channel& theChannel)
 		  idData[6] = 0;
 	 else
 		  idData[6] = 1;
+	 idData(7) = dofsFirstFlag ? 1 : 0;
 
 	 if (theChannel.sendID(0, commitTag, idData) < 0) {
-		  opserr << "EnvelopeNodeRecorder::sendSelf() - failed to send idData\n";
+		  opserr << "ResidNodeRecorder::sendSelf() - failed to send idData\n";
 		  return -1;
 	 }
 
 	 if (theDofs != 0)
 		  if (theChannel.sendID(0, commitTag, *theDofs) < 0) {
-				opserr << "EnvelopeNodeRecorder::sendSelf() - failed to send dof id's\n";
+				opserr << "ResidNodeRecorder::sendSelf() - failed to send dof id's\n";
 				return -1;
 		  }
 
 	 if (theNodalTags != 0)
 		  if (theChannel.sendID(0, commitTag, *theNodalTags) < 0) {
-				opserr << "EnvelopeNodeRecorder::sendSelf() - failed to send nodal tags\n";
+				opserr << "ResidNodeRecorder::sendSelf() - failed to send nodal tags\n";
 				return -1;
 		  }
 
 	 if (theHandler != 0)
-
 		  if (theHandler->sendSelf(commitTag, theChannel) < 0) {
-				opserr << "EnvelopeNodeRecorder::sendSelf() - failed to send the DataOutputHandler\n";
+				opserr << "ResidNodeRecorder::sendSelf() - failed to send the DataOutputHandler\n";
 				return -1;
 		  }
 
@@ -729,13 +679,13 @@ EnvelopeNodeRecorder::sendSelf(int commitTag, Channel& theChannel)
 					 timeSeriesTags[i] = -1;
 		  }
 		  if (theChannel.sendID(0, commitTag, timeSeriesTags) < 0) {
-				opserr << "EnvelopeNodeRecorder::sendSelf() - failed to send time series tags\n";
+				opserr << "ResidNodeRecorder::sendSelf() - failed to send time series tags\n";
 				return -1;
 		  }
 		  for (int i = 0; i < numDOF; i++) {
 				if (theTimeSeries[i] != 0) {
 					 if (theTimeSeries[i]->sendSelf(commitTag, theChannel) < 0) {
-						  opserr << "EnvelopeNodeRecorder::sendSelf() - time series failed in send\n";
+						  opserr << "ResidNodeRecorder::sendSelf() - time series failed in send\n";
 						  return -1;
 
 					 }
@@ -747,19 +697,19 @@ EnvelopeNodeRecorder::sendSelf(int commitTag, Channel& theChannel)
 }
 
 int
-EnvelopeNodeRecorder::recvSelf(int commitTag, Channel& theChannel,
+ResidNodeRecorder::recvSelf(int commitTag, Channel& theChannel,
 	 FEM_ObjectBroker& theBroker)
 {
 	 addColumnInfo = 1;
 
 	 if (theChannel.isDatastore() == 1) {
-		  opserr << "EnvelopeNodeRecorder::sendSelf() - does not send data to a datastore\n";
+		  opserr << "ResidNodeRecorder::sendSelf() - does not send data to a datastore\n";
 		  return -1;
 	 }
 
-	 static ID idData(7);
+	 static ID idData(8);
 	 if (theChannel.recvID(0, commitTag, idData) < 0) {
-		  opserr << "EnvelopeNodeRecorder::recvSelf() - failed to send idData\n";
+		  opserr << "ResidNodeRecorder::recvSelf() - failed to send idData\n";
 		  return -1;
 	 }
 
@@ -775,6 +725,8 @@ EnvelopeNodeRecorder::recvSelf(int commitTag, Channel& theChannel,
 	 else
 		  echoTimeFlag = false;
 
+	 dofsFirstFlag = (idData(7) == 1);
+
 
 	 //
 	 // get the DOF ID data
@@ -787,14 +739,14 @@ EnvelopeNodeRecorder::recvSelf(int commitTag, Channel& theChannel,
 		  if (numDOFs != 0) {
 				theDofs = new ID(numDOFs);
 				if (theDofs == 0 || theDofs->Size() != numDOFs) {
-					 opserr << "EnvelopeNodeRecorder::recvSelf() - out of memory\n";
+					 opserr << "ResidNodeRecorder::recvSelf() - out of memory\n";
 					 return -1;
 				}
 		  }
 	 }
 	 if (theDofs != 0)
 		  if (theChannel.recvID(0, commitTag, *theDofs) < 0) {
-				opserr << "EnvelopeNodeRecorder::recvSelf() - failed to recv dof data\n";
+				opserr << "ResidNodeRecorder::recvSelf() - failed to recv dof data\n";
 				return -1;
 		  }
 
@@ -809,25 +761,25 @@ EnvelopeNodeRecorder::recvSelf(int commitTag, Channel& theChannel,
 		  if (numNodes != 0) {
 				theNodalTags = new ID(numNodes);
 				if (theNodalTags == 0 || theNodalTags->Size() != numNodes) {
-					 opserr << "EnvelopeNodeRecorder::recvSelf() - out of memory\n";
+					 opserr << "ResidNodeRecorder::recvSelf() - out of memory\n";
 					 return -1;
 				}
 		  }
 	 }
 	 if (theNodalTags != 0)
 		  if (theChannel.recvID(0, commitTag, *theNodalTags) < 0) {
-				opserr << "EnvelopeNodeRecorder::recvSelf() - failed to recv dof data\n";
+				opserr << "ResidNodeRecorder::recvSelf() - failed to recv dof data\n";
 				return -1;
 		  }
 
 
 	 if (theHandler != 0)
 		  delete theHandler;
-	 if (idData(2) != 0)
+	 if (idData(2)= 0)
 	 {
 		 theHandler = theBroker.getPtrNewStream(idData(2));
 		 if (theHandler == 0) {
-			 opserr << "EnvelopeNodeRecorder::sendSelf() - failed to get a data output handler\n";
+			 opserr << "ResidNodeRecorder::sendSelf() - failed to get a data output handler\n";
 			 return -1;
 		 }
 
@@ -842,7 +794,7 @@ EnvelopeNodeRecorder::recvSelf(int commitTag, Channel& theChannel,
 		  theTimeSeries = new TimeSeries * [numDOFs];
 		  ID timeSeriesTags(numDOFs);
 		  if (theChannel.recvID(0, commitTag, timeSeriesTags) < 0) {
-				opserr << "EnvelopeNodeRecorder::recvSelf() - failed to recv time series tags\n";
+				opserr << "ResidNodeRecorder::recvSelf() - failed to recv time series tags\n";
 				return -1;
 		  }
 		  for (int i = 0; i < numDOFs; i++) {
@@ -851,7 +803,7 @@ EnvelopeNodeRecorder::recvSelf(int commitTag, Channel& theChannel,
 				else {
 					 theTimeSeries[i] = theBroker.getNewTimeSeries(timeSeriesTags(i));
 					 if (theTimeSeries[i]->recvSelf(commitTag, theChannel, theBroker) < 0) {
-						  opserr << "EnvelopeNodeRecorder::recvSelf() - time series failed in recv\n";
+						  opserr << "ResidNodeRecorder::recvSelf() - time series failed in recv\n";
 						  return -1;
 					 }
 				}
@@ -863,19 +815,12 @@ EnvelopeNodeRecorder::recvSelf(int commitTag, Channel& theChannel,
 
 
 int
-EnvelopeNodeRecorder::initialize(void)
+ResidNodeRecorder::initialize(void)
 {
-#ifdef _CSS
 	 if (theDomain == 0) {
-		  opserr << "EnvelopeNodeRecorder::initialize() - either nodes or domain has not been set\n";
+		  opserr << "ResidNodeRecorder::initialize() - either nodes or domain has not been set\n";
 		  return -1;
 	 }
-#else
-	 if (theDofs == 0 || theDomain == 0) {
-		  opserr << "EnvelopeNodeRecorder::initialize() - either nodes, dofs or domain has not been set\n";
-		  return -1;
-	 }
-#endif // _CSS
 
 	 //
 	 // create & set nodal array pointer
@@ -890,9 +835,9 @@ EnvelopeNodeRecorder::initialize(void)
 		  int numNode = theNodalTags->Size();
 		  theNodes = new Node * [numNode];
 		  if (theNodes == 0) {
-				opserr << "EnvelopeNodeRecorder::domainChanged - out of memory\n";
+				opserr << "ResidNodeRecorder::domainChanged - out of memory\n";
 				return -1;
-}
+		  }
 
 		  for (int i = 0; i < numNode; i++) {
 				int nodeTag = (*theNodalTags)(i);
@@ -910,7 +855,7 @@ EnvelopeNodeRecorder::initialize(void)
 				theNodes = new Node * [numNodes];
 
 				if (theNodes == 0) {
-					 opserr << "NodeRecorder::domainChanged - out of memory\n";
+					 opserr << "ResidNodeRecorder::domainChanged - out of memory\n";
 					 return -1;
 				}
 				NodeIter& theDomainNodes = theDomain->getNodes();
@@ -978,24 +923,27 @@ EnvelopeNodeRecorder::initialize(void)
 	 //
 
 #ifdef _CSS
-	 int nVals = numValidNodes;
-	 int nProcOuts = (procDataMethods.Size() == 0) ? nVals
-		  : Recorder::getFinalProcOuts(nVals, procDataMethods, procGrpNums);
-	 int numValidResponse = nProcOuts * numDOF;
+	 int nRaw = (dataFlag == 10000) ? numValidNodes : (numValidNodes * numDOF);
+	 int nProcOuts = (procDataMethods.Size() == 0) ? nRaw
+		  : Recorder::getFinalProcOuts(nRaw, procDataMethods, procGrpNums);
+	 int numValidResponse = nProcOuts;
 #else
 	 int numDOF = theDofs->Size();
 	 int numValidResponse = numValidNodes * numDOF;
 #endif // _CSS
 
-	 if (dataFlag == 10000)
+	 if (dataFlag == 10000) {
+#ifndef _CSS
 		  numValidResponse = numValidNodes;
-
-	 if (echoTimeFlag == true) {
-		  numValidResponse *= 2;
+#endif
 	 }
 
-	 currentData = new Vector(numValidResponse);
-	 data = new Matrix(3, numValidResponse);
+	 if (echoTimeFlag == true) {
+		  numValidResponse += 1;
+	 }
+
+
+	 data = new Matrix(1, numValidResponse);
 	 data->Zero();
 
 	 ID dataOrder(numValidResponse);
@@ -1007,46 +955,50 @@ EnvelopeNodeRecorder::initialize(void)
 		  int nodeCount = 0;
 
 		  int numNode = theNodalTags->Size();
-		  for (int j = 0; j < numDOF; j++) {
+		  if (dofsFirstFlag) {
 				for (int i = 0; i < numNode; i++) {
 					 int nodeTag = (*theNodalTags)(i);
 					 Node* theNode = theDomain->getNode(nodeTag);
 					 if (theNode != 0) {
-						  if (j == 0)
-								xmlOrder(nodeCount++) = i + 1;
-						  dataOrder(count++) = i + 1;
-					 }
-				}
-		  }
-		  if (echoTimeFlag == true) {
-				for (int j = 0; j < numDOF; j++) {
-					 for (int i = 0; i < numNode; i++) {
-						  int nodeTag = (*theNodalTags)(i);
-						  Node* theNode = theDomain->getNode(nodeTag);
-						  if (theNode != 0)
+						  xmlOrder(nodeCount++) = i + 1;
+						  for (int j = 0; j < numDOF; j++)
 								dataOrder(count++) = i + 1;
 					 }
 				}
 		  }
+		  else {
+				for (int j = 0; j < numDOF; j++) {
+					 for (int i = 0; i < numNode; i++) {
+						  int nodeTag = (*theNodalTags)(i);
+						  Node* theNode = theDomain->getNode(nodeTag);
+						  if (theNode != 0) {
+								if (j == 0)
+									 xmlOrder(nodeCount++) = i + 1;
+								dataOrder(count++) = i + 1;
+						  }
+					 }
+				}
+		  }
+
 		  if (theHandler != 0)
 				theHandler->setOrder(xmlOrder);
 	 }
 
 	 if (theHandler != 0)
+	 {
 		  for (int i = 0; i < numValidNodes; i++) {
 				int nodeTag = theNodes[i]->getTag();
 
 				theHandler->tag("NodeOutput");
 				theHandler->attr("nodeTag", nodeTag);
 
-				for (int j = 0; j < numDOF; j++) {
+				for (int j = 0; j < theDofs->Size(); j++) {
 
 					 if (echoTimeFlag == true) {
 						  theHandler->tag("TimeOutput");
 						  theHandler->tag("ResponseType", "time");
 						  theHandler->endTag();
 					 }
-
 					 sprintf(outputData, "%s%d", dataType, j + 1);
 					 theHandler->tag("ResponseType", outputData);
 				}
@@ -1054,40 +1006,12 @@ EnvelopeNodeRecorder::initialize(void)
 				theHandler->endTag();
 		  }
 
-	 if (theHandler != 0)
 		  if (theNodalTags != 0 && addColumnInfo == 1) {
 				theHandler->setOrder(dataOrder);
 		  }
-
+	 }
 	 initializationDone = true;
 
 	 return 0;
 }
-//added by SAJalali
-double EnvelopeNodeRecorder::getRecordedValue(int clmnId, int rowOffset, bool reset)
-{
-	 double res = 0;
-	 if (!initializationDone)
-		  return res;
-	 if (clmnId >= data->noCols())
-	 {
-		 opserr << "EnvelopeNodeRecorder::getRecordedValue: columnId exceeds valid range" << endln;
-		 return 0;
-	 }
-	 if (rowOffset > 2 || rowOffset < 0)
-	 {
-		 opserr << "EnvelopeNodeRecorder::getRecordedValue: 0 < rowOffset < 2 not met" << endln;
-		 return 0;
-	 }
-	 res = (*data)(2 - rowOffset, clmnId);
-	 if (reset)
-		  first = true;
-	 return res;
-}
-
-int EnvelopeNodeRecorder::flush(void) {
-	if (theHandler != 0) {
-		return theHandler->flush();
-	}
-	return 0;
-}
+#endif // _CSS

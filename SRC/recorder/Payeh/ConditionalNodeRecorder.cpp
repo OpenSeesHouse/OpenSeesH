@@ -20,12 +20,12 @@
 
 // Written: SAJalali 
 //
-// Description: This file contains the class definition for ResidNodeRecorder.
-// A ResidNodeRecorder is used to record the envelop of specified dof responses 
+// Description: This file contains the class definition for ConditionalNodeRecorder.
+// A ConditionalNodeRecorder is used to record the envelop of specified dof responses 
 // at a collection of nodes over an analysis. (between commitTag of 0 and
 // last commitTag).
 //
-// What: "@(#) ResidNodeRecorder.C, revA"
+// What: "@(#) ConditionalNodeRecorder.C, revA"
 
 #include <OPS_Globals.h>
 #ifdef _CSS
@@ -34,7 +34,7 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include <ResidNodeRecorder.h>
+#include <ConditionalNodeRecorder.h>
 #include <Domain.h>
 #include <Node.h>
 #include <NodeIter.h>
@@ -47,46 +47,40 @@
 
 #include <string.h>
 
-ResidNodeRecorder::ResidNodeRecorder()
-	 :Recorder(RECORDER_TAGS_ResidNodeRecorder),
+ConditionalNodeRecorder::ConditionalNodeRecorder()
+	 :Recorder(RECORDER_TAGS_ConditionalNodeRecorder),
 	 theDofs(0), theNodalTags(0), theNodes(0),
 	 data(0),
 	 theDomain(0), theHandler(0),
 	 initializationDone(false),
-	 numValidNodes(0), addColumnInfo(0), theTimeSeries(0), timeSeriesValues(0)
-#ifdef _CSS
+	 numValidNodes(0), echoTimeFlag(false), dofsFirstFlag(false),
+	 addColumnInfo(0), theTimeSeries(0), timeSeriesValues(0)
 	 , procDataMethods(0), procGrpNums(0)
-#endif
 {
 
 }
 
-ResidNodeRecorder::ResidNodeRecorder(const ID& dofs,
+ConditionalNodeRecorder::ConditionalNodeRecorder(const ID& dofs,
 	 const ID* nodes,
 	 const char* dataToStore,
 	 Domain& theDom,
 	 OPS_Stream* theOutputHandler,
-#ifdef _CSS
+	 int rcrdrTag,
 	 const ID& procMethods, const ID& procGrpN,
-#endif // _CSS
 	 bool echoTime,
-	 TimeSeries** theSeries)
-	 :Recorder(RECORDER_TAGS_ResidNodeRecorder),
+	 TimeSeries** theSeries,
+	 bool dofsFirst)
+	 :Recorder(RECORDER_TAGS_ConditionalNodeRecorder),
 	 theDofs(0), theNodalTags(0), theNodes(0),
 	 data(0),
 	 theDomain(&theDom), theHandler(theOutputHandler),
 	 initializationDone(false), numValidNodes(0), echoTimeFlag(echoTime),
+	 dofsFirstFlag(dofsFirst),
 	 addColumnInfo(0), theTimeSeries(theSeries), timeSeriesValues(0)
-#ifdef _CSS
-	 , procDataMethods(procMethods), procGrpNums(procGrpN)
-#endif // _CSS
+	 , procDataMethods(procMethods), procGrpNums(procGrpN), envRcrdrTag(rcrdrTag)
 {
 	 // verify dof are valid 
-#ifndef _CSS
-	 int numDOF = dofs.Size();
-#else
 	 numDOF = dofs.Size();
-#endif // !_CSS
 	 theDofs = new ID(0, numDOF);
 
 	 int count = 0;
@@ -98,7 +92,7 @@ ResidNodeRecorder::ResidNodeRecorder(const ID& dofs,
 				count++;
 		  }
 		  else {
-				opserr << "ResidNodeRecorder::ResidNodeRecorder - invalid dof  " << dof;
+				opserr << "ConditionalNodeRecorder::ConditionalNodeRecorder - invalid dof  " << dof;
 				opserr << " will be ignored\n";
 		  }
 	 }
@@ -113,18 +107,10 @@ ResidNodeRecorder::ResidNodeRecorder(const ID& dofs,
 		  if (numNode != 0) {
 				theNodalTags = new ID(*nodes);
 				if (theNodalTags == 0 || theNodalTags->Size() != nodes->Size()) {
-					 opserr << "ResidNodeRecorder::ResidNodeRecorder - out of memory\n";
+					 opserr << "ConditionalNodeRecorder::ConditionalNodeRecorder - out of memory\n";
 				}
 		  }
 	 }
-
-#ifndef _CSS
-	 if (theTimeSeries != 0) {
-		  timeSeriesValues = new double[numDOF];
-		  for (int i = 0; i < numDOF; i++)
-				timeSeriesValues[i] = 0.0;
-	 }
-#endif // !_CSS
 
 	 //
 	 // set the data flag used as a switch to get the response in a record
@@ -170,7 +156,34 @@ ResidNodeRecorder::ResidNodeRecorder(const ID& dofs,
 		  dataFlag = 10000;
 
 	 }
-#ifdef _CSS
+	 else if ((strncmp(dataToStore, "eigen", 5) == 0)) {
+		  int mode = atoi(&(dataToStore[5]));
+		  if (mode > 0)
+				dataFlag = 10 + mode;
+		  else
+				dataFlag = 10;
+	 }
+	 else if ((strncmp(dataToStore, "sensitivity", 11) == 0)) {
+		  int grad = atoi(&(dataToStore[11]));
+		  if (grad > 0)
+				dataFlag = 1000 + grad;
+		  else
+				dataFlag = 10;
+	 }
+	 else if ((strncmp(dataToStore, "velSensitivity", 14) == 0)) {
+		  int grad = atoi(&(dataToStore[14]));
+		  if (grad > 0)
+				dataFlag = 2000 + grad;
+		  else
+				dataFlag = 10;
+	 }
+	 else if ((strncmp(dataToStore, "accSensitivity", 14) == 0)) {
+		  int grad = atoi(&(dataToStore[14]));
+		  if (grad > 0)
+				dataFlag = 3000 + grad;
+		  else
+				dataFlag = 10;
+	 }
 	 else if ((strcmp(dataToStore, "motionEnergy") == 0) || (strcmp(dataToStore, "MotionEnergy") == 0)) {
 		  dataFlag = 999997;
 		  numDOF = 1;
@@ -182,23 +195,86 @@ ResidNodeRecorder::ResidNodeRecorder(const ID& dofs,
 	 else if ((strcmp(dataToStore, "dampingEnergy") == 0) || (strcmp(dataToStore, "DampingEnergy") == 0)) {
 		  dataFlag = 999999;
 		  numDOF = 1;
-#endif _CSS
-
 	 }
 	 else {
 		  dataFlag = 10;
-		  opserr << "ResidNodeRecorder::ResidNodeRecorder - dataToStore " << dataToStore;
+		  opserr << "ConditionalNodeRecorder::ConditionalNodeRecorder - dataToStore " << dataToStore;
 		  opserr << "not recognized (disp, vel, accel, incrDisp, incrDeltaDisp)\n";
 	 }
-#ifdef _CSS
 	 if (theTimeSeries != 0) {
 		  timeSeriesValues = new double[numDOF];
 		  for (int i = 0; i < numDOF; i++)
 				timeSeriesValues[i] = 0.0;
 	 }
-#endif // !_CSS
 }
-Vector ResidNodeRecorder::getResponse(Node* theNode)
+
+
+ConditionalNodeRecorder::~ConditionalNodeRecorder()
+{
+	 //
+	 // write the data
+	 //
+
+	 if (theHandler != 0 && data != 0) {
+
+		  theHandler->tag("Data"); // Data
+
+		  int numResponse = data->noCols();
+		  Vector currentData(numResponse);
+		  for (int j = 0; j < numResponse; j++)
+				currentData(j) = (*data)(0, j);
+		  theHandler->write(currentData);
+
+
+		  theHandler->endTag(); // Data
+	 }
+
+	 //
+	 // clean up the memory
+	 //
+
+#ifdef _CSS
+	 if (theDofs != 0) {
+		  delete theDofs;
+	 }
+	 if (theTimeSeries != 0 && theNodes != 0)
+	 {
+		  for (int i = 0; i < numValidNodes; i++)
+				theNodes[i]->resetTimeSeries();
+	 }
+	 if (dataFlag == 999997 || dataFlag == 999999)
+	 {
+		  for (int i = 0; i < numValidNodes; i++)
+				theNodes[i]->resetEnergies();
+	 }
+#else
+	 int numDOF;
+	 if (theDofs != 0) {
+		  numDOF = theDofs->Size();
+		  delete theDofs;
+	 }
+#endif // _CSS
+
+	 if (theNodalTags != 0)
+		  delete theNodalTags;
+
+	 if (theHandler != 0)
+		  delete theHandler;
+
+	 if (data != 0)
+		  delete data;
+
+	 if (theNodes != 0)
+		  delete[] theNodes;
+
+	 if (theTimeSeries != 0) {
+		  for (int i = 0; i < numDOF; i++)
+				delete theTimeSeries[i];
+		  delete[] theTimeSeries;
+	 }
+}
+
+Vector ConditionalNodeRecorder::getResponse(Node* theNode)
 {
 	//
 	// if need nodal reactions get the domain to calculate them
@@ -216,24 +292,26 @@ Vector ResidNodeRecorder::getResponse(Node* theNode)
 	Vector response;
 	if (dataFlag == 0) {
 
+		// AddingSensitivity:BEGIN ///////////////////////////////////
 		response.resize(numDOF);
 
-		const Vector& theResponse = theNode->getTrialDisp();
-		for (int j = 0; j < numDOF; j++) {
+			const Vector& theResponse = theNode->getTrialDisp();
+			for (int j = 0; j < numDOF; j++) {
 
-			if (theTimeSeries != 0) {
-				timeSeriesTerm = timeSeriesValues[j];
-			}
+				if (theTimeSeries != 0) {
+					timeSeriesTerm = timeSeriesValues[j];
+				}
 
-			int dof = (*theDofs)(j);
-			if (theResponse.Size() > dof) {
-				response[j] = theResponse(dof) + timeSeriesTerm;
+				int dof = (*theDofs)(j);
+				if (theResponse.Size() > dof) {
+					response[j] = theResponse(dof) + timeSeriesTerm;
+				}
+				else {
+					response[j] = 0.0 + timeSeriesTerm;
+				}
 			}
-			else {
-				response[j] = 0.0 + timeSeriesTerm;
-			}
-		}
 		return response;
+		// AddingSensitivity:END /////////////////////////////////////
 	}
 	if (dataFlag == 1) {
 		response.resize(numDOF);
@@ -379,84 +457,12 @@ Vector ResidNodeRecorder::getResponse(Node* theNode)
 	return response;
 }
 
-
-ResidNodeRecorder::~ResidNodeRecorder()
-{
-	 //
-	 // write the data
-	 //
-
-	 if (theHandler != 0 && data != 0) {
-
-		  theHandler->tag("Data"); // Data
-
-		  int numResponse = data->noCols();
-		  Vector currentData(numResponse);
-		  for (int j = 0; j < numResponse; j++)
-				currentData(j) = (*data)(0, j);
-		  theHandler->write(currentData);
-
-
-		  theHandler->endTag(); // Data
-	 }
-
-	 //
-	 // clean up the memory
-	 //
-
-#ifdef _CSS
-	 if (theDofs != 0) {
-		  delete theDofs;
-	 }
-	 if (theTimeSeries != 0 && theNodes != 0)
-	 {
-		  for (int i = 0; i < numValidNodes; i++)
-				theNodes[i]->resetTimeSeries();
-	 }
-	 if (dataFlag == 999997 || dataFlag == 999999)
-	 {
-		  for (int i = 0; i < numValidNodes; i++)
-				theNodes[i]->resetEnergies();
-	 }
-#else
-	 int numDOF;
-	 if (theDofs != 0) {
-		  numDOF = theDofs->Size();
-		  delete theDofs;
-	 }
-#endif // _CSS
-
-	 if (theNodalTags != 0)
-		  delete theNodalTags;
-
-	 if (theHandler != 0)
-		  delete theHandler;
-
-	 if (data != 0)
-		  delete data;
-
-	 if (theNodes != 0)
-		  delete[] theNodes;
-
-	 if (theTimeSeries != 0) {
-		  for (int i = 0; i < numDOF; i++)
-				delete theTimeSeries[i];
-		  delete[] theTimeSeries;
-	 }
-}
-
 int
-ResidNodeRecorder::record(int commitTag, double timeStamp)
+ConditionalNodeRecorder::record(int commitTag, double timeStamp)
 {
-#ifdef _CSS
 	 if (theDomain == 0) {
 		  return 0;
 	 }
-#else
-	 if (theDomain == 0 || theDofs == 0) {
-		  return 0;
-	 }
-#endif // _CSS
 
 	 // 
 	 // check that initialization has been done
@@ -464,10 +470,13 @@ ResidNodeRecorder::record(int commitTag, double timeStamp)
 
 	 if (initializationDone == false) {
 		  if (this->initialize() != 0) {
-				opserr << "ResidNodeRecorder::record() - failed to initialize\n";
+				opserr << "ConditionalNodeRecorder::record() - failed to initialize\n";
 				return -1;
 		  }
 	 }
+
+	 if (envRcrdr->getModified() == 0)
+		  return 0;
 
 	 int iCnt = 0;
 	 if (echoTimeFlag)
@@ -477,14 +486,10 @@ ResidNodeRecorder::record(int commitTag, double timeStamp)
 	 }
 	 if (initializationDone != true)
 		  if (this->initialize() != 0) {
-				opserr << "ResidNodeRecorder::record() - failed in initialize()\n";
+				opserr << "ConditionalNodeRecorder::record() - failed in initialize()\n";
 				return -1;
 		  }
 
-
-#ifndef _CSS
-	 int numDOF = theDofs->Size();
-#endif // !_CSS
 
 	 double timeSeriesTerm = 0.0;
 
@@ -495,28 +500,59 @@ ResidNodeRecorder::record(int commitTag, double timeStamp)
 		  }
 	 }
 
-#ifdef _CSS
+	 //
+	 // if need nodal reactions get the domain to calculate them
+	 // before we iterate over the nodes
+	 //
+
 	 if (procDataMethods.Size() != 0)
 	 {
+		 // Materialize full raw layout, then reduce once
 		 Vector* respVecs = new Vector[numValidNodes];
 		 for (int i = 0; i < numValidNodes; i++)
 			 respVecs[i] = getResponse(theNodes[i]);
 
-		 double* buf = new double[numValidNodes];
-		 for (int j = 0; j < numDOF; j++) {
+		 int nRaw;
+		 double* raw;
+		 if (dataFlag == 10000) {
+			 nRaw = numValidNodes;
+			 raw = new double[nRaw];
 			 for (int i = 0; i < numValidNodes; i++)
-				 buf[i] = respVecs[i][j];
-			 int nOut = Recorder::applyProcDataChain(procDataMethods, procGrpNums, buf, numValidNodes, false);
-			 for (int i = 0; i < nOut; i++) {
-				 int cnt = j * nOut + i + (echoTimeFlag ? 1 : 0);
-				 (*data)(0, cnt) = buf[i];
+				 raw[i] = respVecs[i][0];
+		 }
+		 else {
+			 nRaw = numValidNodes * numDOF;
+			 raw = new double[nRaw];
+			 if (dofsFirstFlag) {
+				 for (int i = 0; i < numValidNodes; i++) {
+					 for (int j = 0; j < numDOF; j++) {
+						 int cnt = i * numDOF + j;
+						 if (j < respVecs[i].Size())
+							 raw[cnt] = respVecs[i][j];
+						 else
+							 raw[cnt] = 0.0;
+					 }
+				 }
+			 }
+			 else {
+				 for (int j = 0; j < numDOF; j++) {
+					 for (int i = 0; i < numValidNodes; i++) {
+						 int cnt = j * numValidNodes + i;
+						 if (j < respVecs[i].Size())
+							 raw[cnt] = respVecs[i][j];
+						 else
+							 raw[cnt] = 0.0;
+					 }
+				 }
 			 }
 		 }
-		 delete[] buf;
+		 int nOut = Recorder::applyProcDataChain(procDataMethods, procGrpNums, raw, nRaw, false);
+		 for (int i = 0; i < nOut; i++)
+			 (*data)(0, i + iCnt) = raw[i];
+		 delete[] raw;
 		 delete[] respVecs;
 	 }
 	 else
-#endif //_CSS
 	 {
 		  Vector* respVecs = new Vector[numValidNodes];
 		  for (int i = 0; i < numValidNodes; i++)
@@ -527,13 +563,26 @@ ResidNodeRecorder::record(int commitTag, double timeStamp)
 					 (*data)(0, i + iCnt) = respVecs[i][0];
 		  }
 		  else {
-				for (int j = 0; j < numDOF; j++) {
+				if (dofsFirstFlag) {
 					 for (int i = 0; i < numValidNodes; i++) {
-						  int cnt = j * numValidNodes + i + iCnt;
-						  if (j < respVecs[i].Size())
-								(*data)(0, cnt) = respVecs[i][j];
-						  else
-								(*data)(0, cnt) = 0.0;
+						  for (int j = 0; j < numDOF; j++) {
+								int cnt = i * numDOF + j + iCnt;
+								if (j < respVecs[i].Size())
+									 (*data)(0, cnt) = respVecs[i][j];
+								else
+									 (*data)(0, cnt) = 0.0;
+						  }
+					 }
+				}
+				else {
+					 for (int j = 0; j < numDOF; j++) {
+						  for (int i = 0; i < numValidNodes; i++) {
+								int cnt = j * numValidNodes + i + iCnt;
+								if (j < respVecs[i].Size())
+									 (*data)(0, cnt) = respVecs[i][j];
+								else
+									 (*data)(0, cnt) = 0.0;
+						  }
 					 }
 				}
 		  }
@@ -545,7 +594,7 @@ ResidNodeRecorder::record(int commitTag, double timeStamp)
 
 
 int
-ResidNodeRecorder::restart(void)
+ConditionalNodeRecorder::restart(void)
 {
 	 data->Zero();
 	 return 0;
@@ -553,7 +602,7 @@ ResidNodeRecorder::restart(void)
 
 
 int
-ResidNodeRecorder::setDomain(Domain& theDom)
+ConditionalNodeRecorder::setDomain(Domain& theDom)
 {
 	 theDomain = &theDom;
 	 initializationDone = false;
@@ -562,19 +611,19 @@ ResidNodeRecorder::setDomain(Domain& theDom)
 
 
 int
-ResidNodeRecorder::sendSelf(int commitTag, Channel& theChannel)
+ConditionalNodeRecorder::sendSelf(int commitTag, Channel& theChannel)
 {
 	 addColumnInfo = 1;
 
 	 int numDOF = theDofs->Size();
 
 	 if (theChannel.isDatastore() == 1) {
-		  opserr << "ResidNodeRecorder::sendSelf() - does not send data to a datastore\n";
+		  opserr << "ConditionalNodeRecorder::sendSelf() - does not send data to a datastore\n";
 		  return -1;
 	 }
 
 	 initializationDone = false;
-	 static ID idData(7);
+	 static ID idData(8);
 	 idData.Zero();
 
 	 if (theDofs != 0)
@@ -600,27 +649,28 @@ ResidNodeRecorder::sendSelf(int commitTag, Channel& theChannel)
 		  idData[6] = 0;
 	 else
 		  idData[6] = 1;
+	 idData(7) = dofsFirstFlag ? 1 : 0;
 
 	 if (theChannel.sendID(0, commitTag, idData) < 0) {
-		  opserr << "ResidNodeRecorder::sendSelf() - failed to send idData\n";
+		  opserr << "ConditionalNodeRecorder::sendSelf() - failed to send idData\n";
 		  return -1;
 	 }
 
 	 if (theDofs != 0)
 		  if (theChannel.sendID(0, commitTag, *theDofs) < 0) {
-				opserr << "ResidNodeRecorder::sendSelf() - failed to send dof id's\n";
+				opserr << "ConditionalNodeRecorder::sendSelf() - failed to send dof id's\n";
 				return -1;
 		  }
 
 	 if (theNodalTags != 0)
 		  if (theChannel.sendID(0, commitTag, *theNodalTags) < 0) {
-				opserr << "ResidNodeRecorder::sendSelf() - failed to send nodal tags\n";
+				opserr << "ConditionalNodeRecorder::sendSelf() - failed to send nodal tags\n";
 				return -1;
 		  }
 
 	 if (theHandler != 0)
 		  if (theHandler->sendSelf(commitTag, theChannel) < 0) {
-				opserr << "ResidNodeRecorder::sendSelf() - failed to send the DataOutputHandler\n";
+				opserr << "ConditionalNodeRecorder::sendSelf() - failed to send the DataOutputHandler\n";
 				return -1;
 		  }
 
@@ -634,13 +684,13 @@ ResidNodeRecorder::sendSelf(int commitTag, Channel& theChannel)
 					 timeSeriesTags[i] = -1;
 		  }
 		  if (theChannel.sendID(0, commitTag, timeSeriesTags) < 0) {
-				opserr << "ResidNodeRecorder::sendSelf() - failed to send time series tags\n";
+				opserr << "ConditionalNodeRecorder::sendSelf() - failed to send time series tags\n";
 				return -1;
 		  }
 		  for (int i = 0; i < numDOF; i++) {
 				if (theTimeSeries[i] != 0) {
 					 if (theTimeSeries[i]->sendSelf(commitTag, theChannel) < 0) {
-						  opserr << "ResidNodeRecorder::sendSelf() - time series failed in send\n";
+						  opserr << "ConditionalNodeRecorder::sendSelf() - time series failed in send\n";
 						  return -1;
 
 					 }
@@ -652,19 +702,19 @@ ResidNodeRecorder::sendSelf(int commitTag, Channel& theChannel)
 }
 
 int
-ResidNodeRecorder::recvSelf(int commitTag, Channel& theChannel,
+ConditionalNodeRecorder::recvSelf(int commitTag, Channel& theChannel,
 	 FEM_ObjectBroker& theBroker)
 {
 	 addColumnInfo = 1;
 
 	 if (theChannel.isDatastore() == 1) {
-		  opserr << "ResidNodeRecorder::sendSelf() - does not send data to a datastore\n";
+		  opserr << "ConditionalNodeRecorder::sendSelf() - does not send data to a datastore\n";
 		  return -1;
 	 }
 
-	 static ID idData(7);
+	 static ID idData(8);
 	 if (theChannel.recvID(0, commitTag, idData) < 0) {
-		  opserr << "ResidNodeRecorder::recvSelf() - failed to send idData\n";
+		  opserr << "ConditionalNodeRecorder::recvSelf() - failed to send idData\n";
 		  return -1;
 	 }
 
@@ -680,6 +730,8 @@ ResidNodeRecorder::recvSelf(int commitTag, Channel& theChannel,
 	 else
 		  echoTimeFlag = false;
 
+	 dofsFirstFlag = (idData(7) == 1);
+
 
 	 //
 	 // get the DOF ID data
@@ -692,14 +744,14 @@ ResidNodeRecorder::recvSelf(int commitTag, Channel& theChannel,
 		  if (numDOFs != 0) {
 				theDofs = new ID(numDOFs);
 				if (theDofs == 0 || theDofs->Size() != numDOFs) {
-					 opserr << "ResidNodeRecorder::recvSelf() - out of memory\n";
+					 opserr << "ConditionalNodeRecorder::recvSelf() - out of memory\n";
 					 return -1;
 				}
 		  }
 	 }
 	 if (theDofs != 0)
 		  if (theChannel.recvID(0, commitTag, *theDofs) < 0) {
-				opserr << "ResidNodeRecorder::recvSelf() - failed to recv dof data\n";
+				opserr << "ConditionalNodeRecorder::recvSelf() - failed to recv dof data\n";
 				return -1;
 		  }
 
@@ -714,25 +766,25 @@ ResidNodeRecorder::recvSelf(int commitTag, Channel& theChannel,
 		  if (numNodes != 0) {
 				theNodalTags = new ID(numNodes);
 				if (theNodalTags == 0 || theNodalTags->Size() != numNodes) {
-					 opserr << "ResidNodeRecorder::recvSelf() - out of memory\n";
+					 opserr << "ConditionalNodeRecorder::recvSelf() - out of memory\n";
 					 return -1;
 				}
 		  }
 	 }
 	 if (theNodalTags != 0)
 		  if (theChannel.recvID(0, commitTag, *theNodalTags) < 0) {
-				opserr << "ResidNodeRecorder::recvSelf() - failed to recv dof data\n";
+				opserr << "ConditionalNodeRecorder::recvSelf() - failed to recv dof data\n";
 				return -1;
 		  }
 
 
 	 if (theHandler != 0)
 		  delete theHandler;
-	 if (idData(2)= 0)
+	 if (idData(2) != 0)
 	 {
 		 theHandler = theBroker.getPtrNewStream(idData(2));
 		 if (theHandler == 0) {
-			 opserr << "ResidNodeRecorder::sendSelf() - failed to get a data output handler\n";
+			 opserr << "ConditionalNodeRecorder::sendSelf() - failed to get a data output handler\n";
 			 return -1;
 		 }
 
@@ -747,7 +799,7 @@ ResidNodeRecorder::recvSelf(int commitTag, Channel& theChannel,
 		  theTimeSeries = new TimeSeries * [numDOFs];
 		  ID timeSeriesTags(numDOFs);
 		  if (theChannel.recvID(0, commitTag, timeSeriesTags) < 0) {
-				opserr << "ResidNodeRecorder::recvSelf() - failed to recv time series tags\n";
+				opserr << "ConditionalNodeRecorder::recvSelf() - failed to recv time series tags\n";
 				return -1;
 		  }
 		  for (int i = 0; i < numDOFs; i++) {
@@ -756,7 +808,7 @@ ResidNodeRecorder::recvSelf(int commitTag, Channel& theChannel,
 				else {
 					 theTimeSeries[i] = theBroker.getNewTimeSeries(timeSeriesTags(i));
 					 if (theTimeSeries[i]->recvSelf(commitTag, theChannel, theBroker) < 0) {
-						  opserr << "ResidNodeRecorder::recvSelf() - time series failed in recv\n";
+						  opserr << "ConditionalNodeRecorder::recvSelf() - time series failed in recv\n";
 						  return -1;
 					 }
 				}
@@ -768,10 +820,10 @@ ResidNodeRecorder::recvSelf(int commitTag, Channel& theChannel,
 
 
 int
-ResidNodeRecorder::initialize(void)
+ConditionalNodeRecorder::initialize(void)
 {
 	 if (theDomain == 0) {
-		  opserr << "ResidNodeRecorder::initialize() - either nodes or domain has not been set\n";
+		  opserr << "ConditionalNodeRecorder::initialize() - either nodes or domain has not been set\n";
 		  return -1;
 	 }
 
@@ -788,7 +840,7 @@ ResidNodeRecorder::initialize(void)
 		  int numNode = theNodalTags->Size();
 		  theNodes = new Node * [numNode];
 		  if (theNodes == 0) {
-				opserr << "ResidNodeRecorder::domainChanged - out of memory\n";
+				opserr << "ConditionalNodeRecorder::domainChanged - out of memory\n";
 				return -1;
 		  }
 
@@ -808,7 +860,7 @@ ResidNodeRecorder::initialize(void)
 				theNodes = new Node * [numNodes];
 
 				if (theNodes == 0) {
-					 opserr << "ResidNodeRecorder::domainChanged - out of memory\n";
+					 opserr << "ConditionalNodeRecorder::domainChanged - out of memory\n";
 					 return -1;
 				}
 				NodeIter& theDomainNodes = theDomain->getNodes();
@@ -875,18 +927,11 @@ ResidNodeRecorder::initialize(void)
 	 // resize the output matrix
 	 //
 
-#ifdef _CSS
-	 int nVals = numValidNodes;
-	 int nProcOuts = (procDataMethods.Size() == 0) ? nVals
-		  : Recorder::getFinalProcOuts(nVals, procDataMethods, procGrpNums);
-	 int numValidResponse = nProcOuts * numDOF;
-#else
-	 int numDOF = theDofs->Size();
-	 int numValidResponse = numValidNodes * numDOF;
-#endif // _CSS
+	 int nRaw = (dataFlag == 10000) ? numValidNodes : (numValidNodes * numDOF);
+	 int nProcOuts = (procDataMethods.Size() == 0) ? nRaw
+		  : Recorder::getFinalProcOuts(nRaw, procDataMethods, procGrpNums);
 
-	 if (dataFlag == 10000)
-		  numValidResponse = numValidNodes;
+	 int numValidResponse = nProcOuts;
 
 	 if (echoTimeFlag == true) {
 		  numValidResponse += 1;
@@ -905,14 +950,27 @@ ResidNodeRecorder::initialize(void)
 		  int nodeCount = 0;
 
 		  int numNode = theNodalTags->Size();
-		  for (int j = 0; j < numDOF; j++) {
+		  if (dofsFirstFlag) {
 				for (int i = 0; i < numNode; i++) {
 					 int nodeTag = (*theNodalTags)(i);
 					 Node* theNode = theDomain->getNode(nodeTag);
 					 if (theNode != 0) {
-						  if (j == 0)
-								xmlOrder(nodeCount++) = i + 1;
-						  dataOrder(count++) = i + 1;
+						  xmlOrder(nodeCount++) = i + 1;
+						  for (int j = 0; j < numDOF; j++)
+								dataOrder(count++) = i + 1;
+					 }
+				}
+		  }
+		  else {
+				for (int j = 0; j < numDOF; j++) {
+					 for (int i = 0; i < numNode; i++) {
+						  int nodeTag = (*theNodalTags)(i);
+						  Node* theNode = theDomain->getNode(nodeTag);
+						  if (theNode != 0) {
+								if (j == 0)
+									 xmlOrder(nodeCount++) = i + 1;
+								dataOrder(count++) = i + 1;
+						  }
 					 }
 				}
 		  }
@@ -936,6 +994,7 @@ ResidNodeRecorder::initialize(void)
 						  theHandler->tag("ResponseType", "time");
 						  theHandler->endTag();
 					 }
+
 					 sprintf(outputData, "%s%d", dataType, j + 1);
 					 theHandler->tag("ResponseType", outputData);
 				}
@@ -946,6 +1005,11 @@ ResidNodeRecorder::initialize(void)
 		  if (theNodalTags != 0 && addColumnInfo == 1) {
 				theHandler->setOrder(dataOrder);
 		  }
+	 }
+	 envRcrdr = theDomain->getRecorder(envRcrdrTag);
+	 if (envRcrdr == 0) {
+		  opserr << "ConditionalNodeRecorder::initialize() - could not retrieve base recorder object with tag: " << envRcrdrTag << "\n";
+		  return -3;
 	 }
 	 initializationDone = true;
 

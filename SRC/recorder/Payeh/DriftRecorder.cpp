@@ -47,9 +47,10 @@ enum outputMode  {STANDARD_STREAM, DATA_STREAM, XML_STREAM, DATABASE_STREAM, BIN
 
 DriftRecorder::DriftRecorder()
 	 :Recorder(RECORDER_TAGS_DriftRecorder),
-	 ndI(0), ndJ(0), dof(0), perpDirn(0), oneOverL(0), data(0),
+	 ndI(0), ndJ(0), theNodes(0), theDofs(0), numDOF(0), perpDirn(0), oneOverL(0), data(0),
 	 theDomain(0), theOutputHandler(0),
-	 initializationDone(false), numNodes(0), echoTimeFlag(false)
+	 initializationDone(false), numNodes(0), echoTimeFlag(false), dofsFirstFlag(false),
+	 deltaT(0.0), nextTimeStampToRecord(0.0)
 #ifdef _CSS
 	 , procDataMethods(0), procGrpNums(0)
 #endif // _CSS
@@ -60,18 +61,19 @@ DriftRecorder::DriftRecorder()
 
 DriftRecorder::DriftRecorder(int ni,
 	 int nj,
-	 int df,
+	 const ID& dofs,
 	 int dirn,
 	 Domain& theDom,
 	 OPS_Stream* theDataOutputHandler,
 	 const ID& procMethods, const ID& procGrpN,
 	 bool timeFlag,
-	 double dT)
+	 double dT,
+	 bool dofsFirst)
 	 :Recorder(RECORDER_TAGS_DriftRecorder),
-	 ndI(0), ndJ(0), theNodes(0), dof(df), perpDirn(dirn), oneOverL(0), data(0),
+	 ndI(0), ndJ(0), theNodes(0), theDofs(0), numDOF(0), perpDirn(dirn), oneOverL(0), data(0),
 	 theDomain(&theDom), theOutputHandler(theDataOutputHandler),
-	 initializationDone(false), numNodes(0), echoTimeFlag(timeFlag), deltaT(dT),
-	 nextTimeStampToRecord(0.0)
+	 initializationDone(false), numNodes(0), echoTimeFlag(timeFlag), dofsFirstFlag(dofsFirst),
+	 deltaT(dT), nextTimeStampToRecord(0.0)
 #ifdef _CSS
 	 , procDataMethods(procMethods), procGrpNums(procGrpN)
 #endif // _CSS
@@ -83,28 +85,34 @@ DriftRecorder::DriftRecorder(int ni,
 		  (*ndI)(0) = ni;
 		  (*ndJ)(0) = nj;
 	 }
+	 theDofs = new ID(dofs);
+	 numDOF = theDofs->Size();
 }
 
 
 DriftRecorder::DriftRecorder(const ID& nI,
 	 const ID& nJ,
-	 int df,
+	 const ID& dofs,
 	 int dirn,
 	 Domain& theDom,
 	 OPS_Stream* theDataOutputHandler,
 	 const ID& procMethods, const ID& procGrpN,
 	 bool timeFlag,
-	 double dT)
+	 double dT,
+	 bool dofsFirst)
 	 :Recorder(RECORDER_TAGS_DriftRecorder),
-	 ndI(0), ndJ(0), theNodes(0), dof(df), perpDirn(dirn), oneOverL(0), data(0),
+	 ndI(0), ndJ(0), theNodes(0), theDofs(0), numDOF(0), perpDirn(dirn), oneOverL(0), data(0),
 	 theDomain(&theDom), theOutputHandler(theDataOutputHandler),
-	 initializationDone(false), numNodes(0), echoTimeFlag(timeFlag), deltaT(dT)
+	 initializationDone(false), numNodes(0), echoTimeFlag(timeFlag), dofsFirstFlag(dofsFirst),
+	 deltaT(dT), nextTimeStampToRecord(0.0)
 #ifdef _CSS
 	 , procDataMethods(procMethods), procGrpNums(procGrpN)
 #endif // _CSS
 {
 	 ndI = new ID(nI);
 	 ndJ = new ID(nJ);
+	 theDofs = new ID(dofs);
+	 numDOF = theDofs->Size();
 }
 
 DriftRecorder::~DriftRecorder()
@@ -114,6 +122,9 @@ DriftRecorder::~DriftRecorder()
 
 	 if (ndJ != 0)
 		  delete ndJ;
+
+	 if (theDofs != 0)
+		  delete theDofs;
 
 	 if (oneOverL != 0)
 		  delete oneOverL;
@@ -129,6 +140,21 @@ DriftRecorder::~DriftRecorder()
 		  theOutputHandler->endTag(); // OpenSeesOutput
 		  delete theOutputHandler;
 	 }
+}
+
+double
+DriftRecorder::computeDrift(int pairIndex, int dofIndex) const
+{
+	 if ((*oneOverL)(pairIndex) == 0.0)
+		  return 0.0;
+	 Node* nodeI = theNodes[2 * pairIndex];
+	 Node* nodeJ = theNodes[2 * pairIndex + 1];
+	 const Vector& dispI = nodeI->getTrialDisp();
+	 const Vector& dispJ = nodeJ->getTrialDisp();
+	 int d = (*theDofs)(dofIndex);
+	 if (d < 0 || d >= dispI.Size() || d >= dispJ.Size())
+		  return 0.0;
+	 return (dispJ(d) - dispI(d)) * (*oneOverL)(pairIndex);
 }
 
 int
@@ -171,48 +197,40 @@ DriftRecorder::record(int commitTag, double timeStamp)
 #ifdef _CSS
 	if (procDataMethods.Size() != 0)
 	{
-		double* buf = new double[numNodes];
-		int loc = timeOffset;
-		for (int i = 0; i < numNodes; i++) {
-			Node* nodeI = theNodes[2 * i];
-			Node* nodeJ = theNodes[2 * i + 1];
-			double val1 = 0.0;
-
-			if ((*oneOverL)(i) != 0.0) {
-				const Vector& dispI = nodeI->getTrialDisp();
-				const Vector& dispJ = nodeJ->getTrialDisp();
-
-				double dx = dispJ(dof) - dispI(dof);
-
-				val1 = dx * (*oneOverL)(i);
-
-			}
-			buf[i] = val1;
+		// Materialize full raw layout, then reduce once
+		int nDof = (numDOF > 0) ? numDOF : 1;
+		int nRaw = numNodes * nDof;
+		double* raw = new double[nRaw];
+		if (dofsFirstFlag) {
+			for (int i = 0; i < numNodes; i++)
+				for (int j = 0; j < nDof; j++)
+					raw[i * nDof + j] = this->computeDrift(i, j);
 		}
-		int nOut = Recorder::applyProcDataChain(procDataMethods, procGrpNums, buf, numNodes, false);
+		else {
+			for (int j = 0; j < nDof; j++)
+				for (int i = 0; i < numNodes; i++)
+					raw[j * numNodes + i] = this->computeDrift(i, j);
+		}
+		int nOut = Recorder::applyProcDataChain(procDataMethods, procGrpNums, raw, nRaw, false);
 		for (int i = 0; i < nOut; i++)
-			(*data)(loc++) = buf[i];
-		delete[] buf;
+			(*data)(timeOffset + i) = raw[i];
+		delete[] raw;
 	}
 	else
 #endif // _CSS
-
-		for (int i = 0; i < numNodes; i++) {
-			Node* nodeI = theNodes[2 * i];
-			Node* nodeJ = theNodes[2 * i + 1];
-
-			if ((*oneOverL)(i) != 0.0) {
-				const Vector& dispI = nodeI->getTrialDisp();
-				const Vector& dispJ = nodeJ->getTrialDisp();
-
-				double dx = dispJ(dof) - dispI(dof);
-
-				(*data)(i + timeOffset) = dx * (*oneOverL)(i);
-
-			}
-			else
-				(*data)(i + timeOffset) = 0.0;
+	{
+		int nDof = (numDOF > 0) ? numDOF : 1;
+		if (dofsFirstFlag) {
+			for (int i = 0; i < numNodes; i++)
+				for (int j = 0; j < nDof; j++)
+					(*data)(timeOffset + i * nDof + j) = this->computeDrift(i, j);
 		}
+		else {
+			for (int j = 0; j < nDof; j++)
+				for (int i = 0; i < numNodes; i++)
+					(*data)(timeOffset + j * numNodes + i) = this->computeDrift(i, j);
+		}
+	}
 	if (theOutputHandler != 0)
 		theOutputHandler->write(*data);
 
@@ -241,13 +259,13 @@ DriftRecorder::sendSelf(int commitTag, Channel& theChannel)
 	 return 0;
 
 
-	 static ID idData(7);
+	 static ID idData(8);
 	 idData.Zero();
 	 if (ndI != 0 && ndI->Size() != 0)
 		  idData(0) = ndI->Size();
 	 if (ndJ != 0 && ndJ->Size() != 0)
 		  idData(1) = ndJ->Size();
-	 idData(2) = dof;
+	 idData(2) = numDOF;
 	 idData(3) = perpDirn;
 	 if (theOutputHandler != 0) {
 		 idData(4) = theOutputHandler->getClassTag();
@@ -260,6 +278,7 @@ DriftRecorder::sendSelf(int commitTag, Channel& theChannel)
 		  idData(5) = 1;
 
 	 idData(6) = this->getTag();
+	 idData(7) = dofsFirstFlag ? 1 : 0;
 
 	 if (theChannel.sendID(0, commitTag, idData) < 0) {
 		  opserr << "DriftRecorder::sendSelf() - failed to send idData\n";
@@ -282,6 +301,12 @@ DriftRecorder::sendSelf(int commitTag, Channel& theChannel)
 	 if (ndJ != 0)
 		  if (theChannel.sendID(0, commitTag, *ndJ) < 0) {
 				opserr << "DriftRecorder::sendSelf() - failed to send dof id's\n";
+				return -1;
+		  }
+
+	 if (theDofs != 0)
+		  if (theChannel.sendID(0, commitTag, *theDofs) < 0) {
+				opserr << "DriftRecorder::sendSelf() - failed to send theDofs\n";
 				return -1;
 		  }
 
@@ -311,7 +336,7 @@ DriftRecorder::recvSelf(int commitTag, Channel& theChannel,
 	 opserr << "DriftRecorder::recvSelf - should not be used in OpenSeesSP\n";
 	 return 0;
 
-	 static ID idData(7);
+	 static ID idData(8);
 	 if (theChannel.recvID(0, commitTag, idData) < 0) {
 		  opserr << "DriftRecorder::sendSelf() - failed to send idData\n";
 		  return -1;
@@ -342,8 +367,17 @@ DriftRecorder::recvSelf(int commitTag, Channel& theChannel,
 		  }
 	 }
 
-	 dof = idData(2);
+	 numDOF = idData(2);
 	 perpDirn = idData(3);
+	 dofsFirstFlag = (idData(7) == 1);
+
+	 if (numDOF != 0) {
+		  theDofs = new ID(numDOF);
+		  if (theChannel.recvID(0, commitTag, *theDofs) < 0) {
+				opserr << "DriftRecorder::recvSelf() - failed to recv theDofs\n";
+				return -1;
+		  }
+	 }
 
 	 if (idData(5) == 0)
 		  echoTimeFlag = true;
@@ -474,12 +508,14 @@ DriftRecorder::initialize(void)
 	 theNodes = new Node * [2 * numNodes];
 	 oneOverL = new Vector(numNodes);
 #ifdef _CSS
-	 int nVals = numNodes;
-	 int nProcOuts = (procDataMethods.Size() == 0) ? nVals
-		  : Recorder::getFinalProcOuts(nVals, procDataMethods, procGrpNums);
+	 int nDof = (numDOF > 0) ? numDOF : 1;
+	 int nRaw = numNodes * nDof;
+	 int nProcOuts = (procDataMethods.Size() == 0) ? nRaw
+		  : Recorder::getFinalProcOuts(nRaw, procDataMethods, procGrpNums);
 	 data = new Vector(nProcOuts + timeOffset); // data(0) allocated for time
 #else
-	 data = new Vector(numNodes + timeOffset); // data(0) allocated for time
+	 int nDof = (numDOF > 0) ? numDOF : 1;
+	 data = new Vector(numNodes * nDof + timeOffset); // data(0) allocated for time
 #endif // _CSS
 	 if (theNodes == 0 || oneOverL == 0 || data == 0) {
 		  opserr << "DriftRecorder::initialize() - out of memory\n";

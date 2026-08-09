@@ -19,15 +19,15 @@
 ** ****************************************************************** */
                                                                         
 // $Revision: 1.10 $
-// $Date: 2009-04-14 21:14:22 $
-// $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeElementRecorder.h,v $
+// $Date: 1395-12-08 22:25:03 $
+// $Source: /usr/local/cvs/OpenSees/SRC/recorder/ConditionalElementRecorder.h,v $
                                                                         
-#ifndef EnvelopeElementRecorder_h
-#define EnvelopeElementRecorder_h
+#ifndef ConditionalElementRecorder_h
+#define ConditionalElementRecorder_h
 
-// Written: fmk 
+// Written: SAJalali 
 //
-// What: "@(#) EnvelopeElementRecorder.h, revA"
+// What: "@(#) ConditionalElementRecorder.h, revA"
 
 #include <Recorder.h>
 #include <Information.h>
@@ -42,43 +42,40 @@ class Element;
 class Response;
 class FE_Datastore;
 
-class EnvelopeElementRecorder: public Recorder
+class ConditionalElementRecorder: public Recorder
 {
   public:
-    EnvelopeElementRecorder();
-    EnvelopeElementRecorder(const ID *eleID, 
+    ConditionalElementRecorder();
+    ConditionalElementRecorder(const ID *eleID, 
 			    const char **argv, 
 			    int argc,
 			    Domain &theDomain, 
 			    OPS_Stream *theOutputHandler,
-          const ID& procDataMethods, const ID& procGrpNums,
+				int rcrdrTag,
+			    const ID& procDataMethods, const ID& procGrpNums,
 			    bool echoTimeFlag,
-			    const ID *dof); 
+			    const ID *dof,
+			    bool dofsFirst = false); 
 
 
-    ~EnvelopeElementRecorder();
+    ~ConditionalElementRecorder();
 
     int record(int commitTag, double timeStamp);
     int restart(void);    
-    int flush(void);    
 
     int setDomain(Domain &theDomain);
     int sendSelf(int commitTag, Channel &theChannel);  
     int recvSelf(int commitTag, Channel &theChannel, 
 		 FEM_ObjectBroker &theBroker);
-	virtual double getRecordedValue(int clmnId, int rowOffset, bool reset); //added by SAJalali
-#ifdef _CSS
 	virtual int removeComponentResponse(int compTag);
    ID procDataMethods;  // empty => no processing; else chained stages:
                         // 1:sum 2:max 3:min 4:maxAbs 5:minAbs 6:SRSS
    ID procGrpNums;      // parallel to procDataMethods; -1 => all columns
-   virtual int getModified() { return Modified; }
-   int Modified;
-#endif // _CSS
-
   protected:
     
   private:	
+	  int envRcrdrTag;
+	  Recorder* envRcrdr;
     int initialize(void);
 
     int numEle;
@@ -93,17 +90,15 @@ class EnvelopeElementRecorder: public Recorder
     OPS_Stream *theHandler;
 
     Matrix *data;
-    Vector *currentData;
-    bool first;
 
     bool initializationDone;
     char **responseArgs;
     int numArgs;
 
     bool echoTimeFlag; 
+    bool dofsFirstFlag;  // true => all dofs of each element first; false => DOF-major
 
     int addColumnInfo;
-    bool closeOnWrite;
 };
 
 

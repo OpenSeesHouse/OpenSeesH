@@ -1,5 +1,5 @@
 /* ****************************************************************** **
-**    OpenSeesite - Open System for Earthquake Engineering Simulation    **
+**    OpenSees - Open System for Earthquake Engineering Simulation    **
 **          Pacific Earthquake Engineering Research Center            **
 **                                                                    **
 **                                                                    **
@@ -18,68 +18,63 @@
 **                                                                    **
 ** ****************************************************************** */
 
-// Written: fmk 
+// Written: SAJalali 
 //
-// Description: This file contains the class implementation of 
-// EnvelopeEnvelopeElementRecorder.
+// Description: This file contains the class implementatation of 
+// ResidElementRecorder.
 //
-// What: "@(#) EnvelopeEnvelopeElementRecorder.C, revA"
+// What: "@(#) ResidElementRecorder.C, revA"
 
-#include <EnvelopeElementRecorder.h>
+#include <OPS_Globals.h>
+#ifdef _CSS
+
+
+#include <ResidElementRecorder.h>
 #include <Domain.h>
 #include <Element.h>
 #include <ElementIter.h>
+#include <Matrix.h>
 #include <Vector.h>
 #include <ID.h>
-#include <Matrix.h>
+#include <string.h>
 #include <Response.h>
 #include <FE_Datastore.h>
+
 #include <Message.h>
 #include <FEM_ObjectBroker.h>
-#include <MeshRegion.h>
-
-#include <StandardStream.h>
-#include <DataFileStream.h>
-#include <DataFileStreamAdd.h>
-#include <XmlFileStream.h>
-#include <BinaryFileStream.h>
-#include <DatabaseStream.h>
-#include <TCP_Stream.h>
-
-#include <elementAPI.h>
-
-#include <string.h>
-#include <stdlib.h>
 #include <math.h>
+#include <stdlib.h>
 
-EnvelopeElementRecorder::EnvelopeElementRecorder()
-	 :Recorder(RECORDER_TAGS_EnvelopeElementRecorder),
+ResidElementRecorder::ResidElementRecorder()
+	 :Recorder(RECORDER_TAGS_ResidElementRecorder),
 	 numEle(0), numDOF(0), eleID(0), dof(0), theResponses(0), theDomain(0),
-	 theHandler(0), data(0), currentData(0), first(true),
-	 initializationDone(false), responseArgs(0), numArgs(0), echoTimeFlag(false), addColumnInfo(0)
+	 theHandler(0), data(0), initializationDone(false), responseArgs(0), numArgs(0), echoTimeFlag(false), dofsFirstFlag(false), addColumnInfo(0)
 #ifdef _CSS
-	 , procDataMethods(0), procGrpNums(0), Modified(0)
+	 , procDataMethods(0), procGrpNums(0)
 #endif // _CSS
 {
 
 }
 
 
-EnvelopeElementRecorder::EnvelopeElementRecorder(const ID* ele,
+ResidElementRecorder::ResidElementRecorder(const ID* ele,
 	 const char** argv,
 	 int argc,
 	 Domain& theDom,
 	 OPS_Stream* theOutputHandler,
+#ifdef _CSS
 	 const ID& procDataMethods,
 	 const ID& procGrpNums,
+#endif // _CSS
 	 bool echoTime,
-	 const ID* indexValues)
-	 :Recorder(RECORDER_TAGS_EnvelopeElementRecorder),
+	 const ID* indexValues,
+	 bool dofsFirst)
+	 :Recorder(RECORDER_TAGS_ResidElementRecorder),
 	 numEle(0), eleID(0), numDOF(0), dof(0), theResponses(0), theDomain(&theDom),
-	 theHandler(theOutputHandler), data(0), currentData(0), first(true),
-	 initializationDone(false), responseArgs(0), numArgs(0), echoTimeFlag(echoTime), addColumnInfo(0)
+	 theHandler(theOutputHandler), data(0),
+	 initializationDone(false), responseArgs(0), numArgs(0), echoTimeFlag(echoTime), dofsFirstFlag(dofsFirst), addColumnInfo(0)
 #ifdef _CSS
-	 , procDataMethods(procDataMethods), procGrpNums(procGrpNums), Modified(0)
+	 , procDataMethods(procDataMethods), procGrpNums(procGrpNums)
 #endif // _CSS
 {
 
@@ -118,7 +113,7 @@ EnvelopeElementRecorder::EnvelopeElementRecorder(const ID* ele,
 	 numArgs = argc;
 }
 
-EnvelopeElementRecorder::~EnvelopeElementRecorder()
+ResidElementRecorder::~ResidElementRecorder()
 {
 	 //
 	 // write the data
@@ -127,15 +122,17 @@ EnvelopeElementRecorder::~EnvelopeElementRecorder()
 	 if (eleID != 0)
 		  delete eleID;
 
-	 if (theHandler != 0 && currentData != 0) {
+	 if (theHandler != 0 && data != 0) {
 
 		  theHandler->tag("Data"); // Data
+		  if (initializationDone)
+		  {
+				int numResponse = data->noCols();
+				Vector currentData(numResponse);
 
-		  for (int i = 0; i < 3; i++) {
-				int numResponse = currentData->Size();
 				for (int j = 0; j < numResponse; j++)
-					 (*currentData)(j) = (*data)(i, j);
-				theHandler->write(*currentData);
+					 currentData(j) = (*data)(0, j);
+				theHandler->write(currentData);
 		  }
 
 		  theHandler->endTag(); // Data
@@ -147,8 +144,6 @@ EnvelopeElementRecorder::~EnvelopeElementRecorder()
 	 if (data != 0)
 		  delete data;
 
-	 if (currentData != 0)
-		  delete currentData;
 
 	 //
 	 // clean up the memory
@@ -175,7 +170,7 @@ EnvelopeElementRecorder::~EnvelopeElementRecorder()
 
 
 int
-EnvelopeElementRecorder::record(int commitTag, double timeStamp)
+ResidElementRecorder::record(int commitTag, double timeStamp)
 {
 	 // 
 	 // check that initialization has been done
@@ -183,238 +178,174 @@ EnvelopeElementRecorder::record(int commitTag, double timeStamp)
 
 	 if (initializationDone == false) {
 		  if (this->initialize() != 0) {
-				opserr << "EnvelopeElementRecorder::record() - failed to initialize\n";
+				opserr << "ResidElementRecorder::record() - failed to initialize\n";
 				return -1;
 		  }
 	 }
 
 	 int result = 0;
 	 int loc = 0;
-#ifdef _CSS
-	 Modified = 0;
+	 if (echoTimeFlag)
+	 {
+		  loc = 1;
+		  (*data)(0, 0) = timeStamp;
+	 }
 	 if (procDataMethods.Size() != 0)
 	 {
+		  // Materialize full raw layout, then reduce once
 		  int respSize = numDOF;
 		  for (int i = 0; i < numEle; i++) {
 				if (theResponses[i] == 0)
 					 continue;
-				// ask the element for the reponse
 				result += theResponses[i]->getResponse();
-				if (numDOF == 0)
-				{
+				if (numDOF == 0) {
 					 const Vector& eleData = theResponses[i]->getData();
 					 int sz = eleData.Size();
 					 if (sz > respSize)
 						  respSize = sz;
 				}
 		  }
-		  int nVals = numEle;
-		  double* buf = new double[nVals];
-		  for (int j = 0; j < respSize; j++)
-		  {
+		  int nRaw = (numDOF != 0) ? (numEle * numDOF) : (numEle * respSize);
+		  double* raw = new double[nRaw];
+		  for (int k = 0; k < nRaw; k++)
+				raw[k] = 0.0;
+
+		  if (numDOF != 0) {
+				if (dofsFirstFlag) {
+					 for (int i = 0; i < numEle; i++) {
+						  if (theResponses[i] == 0)
+								continue;
+						  const Vector& eleData = theResponses[i]->getData();
+						  for (int j = 0; j < numDOF; j++) {
+								int index = (*dof)(j);
+								if (index >= 0 && index < eleData.Size())
+									 raw[i * numDOF + j] = eleData(index);
+						  }
+					 }
+				}
+				else {
+					 for (int j = 0; j < numDOF; j++) {
+						  int index = (*dof)(j);
+						  for (int i = 0; i < numEle; i++) {
+								if (theResponses[i] == 0)
+									 continue;
+								const Vector& eleData = theResponses[i]->getData();
+								if (index >= 0 && index < eleData.Size())
+									 raw[j * numEle + i] = eleData(index);
+						  }
+					 }
+				}
+		  }
+		  else {
 				for (int i = 0; i < numEle; i++) {
-					 buf[i] = 0.0;
 					 if (theResponses[i] == 0)
 						  continue;
 					 const Vector& eleData = theResponses[i]->getData();
-					 int index = j;
-					 if (numDOF != 0)
-						  index = (*dof)(j);
-					 if (index >= eleData.Size())
-						  continue;
-					 buf[i] = eleData(index);
-				}
-				int nOut = Recorder::applyProcDataChain(procDataMethods, procGrpNums, buf, nVals, false);
-				for (int i = 0; i < nOut; i++)
-				{
-					 loc = j * nOut + i;
-					 (*currentData)(loc) = buf[i];
+					 for (int j = 0; j < respSize; j++) {
+						  if (j < eleData.Size())
+								raw[i * respSize + j] = eleData(j);
+					 }
 				}
 		  }
-		  delete[] buf;
+		  int nOut = Recorder::applyProcDataChain(procDataMethods, procGrpNums, raw, nRaw, false);
+		  for (int i = 0; i < nOut; i++)
+				(*data)(0, loc++) = raw[i];
+		  delete[] raw;
 	 }
 	 else if (numDOF != 0)
 	 {
+		  // DOF-major by default; -dofsFirst => all dofs of each element first
 		  for (int i = 0; i < numEle; i++) {
-				if (theResponses[i] != 0) {
-					 int res;
-					 if ((res = theResponses[i]->getResponse()) < 0)
-						  result += res;
-				}
+				if (theResponses[i] == 0)
+					 continue;
+				int res;
+				if ((res = theResponses[i]->getResponse()) < 0)
+					 result += res;
 		  }
-		  for (int j = 0; j < numDOF; j++) {
-				int index = (*dof)(j);
+		  if (dofsFirstFlag) {
 				for (int i = 0; i < numEle; i++) {
 					 if (theResponses[i] == 0)
 						  continue;
 					 const Vector& eleData = theResponses[i]->getData();
-					 if (index >= 0 && index < eleData.Size())
-						  (*currentData)(loc++) = eleData(index);
-					 else
-						  (*currentData)(loc++) = 0.0;
+					 for (int j = 0; j < numDOF; j++) {
+						  int index = (*dof)(j);
+						  if (index >= 0 && index < eleData.Size())
+								(*data)(0, loc++) = eleData(index);
+						  else
+								(*data)(0, loc++) = 0.0;
+					 }
+				}
+		  }
+		  else {
+				for (int j = 0; j < numDOF; j++) {
+					 int index = (*dof)(j);
+					 for (int i = 0; i < numEle; i++) {
+						  if (theResponses[i] == 0)
+								continue;
+						  const Vector& eleData = theResponses[i]->getData();
+						  if (index >= 0 && index < eleData.Size())
+								(*data)(0, loc++) = eleData(index);
+						  else
+								(*data)(0, loc++) = 0.0;
+					 }
 				}
 		  }
 	 }
 	 else
-#endif // _CSS
 		  // for each element do a getResponse() & put the result in current data
 		  for (int i = 0; i < numEle; i++) {
-				if (theResponses[i] != 0) {
-					 // ask the element for the reponse
-					 int res;
-					 if ((res = theResponses[i]->getResponse()) < 0)
-						  result += res;
-					 else {
-						  // from the response determine no of cols for each
-						  const Vector& eleData = theResponses[i]->getData();
-						  //	  for (int j=0; j<eleData.Size(); j++) 
-						  //	    (*currentData)(loc++) = eleData(j);
-						  if (numDOF == 0) {
-								for (int j = 0; j < eleData.Size(); j++)
-									 (*currentData)(loc++) = eleData(j);
-						  }
-						  else {
-								int dataSize = eleData.Size();
-								for (int j = 0; j < numDOF; j++) {
-									 int index = (*dof)(j);
-									 if (index >= 0 && index < dataSize)
-										  (*currentData)(loc++) = eleData(index);
-									 else
-										  (*currentData)(loc++) = 0.0;
-								}
-						  }
+				if (theResponses[i] == 0)
+					 continue;
+				// ask the element for the reponse
+				int res;
+				if ((res = theResponses[i]->getResponse()) < 0)
+				{
+					 result += res;
+					 continue;
+				}
+				// from the response determine no of cols for each
+				const Vector& eleData = theResponses[i]->getData();
+				if (numDOF == 0) {
+					 for (int j = 0; j < eleData.Size(); j++)
+						  (*data)(0, loc++) = eleData(j);
+				}
+				else {
+					 int dataSize = eleData.Size();
+					 for (int j = 0; j < numDOF; j++) {
+						  int index = (*dof)(j);
+						  if (index >= 0 && index < dataSize)
+								(*data)(0, loc++) = eleData(index);
+						  else
+								(*data)(0, loc++) = 0.0;
 					 }
 				}
 		  }
-
-	 int sizeData = currentData->Size();
-	 if (echoTimeFlag == false) {
-
-		  bool writeIt = false;
-		  if (first == true) {
-				for (int i = 0; i < sizeData; i++) {
-					 (*data)(0, i) = (*currentData)(i);
-					 (*data)(1, i) = (*currentData)(i);
-					 (*data)(2, i) = fabs((*currentData)(i));
-					 first = false;
-					 writeIt = true;
-#ifdef _CSS
-					 Modified = 1;
-#endif // _CSS
-				}
-		  }
-		  else {
-				for (int i = 0; i < sizeData; i++) {
-					 double value = (*currentData)(i);
-					 if ((*data)(0, i) > value) {
-						  (*data)(0, i) = value;
-						  double absValue = fabs(value);
-						  if ((*data)(2, i) < absValue)
-#ifdef _CSS
-						  {
-								Modified = 1;
-								(*data)(2, i) = absValue;
-						  }
-#else
-								(*data)(2, i) = absValue;
-#endif // _CSS
-						  writeIt = true;
-					 }
-					 else if ((*data)(1, i) < value) {
-						  (*data)(1, i) = value;
-						  double absValue = fabs(value);
-						  if ((*data)(2, i) < absValue)
-#ifdef _CSS
-						  {
-								Modified = 1;
-								(*data)(2, i) = absValue;
-						  }
-#else
-								(*data)(2, i) = absValue;
-#endif // _CSS
-						  writeIt = true;
-				}
-				}
-		  }
-		  }
-	 else {
-		  sizeData /= 2;
-		  bool writeIt = false;
-		  if (first == true) {
-				for (int i = 0; i < sizeData; i++) {
-
-					 (*data)(0, i * 2) = timeStamp;
-					 (*data)(1, i * 2) = timeStamp;
-					 (*data)(2, i * 2) = timeStamp;
-					 (*data)(0, i * 2 + 1) = (*currentData)(i);
-					 (*data)(1, i * 2 + 1) = (*currentData)(i);
-					 (*data)(2, i * 2 + 1) = fabs((*currentData)(i));
-					 first = false;
-					 writeIt = true;
-#ifdef _CSS
-					 Modified = 1;
-#endif // _CSS
-				}
-		  }
-		  else {
-				for (int i = 0; i < sizeData; i++) {
-					 double value = (*currentData)(i);
-					 if ((*data)(0, 2 * i + 1) > value) {
-						  (*data)(0, i * 2) = timeStamp;
-						  (*data)(0, i * 2 + 1) = value;
-						  double absValue = fabs(value);
-						  if ((*data)(2, i * 2 + 1) < absValue) {
-								(*data)(2, i * 2 + 1) = absValue;
-								(*data)(2, i * 2) = timeStamp;
-#ifdef _CSS
-								Modified = 1;
-#endif // _CSS
-						  }
-						  writeIt = true;
-					 }
-					 else if ((*data)(1, i * 2 + 1) < value) {
-						  (*data)(1, i * 2) = timeStamp;
-						  (*data)(1, i * 2 + 1) = value;
-						  double absValue = fabs(value);
-						  if ((*data)(2, i * 2 + 1) < absValue) {
-								(*data)(2, i * 2) = timeStamp;
-								(*data)(2, i * 2 + 1) = absValue;
-#ifdef _CSS
-								Modified = 1;
-#endif // _CSS
-						  }
-						  writeIt = true;
-					 }
-				}
-		  }
-	 }
 
 	 // succesfull completion - return 0
 	 return result;
-	 }
+}
 
 int
-EnvelopeElementRecorder::restart(void)
+ResidElementRecorder::restart(void)
 {
 	 data->Zero();
-	 first = true;
 	 return 0;
 }
 
 int
-EnvelopeElementRecorder::setDomain(Domain& theDom)
+ResidElementRecorder::setDomain(Domain& theDom)
 {
 	 theDomain = &theDom;
 	 return 0;
 }
 
 int
-EnvelopeElementRecorder::sendSelf(int commitTag, Channel& theChannel)
+ResidElementRecorder::sendSelf(int commitTag, Channel& theChannel)
 {
 	 addColumnInfo = 1;
 
 	 if (theChannel.isDatastore() == 1) {
-		  opserr << "EnvelopeElementRecorder::sendSelf() - does not send data to a datastore\n";
+		  opserr << "ResidElementRecorder::sendSelf() - does not send data to a datastore\n";
 		  return -1;
 	 }
 	 initializationDone = false;
@@ -422,7 +353,7 @@ EnvelopeElementRecorder::sendSelf(int commitTag, Channel& theChannel)
 	 // into an ID, place & send eleID size, numArgs and length of all responseArgs
 	 //
 
-	 static ID idData(7);
+	 static ID idData(8);
 	 if (eleID != 0)
 		  idData(0) = eleID->Size();
 	 else
@@ -432,6 +363,7 @@ EnvelopeElementRecorder::sendSelf(int commitTag, Channel& theChannel)
 
 	 idData(5) = this->getTag();
 	 idData(6) = numDOF;
+	 idData(7) = dofsFirstFlag ? 1 : 0;
 
 	 int msgLength = 0;
 	 for (int i = 0; i < numArgs; i++)
@@ -451,9 +383,11 @@ EnvelopeElementRecorder::sendSelf(int commitTag, Channel& theChannel)
 		  idData(4) = 0;
 
 	 if (theChannel.sendID(0, commitTag, idData) < 0) {
-		  opserr << "EnvelopeElementRecorder::sendSelf() - failed to send idData\n";
+		  opserr << "ResidElementRecorder::sendSelf() - failed to send idData\n";
 		  return -1;
 	 }
+
+
 
 
 	 //
@@ -462,7 +396,7 @@ EnvelopeElementRecorder::sendSelf(int commitTag, Channel& theChannel)
 
 	 if (eleID != 0)
 		  if (theChannel.sendID(0, commitTag, *eleID) < 0) {
-				opserr << "EnvelopeElementRecorder::sendSelf() - failed to send idData\n";
+				opserr << "ResidElementRecorder::sendSelf() - failed to send idData\n";
 				return -1;
 		  }
 
@@ -479,13 +413,13 @@ EnvelopeElementRecorder::sendSelf(int commitTag, Channel& theChannel)
 	 //
 
 	 if (msgLength == 0) {
-		  opserr << "EnvelopeElementRecorder::sendSelf() - no data to send!!\n";
+		  opserr << "ResidElementRecorder::sendSelf() - no data to send!!\n";
 		  return -1;
 	 }
 
 	 char* allResponseArgs = new char[msgLength];
 	 if (allResponseArgs == 0) {
-		  opserr << "EnvelopeElementRecorder::sendSelf() - out of memory\n";
+		  opserr << "ResidElementRecorder::sendSelf() - out of memory\n";
 		  return -1;
 	 }
 
@@ -502,7 +436,7 @@ EnvelopeElementRecorder::sendSelf(int commitTag, Channel& theChannel)
 
 	 Message theMessage(allResponseArgs, msgLength);
 	 if (theChannel.sendMsg(0, commitTag, theMessage) < 0) {
-		  opserr << "EnvelopeElementRecorder::sendSelf() - failed to send message\n";
+		  opserr << "ResidElementRecorder::sendSelf() - failed to send message\n";
 		  return -1;
 	 }
 
@@ -511,7 +445,7 @@ EnvelopeElementRecorder::sendSelf(int commitTag, Channel& theChannel)
 	 //
 	 if (theHandler != 0)
 		  if (theHandler->sendSelf(commitTag, theChannel) < 0) {
-				opserr << "EnvelopeElementRecorder::sendSelf() - failed to send the DataOutputHandler\n";
+				opserr << "ResidElementRecorder::sendSelf() - failed to send the DataOutputHandler\n";
 				return -1;
 		  }
 
@@ -525,13 +459,13 @@ EnvelopeElementRecorder::sendSelf(int commitTag, Channel& theChannel)
 
 
 int
-EnvelopeElementRecorder::recvSelf(int commitTag, Channel& theChannel,
+ResidElementRecorder::recvSelf(int commitTag, Channel& theChannel,
 	 FEM_ObjectBroker& theBroker)
 {
 	 addColumnInfo = 1;
 
 	 if (theChannel.isDatastore() == 1) {
-		  opserr << "EnvelopeElementRecorder::recvSelf() - does not recv data to a datastore\n";
+		  opserr << "ResidElementRecorder::recvSelf() - does not recv data to a datastore\n";
 		  return -1;
 	 }
 
@@ -546,9 +480,9 @@ EnvelopeElementRecorder::recvSelf(int commitTag, Channel& theChannel,
 	 // into an ID of size 2 recv eleID size and length of all responseArgs
 	 //
 
-	 static ID idData(7);
+	 static ID idData(8);
 	 if (theChannel.recvID(0, commitTag, idData) < 0) {
-		  opserr << "EnvelopeElementRecorder::recvSelf() - failed to recv idData\n";
+		  opserr << "ResidElementRecorder::recvSelf() - failed to recv idData\n";
 		  return -1;
 	 }
 
@@ -556,6 +490,7 @@ EnvelopeElementRecorder::recvSelf(int commitTag, Channel& theChannel,
 	 numArgs = idData(1);
 	 int msgLength = idData(2);
 	 numDOF = idData(6);
+	 dofsFirstFlag = (idData(7) == 1);
 
 	 this->setTag(idData(5));
 
@@ -565,6 +500,7 @@ EnvelopeElementRecorder::recvSelf(int commitTag, Channel& theChannel,
 		  echoTimeFlag = false;
 
 	 numEle = eleSize;
+
 
 
 	 //
@@ -605,19 +541,19 @@ EnvelopeElementRecorder::recvSelf(int commitTag, Channel& theChannel,
 	 //
 
 	 if (msgLength == 0) {
-		  opserr << "EnvelopeElementRecorder::recvSelf() - 0 sized string for responses\n";
+		  opserr << "ResidElementRecorder::recvSelf() - 0 sized string for responses\n";
 		  return -1;
 	 }
 
 	 char* allResponseArgs = new char[msgLength];
 	 if (allResponseArgs == 0) {
-		  opserr << "EnvelopeElementRecorder::recvSelf() - out of memory\n";
+		  opserr << "ResidElementRecorder::recvSelf() - out of memory\n";
 		  return -1;
 	 }
 
 	 Message theMessage(allResponseArgs, msgLength);
 	 if (theChannel.recvMsg(0, commitTag, theMessage) < 0) {
-		  opserr << "EnvelopeElementRecorder::recvSelf() - failed to recv message\n";
+		  opserr << "ResidElementRecorder::recvSelf() - failed to recv message\n";
 		  return -1;
 	 }
 
@@ -627,7 +563,7 @@ EnvelopeElementRecorder::recvSelf(int commitTag, Channel& theChannel,
 
 	 responseArgs = new char* [numArgs];
 	 if (responseArgs == 0) {
-		  opserr << "EnvelopeElementRecorder::recvSelf() - out of memory\n";
+		  opserr << "ResidElementRecorder::recvSelf() - out of memory\n";
 		  return -1;
 	 }
 
@@ -638,7 +574,7 @@ EnvelopeElementRecorder::recvSelf(int commitTag, Channel& theChannel,
 
 		  responseArgs[j] = new char[argLength];
 		  if (responseArgs[j] == 0) {
-				opserr << "EnvelopeElementRecorder::recvSelf() - out of memory\n";
+				opserr << "ResidElementRecorder::recvSelf() - out of memory\n";
 				return -1;
 		  }
 
@@ -676,7 +612,7 @@ EnvelopeElementRecorder::recvSelf(int commitTag, Channel& theChannel,
 }
 
 int
-EnvelopeElementRecorder::initialize(void)
+ResidElementRecorder::initialize(void)
 {
 	 if (theDomain == 0)
 		  return 0;
@@ -708,8 +644,7 @@ EnvelopeElementRecorder::initialize(void)
 		  for (i = 0; i < numEle; i++) {
 				Element* theEle = theDomain->getElement((*eleID)(i));
 				if (theEle != 0) {
-					 xmlOrder[eleCount] = i + 1;
-					 eleCount++;
+					 xmlOrder[eleCount++] = i + 1;
 				}
 		  }
 
@@ -727,7 +662,6 @@ EnvelopeElementRecorder::initialize(void)
 				return -1;
 		  }
 
-#ifdef _CSS
 		  if (procDataMethods.Size() != 0)
 		  {
 				int dataSize = 0;
@@ -750,22 +684,16 @@ EnvelopeElementRecorder::initialize(void)
 								dataSize = size;
 					 }
 				}
-				int nVals = numEle;
-				int nProcOuts = (procDataMethods.Size() == 0) ? nVals
-					 : Recorder::getFinalProcOuts(nVals, procDataMethods, procGrpNums);
-				if (numDOF == 0)
-					 numDbColumns = dataSize * nProcOuts;
-				else
-					 numDbColumns += numDOF * nProcOuts;
-
+				int nRaw = (numDOF == 0) ? (numEle * dataSize) : (numEle * numDOF);
+				int nProcOuts = Recorder::getFinalProcOuts(nRaw, procDataMethods, procGrpNums);
+				numDbColumns += nProcOuts;
 				if (addColumnInfo == 1) {
-					 for (int j = 0; j < numDbColumns; j++)
+					 for (int j = 0; j < nProcOuts; j++)
 						  responseOrder[responseCount++] = 1;
 				}
 		  }
 		  else
-#endif // _CSS
-
+		  {
 				for (int ii = 0; ii < numEle; ii++) {
 					 Element* theEle = theDomain->getElement((*eleID)(ii));
 					 if (theEle == 0) {
@@ -774,7 +702,7 @@ EnvelopeElementRecorder::initialize(void)
 					 else {
 						  if (theHandler != 0)
 								if (echoTimeFlag == true)
-									 theHandler->tag("EnvelopeElementOutput");
+									 theHandler->tag("ResidualElementOutput");
 
 						  theResponses[ii] = theEle->setResponse((const char**)responseArgs, numArgs, theHandler);
 						  if (theResponses[ii] != 0) {
@@ -792,7 +720,7 @@ EnvelopeElementRecorder::initialize(void)
 										  if (numDOF == 0)
 												for (int j = 0; j < 2 * dataSize; j++)
 													 responseOrder[responseCount++] = i + 1;
-										  else
+										  else if (dofsFirstFlag)
 												for (int j = 0; j < 2 * numDOF; j++)
 													 responseOrder[responseCount++] = i + 1;
 									 }
@@ -800,7 +728,7 @@ EnvelopeElementRecorder::initialize(void)
 										  if (numDOF == 0)
 												for (int j = 0; j < dataSize; j++)
 													 responseOrder[responseCount++] = i + 1;
-										  else
+										  else if (dofsFirstFlag)
 												for (int j = 0; j < numDOF; j++)
 													 responseOrder[responseCount++] = i + 1;
 									 }
@@ -818,25 +746,33 @@ EnvelopeElementRecorder::initialize(void)
 						  }
 					 }
 				}
-
+		  }
+		  if (addColumnInfo == 1 && numDOF != 0 && !dofsFirstFlag) {
+				int mult = echoTimeFlag ? 2 : 1;
+				for (int k = 0; k < mult; k++) {
+					 for (int j = 0; j < numDOF; j++) {
+						  for (int ii = 0; ii < numEle; ii++) {
+								if (theResponses[ii] != 0)
+									 responseOrder[responseCount++] = ii + 1;
+						  }
+					 }
+				}
+		  }
 		  if (theHandler != 0)
 				theHandler->setOrder(responseOrder);
 
 	 }
 	 else {
-
-		  //
-		  // if no eleID we don't know response size so make initial guess & loop over & ask ele
-		  // if guess to small, we enlarge
-		  //
-#ifdef _CSS
 		  if (procDataMethods.Size() != 0)
 		  {
 				opserr << "Combining element responses is not currently supported for empty input elements" << endln;
 				initializationDone = false;
 				return -1;
 		  }
-#endif // _CSS
+		  //
+		  // if no eleID we don't know response size so make initial guess & loop over & ask ele
+		  // if guess to small, we enlarge
+		  //
 
 
 		  // initial size & allocation
@@ -899,12 +835,12 @@ EnvelopeElementRecorder::initialize(void)
 	 //
 
 	 if (echoTimeFlag == true) {
-		  numDbColumns *= 2;
+		  numDbColumns += 1;
 	 }
-	 data = new Matrix(3, numDbColumns);
-	 currentData = new Vector(numDbColumns);
-	 if (data == 0 || currentData == 0) {
-		  opserr << "EnvelopeElementRecorder::EnvelopeElementRecorder() - out of memory\n";
+
+	 data = new Matrix(1, numDbColumns);
+	 if (data == 0) {
+		  opserr << "ResidElementRecorder::ResidElementRecorder() - out of memory\n";
 		  exit(-1);
 	 }
 
@@ -912,31 +848,7 @@ EnvelopeElementRecorder::initialize(void)
 	 return 0;
 }
 
-//added by SAJalali
-double EnvelopeElementRecorder::getRecordedValue(int clmnId, int rowOffset, bool reset)
-{
-	 double res = 0;
-	 if (!initializationDone)
-		  return res;
-	 if (clmnId >= data->noCols())
-	 {
-		 opserr << "EnvelopeElementRecorder::getRecordedValue: columnId exceeds valid range" << endln;
-		 return 0;
-	 }
-	 if (rowOffset > 2 || rowOffset < 0)
-	 {
-		 opserr << "EnvelopeElementRecorder::getRecordedValue: 0 < rowOffset < 2 not met" << endln;
-		 return 0;
-	 }
-	 res = (*data)(2 - rowOffset, clmnId);
-	 if (reset)
-		  first = true;
-	 return res;
-}
-
-#ifdef _CSS
-//by SAJalali
-int EnvelopeElementRecorder::removeComponentResponse(int compTag)
+int ResidElementRecorder::removeComponentResponse(int compTag)
 {
 	 if (theResponses == 0)
 		  return -1;
@@ -953,9 +865,3 @@ int EnvelopeElementRecorder::removeComponentResponse(int compTag)
 }
 
 #endif // _CSS
-int EnvelopeElementRecorder::flush(void) {
-	if (theHandler != 0) {
-		return theHandler->flush();
-	}
-	return 0;
-}

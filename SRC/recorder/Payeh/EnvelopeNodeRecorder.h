@@ -18,63 +18,60 @@
 **                                                                    **
 ** ****************************************************************** */
                                                                         
-// $Revision: 1.17 $
-// $Date: 2010-04-23 22:47:42 $
-// $Source: /usr/local/cvs/OpenSees/SRC/recorder/NodeRecorder.h,v $
+
+// $Revision: 1.11 $
+// $Date: 2010-02-04 01:03:34 $
+// $Source: /usr/local/cvs/OpenSees/SRC/recorder/EnvelopeNodeRecorder.h,v $
                                                                         
-#ifndef NodeRecorder_h
-#define NodeRecorder_h
+
+                                                                        
+#ifndef EnvelopeNodeRecorder_h
+#define EnvelopeNodeRecorder_h
 
 // Written: fmk 
-// Created: 09/00
-// Revision: A
 //
-// Description: This file contains the class definition for 
-// NodeRecorder. A NodeRecorder is used to store the specified nodal dof responses
-// for the specified nodes in a file.
+// Description: This file contains the class definition for EnvelopeRecorder.
+// A EnvelopeRecorder is used to record the envelop of specified dof responses 
+// at a collection of nodes over an analysis. (between commitTag of 0 and
+// last commitTag).
 //
-// What: "@(#) NodeRecorder.h, revA"
+// What: "@(#) EnvelopeNodeRecorder.h, revA"
 
 
 #include <Recorder.h>
 #include <ID.h>
 #include <Vector.h>
+#include <Matrix.h>
 #include <TimeSeries.h>
 
 class Domain;
 class FE_Datastore;
 class Node;
 
-class NodeRecorder: public Recorder
+class EnvelopeNodeRecorder: public Recorder
 {
   public:
-    NodeRecorder();
-    NodeRecorder(const ID &theDof, const ID *theNodes, int pgradIndex,
-		 const char *dataToStore, Domain &theDomain, OPS_Stream *theOutputHandler,
-        const ID& procDataMethods, const ID& procGrpNums, double deltaT,
-		 bool echoTimeFlag, TimeSeries **timeSeries);
+    EnvelopeNodeRecorder();
+    EnvelopeNodeRecorder(const ID &theDof, const ID *theNodes, const char *dataToStore,
+			 Domain &theDomain, OPS_Stream *theOutputHandler,
+          const ID& procDataMethods, const ID& procGrpNums,
+			 bool echoTimeFlag, TimeSeries **theTimeSeries, bool dofsFirst = false); 
+    
+    ~EnvelopeNodeRecorder();
 
-    ~NodeRecorder();
-#if _NET
-	OPS_Stream* getOutputHandler() {
-		return theOutputHandler;
-	}
-	const char* getOutputHandlerFilename() {
-		return theOutputHandler->getOutputFilename();
-	}
-#endif
     int record(int commitTag, double timeStamp);
-    int flush();
+    int restart(void);    
+    int flush(void);    
 
-    int domainChanged(void);
     int setDomain(Domain &theDomain);
-    int sendSelf(int commitTag, Channel &theChannel);
-    int recvSelf(int commitTag, Channel &theChannel,
+    int sendSelf(int commitTag, Channel &theChannel);  
+    int recvSelf(int commitTag, Channel &theChannel, 
 		 FEM_ObjectBroker &theBroker);
+	
 	virtual double getRecordedValue(int clmnId, int rowOffset, bool reset); //added by SAJalali
 
   protected:
-
+    
   private:	
 #ifdef _CSS
      int numDOF;
@@ -82,35 +79,34 @@ class NodeRecorder: public Recorder
                           // 1:sum 2:max 3:min 4:maxAbs 5:minAbs 6:SRSS
    ID procGrpNums;      // parallel to procDataMethods; -1 => all columns
    Vector getResponse(Node* theNode);
+   virtual int getModified() { return Modified; }
+     int Modified;
 #endif // _CSS
-
     int initialize(void);
 
     ID *theDofs;
     ID *theNodalTags;
     Node **theNodes;
-    Vector response;
+
+    Vector *currentData;
+    Matrix *data;
 
     Domain *theDomain;
-    OPS_Stream *theOutputHandler;
+    OPS_Stream *theHandler;
 
-    bool echoTimeFlag;   // flag indicating whether time to be included in o/p
-    int dataFlag;        // flag indicating what it is to be stored in recorder
+    int dataFlag; // flag indicating what it is to be stored in recorder
 
-    double deltaT;
-    double nextTimeStampToRecord;
-
-    // AddingSensitivity:BEGIN //////////////////////////////
-    int gradIndex;
-    // AddingSensitivity:END ////////////////////////////////
-
+    bool first;
     bool initializationDone;
     int numValidNodes;
 
-    int addColumnInfo;
+    bool echoTimeFlag;   // flag indicating whether time to be included in o/p
+    bool dofsFirstFlag;  // true => all dofs of each node first; false => DOF-major
 
+    int addColumnInfo;
     TimeSeries **theTimeSeries;
     double *timeSeriesValues;
+  bool closeOnWrite;
 };
 
 #endif

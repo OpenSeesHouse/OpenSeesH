@@ -157,6 +157,7 @@ void* OPS_NodeRecorder(const char* type)
 #endif // _CSS
 
 	bool echoTimeFlag = false;
+	bool dofsFirstFlag = false;
 	double dT = 0.0;
 	bool doScientific = false;
 
@@ -182,6 +183,9 @@ void* OPS_NodeRecorder(const char* type)
 
 		if (strcmp(option, "-time") == 0 || strcmp(option, "-load") == 0) {
 			echoTimeFlag = true;
+		}
+		else if (strcmp(option, "-dofsFirst") == 0) {
+			dofsFirstFlag = true;
 		}
 		else if (strcmp(option, "-scientific") == 0) {
 			doScientific = true;
@@ -418,16 +422,16 @@ void* OPS_NodeRecorder(const char* type)
 	Recorder* recorder = 0;
 	if (strcmp(type, "Node") == 0)
 		recorder = new NodeRecorder(dofs, &nodes, gradIndex, responseID, *domain, theOutputStream,
-			procDataMethods, procGrpNums, dT, echoTimeFlag, theTimeSeries);
+			procDataMethods, procGrpNums, dT, echoTimeFlag, theTimeSeries, dofsFirstFlag);
 	else if (strcmp(type, "EnvelopeNode") == 0)
 		recorder = new EnvelopeNodeRecorder(dofs, &nodes, responseID, *domain, theOutputStream,
-			procDataMethods, procGrpNums, echoTimeFlag, theTimeSeries);
+			procDataMethods, procGrpNums, echoTimeFlag, theTimeSeries, dofsFirstFlag);
 	else if (strcmp(type, "ResidNode") == 0)
 		recorder = new ResidNodeRecorder(dofs, &nodes, responseID, *domain, theOutputStream,
-			procDataMethods, procGrpNums, echoTimeFlag, theTimeSeries);
+			procDataMethods, procGrpNums, echoTimeFlag, theTimeSeries, dofsFirstFlag);
 	else if (strcmp(type, "ConditionalNode") == 0)
 		recorder = new ConditionalNodeRecorder(dofs, &nodes, responseID, *domain, theOutputStream,
-			cntrlRcrdrTag, procDataMethods, procGrpNums, echoTimeFlag, theTimeSeries);
+			cntrlRcrdrTag, procDataMethods, procGrpNums, echoTimeFlag, theTimeSeries, dofsFirstFlag);
 
 	return recorder;
 }
@@ -449,6 +453,7 @@ void* OPS_ElementRecorder(const char* type)
 	outputMode eMode = No_Output;
 
 	bool echoTimeFlag = false;
+	bool dofsFirstFlag = false;
 	double dT = 0.0;
 	double rTolDt = 0.00001;
 	bool doScientific = false;
@@ -474,6 +479,9 @@ void* OPS_ElementRecorder(const char* type)
 
 		if (strcmp(option, "-time") == 0 || strcmp(option, "-load") == 0) {
 			echoTimeFlag = true;
+		}
+		else if (strcmp(option, "-dofsFirst") == 0) {
+			dofsFirstFlag = true;
 		}
 		else if (strcmp(option, "-scientific") == 0) {
 			doScientific = true;
@@ -709,16 +717,16 @@ void* OPS_ElementRecorder(const char* type)
 	Recorder* recorder = 0;
 	if (strcmp(type, "Element") == 0)
 		recorder = new ElementRecorder(&elements, data, nargrem, echoTimeFlag, *domain,
-			theOutputStream, procDataMethods, procGrpNums, dT, &dofs);
+			theOutputStream, procDataMethods, procGrpNums, dT, &dofs, dofsFirstFlag);
 	if (strcmp(type, "EnvelopeElement") == 0)
 		recorder = new EnvelopeElementRecorder(&elements, data, nargrem, *domain,
-			theOutputStream, procDataMethods, procGrpNums, echoTimeFlag, &dofs);
+			theOutputStream, procDataMethods, procGrpNums, echoTimeFlag, &dofs, dofsFirstFlag);
 	if (strcmp(type, "ResidElement") == 0)
 		recorder = new ResidElementRecorder(&elements, data, nargrem, *domain,
-			theOutputStream, procDataMethods, procGrpNums, echoTimeFlag, &dofs);
+			theOutputStream, procDataMethods, procGrpNums, echoTimeFlag, &dofs, dofsFirstFlag);
 	if (strcmp(type, "ConditionalElement") == 0)
 		recorder = new ConditionalElementRecorder(&elements, data, nargrem, *domain,
-			theOutputStream, cntrlRcrdrTag, procDataMethods, procGrpNums, echoTimeFlag, &dofs);
+			theOutputStream, cntrlRcrdrTag, procDataMethods, procGrpNums, echoTimeFlag, &dofs, dofsFirstFlag);
 	if (data != 0) {
 		delete[] data;
 	}
@@ -732,9 +740,10 @@ void* OPS_DriftRecorder(const char* type)
 	outputMode eMode = No_Output;       // enum found in DataOutputFileHandler.h
 
 	bool echoTimeFlag = false;
+	bool dofsFirstFlag = false;
 	ID iNodes(0, 16);
 	ID jNodes(0, 16);
-	int dof = 1;
+	ID dofs(0, 6);
 	int perpDirn = 2;
 	int pos = 2;
 	double dT = 0.0;
@@ -878,10 +887,16 @@ void* OPS_DriftRecorder(const char* type)
 		}
 
 		else if (strcmp(option, "-dof") == 0) {
-			if (OPS_GetInt(&numData, &dof) != 0) {
-				opserr << "WARNING: INVALID dof number\n";
-				return 0;
+			int numDOF = 0;
+			while (OPS_GetNumRemainingInputArgs() > 0) {
+				int dof;
+				if (OPS_GetInt(&numData, &dof) != 0)
+					break;
+				dofs[numDOF++] = dof - 1;
 			}
+		}
+		else if (strcmp(option, "-dofsFirst") == 0) {
+			dofsFirstFlag = true;
 		}
 
 		else if (strcmp(option, "-perpDirn") == 0) {
@@ -928,21 +943,24 @@ theOutputStream = new DatabaseStream(theDatabase, tableName);
 	}
 	if (theOutputStream != 0)
 		theOutputStream->setPrecision(precision);
-	// Subtract one from dof and perpDirn for C indexing
+	if (dofs.Size() == 0)
+		dofs[0] = 0; // default DOF 1 (0-based)
+
+	// Subtract one from perpDirn for C indexing
 	Recorder* theRecorder = 0;
 	Domain* theDomain = OPS_GetDomain();
 	if (strcmp(type, "ResidDrift") == 0)
-		theRecorder = new ResidDriftRecorder(iNodes, jNodes, dof - 1, perpDirn - 1,
-			*theDomain, theOutputStream, procDataMethods, procGrpNums, echoTimeFlag);
+		theRecorder = new ResidDriftRecorder(iNodes, jNodes, dofs, perpDirn - 1,
+			*theDomain, theOutputStream, procDataMethods, procGrpNums, echoTimeFlag, dofsFirstFlag);
 	else if (strcmp(type, "ConditionalDrift") == 0)
-		theRecorder = new ConditionalDriftRecorder(iNodes, jNodes, dof - 1, perpDirn - 1,
-			*theDomain, theOutputStream, cntrlRcrdrTag, procDataMethods, procGrpNums, echoTimeFlag);
+		theRecorder = new ConditionalDriftRecorder(iNodes, jNodes, dofs, perpDirn - 1,
+			*theDomain, theOutputStream, cntrlRcrdrTag, procDataMethods, procGrpNums, echoTimeFlag, dofsFirstFlag);
 	else if (strcmp(type, "Drift") == 0)
-		theRecorder = new DriftRecorder(iNodes, jNodes, dof - 1, perpDirn - 1,
-			*theDomain, theOutputStream, procDataMethods, procGrpNums, echoTimeFlag, dT);
+		theRecorder = new DriftRecorder(iNodes, jNodes, dofs, perpDirn - 1,
+			*theDomain, theOutputStream, procDataMethods, procGrpNums, echoTimeFlag, dT, dofsFirstFlag);
 	else if (strcmp(type, "EnvelopeDrift") == 0)
-		theRecorder = new EnvelopeDriftRecorder(iNodes, jNodes, dof - 1, perpDirn - 1,
-			*theDomain, theOutputStream, procDataMethods, procGrpNums, echoTimeFlag);
+		theRecorder = new EnvelopeDriftRecorder(iNodes, jNodes, dofs, perpDirn - 1,
+			*theDomain, theOutputStream, procDataMethods, procGrpNums, echoTimeFlag, dofsFirstFlag);
 	else
 		opserr << "WARNING! Unrecognized Drift Recorder type: " << type << endln;
 	return theRecorder;
