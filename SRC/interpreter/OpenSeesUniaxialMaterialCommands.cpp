@@ -283,13 +283,11 @@ void* OPS_SMAMaterial();
 //void* OPS_PipeMaterial();
 //void* OPS_TzSandCPT(void);
 //void* OPS_QbSandCPT(void);
-#ifdef _CSS
 void* OPS_Steel05(void);		// SAJalali
 extern void* OPS_SmoothIMK(void);		// SAJalali
 //void* OPS_BucklingStrut(void);		// SAJalali
 //void* OPS_BucklingMaterial(void);		// SAJalali
 void* OPS_ConfinedConcrete(void);		// SAJalali
-#endif
 
 
 namespace {

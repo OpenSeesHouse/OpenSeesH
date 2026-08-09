@@ -30,14 +30,19 @@
 
 #include <Concrete02.h>
 #include <Concrete01.h>
-#include <FileStream.h>
 //#include <OPS_Globals.h>
 //#include <float.h>
 //#include <Channel.h>
 //#include <Information.h>
 
+// Command logging lives in tcl/commands.cpp (OpenSees.exe only).
+// Exclude from Python builds and from shared Release libs linked by OpenSeesPy.
+#if defined(_CSS) && !defined(_PYTHON3) && defined(_DEBUG)
+#include <FileStream.h>
 extern int LOG_COMMANDS;
 extern FileStream CmdLogStream;
+#define OPS_CC_CMD_LOG
+#endif
 #include <elementAPI.h>
 #include <OPS_Globals.h>
 
@@ -59,224 +64,276 @@ const double facs[16][16] = {
 	{1.55, 1.54, 1.53, 1.51, 1.50, 1.48, 1.47, 1.45, 1.43, 1.41, 1.38, 1.35, 1.31, 1.26, 0.00, 0.00},
 	{1.44, 1.43, 1.42, 1.40, 1.39, 1.38, 1.37, 1.35, 1.33, 1.30, 1.28, 1.26, 1.23, 1.19, 1.13, 0.00},
 	{1.30, 1.30, 1.29, 1.28, 1.27, 1.26, 1.25, 1.23, 1.21, 1.20, 1.17, 1.15, 1.12, 1.09, 1.05, 1.00} };
+
+// facs is lower-triangular: valid at facs[iHigh][iLow] with iHigh >= iLow
+// (larger index = smaller fl/|fc| along descending rats[]).
+static double
+confinedFacAt(int ia, int ib)
+{
+	const int iHigh = (ia > ib) ? ia : ib;
+	const int iLow = (ia > ib) ? ib : ia;
+	return facs[iHigh][iLow];
+}
+
+static void
+confinedBracketRat(double r, int& iLo, int& iHi)
+{
+	if (r >= rats[0]) { iLo = iHi = 0; return; }
+	if (r <= rats[15]) { iLo = iHi = 15; return; }
+	for (iHi = 1; iHi < 16; ++iHi) {
+		if (r > rats[iHi]) {
+			iLo = iHi - 1;
+			return;
+		}
+	}
+	iLo = iHi = 15;
+}
+
 void*
 OPS_ConfinedConcrete()
 {
-	 // Pointer to a uniaxial material that will be returned
-	 UniaxialMaterial* theMaterial = 0;
+	// Pointer to a uniaxial material that will be returned
+	UniaxialMaterial* theMaterial = 0;
 
-	 int tag;
-	 int numData = 1;
-	 if (OPS_GetIntInput(&numData, &tag) != 0)
-	 {
-		  opserr << "WARNING invalid tag for uniaxialMaterial ConfinedConcrete" << endln;
-		  return 0;
-	 }
+	int tag;
+	int numData = 1;
+	if (OPS_GetIntInput(&numData, &tag) != 0)
+	{
+		opserr << "WARNING invalid tag for uniaxialMaterial ConfinedConcrete" << endln;
+		return 0;
+	}
 
-	 numData = OPS_GetNumRemainingInputArgs();
-	 if (numData < 8)
-	 {
-		  opserr << "ConfinedConcrete::Invalid number of arguments; tag = " << tag << "; wants:\n";
-		  opserr << "uniaxialMaterial ConfinedConcrete tag fc0 epsc0 fcu Lambda ft Ets \n";
-		  opserr << "    [-beam StressUnitToGPa]\n";
-		  opserr << "    [-column B H cover fyh nBarTop dBarTop nBarBot dBarBot nBarInt dBarInt nBarTransH\n \
+	numData = OPS_GetNumRemainingInputArgs();
+	if (numData < 8)
+	{
+		opserr << "ConfinedConcrete::Invalid number of arguments; tag = " << tag << "; wants:\n";
+		opserr << "uniaxialMaterial ConfinedConcrete tag fc0 epsc0 fcu Lambda ft Ets \n";
+		opserr << "    [-beam StressUnitToGPa]\n";
+		opserr << "    [-column B H cover fyh nBarTop dBarTop nBarBot dBarBot nBarInt dBarInt nBarTransH\n \
 						   nBarTransB dBarTrans sStirrup [-wrap Area Fy spacing]]\n";
-		  return 0;
-	 }
-	 double concData[6];
-	 numData = 6;
-	 if (OPS_GetDouble(&numData, concData) != 0)
-	 {
-		  opserr << "ConfinedConcrete::failed to read concrete properties before the [-beam/-column] switch; tag = " << tag << "\nwants:\n";
-		  opserr << "uniaxialMaterial ConfinedConcrete tag fc0 epsc0 fcu Lambda ft Ets \n";
-		  opserr << "    [-beam StressUnitToGPa]\n";
-		  opserr << "    [-column B H cover fyh nBarTop dBarTop nBarBot dBarBot nBarInt dBarInt nBarTransH\n \
+		return 0;
+	}
+	double concData[6];
+	numData = 6;
+	if (OPS_GetDouble(&numData, concData) != 0)
+	{
+		opserr << "ConfinedConcrete::failed to read concrete properties before the [-beam/-column] switch; tag = " << tag << "\nwants:\n";
+		opserr << "uniaxialMaterial ConfinedConcrete tag fc0 epsc0 fcu Lambda ft Ets \n";
+		opserr << "    [-beam StressUnitToGPa]\n";
+		opserr << "    [-column B H cover fyh nBarTop dBarTop nBarBot dBarBot nBarInt dBarInt nBarTransH\n \
 						   nBarTransB dBarTrans sStirrup [wrapArea wrapFy wrapSpacing]]\n";
-		  return 0;
-	 }
-	 int i = 0;
-	 double& fc0 = concData[i++];
-	 double& epsc0 = concData[i++];
-	 double& fcu = concData[i++];
-	 double& rat = concData[i++];
-	 double& ft = concData[i++];
-	 double& Ets = concData[i++];
-	 i = 0;
-	 bool isBeam = false;
-	 const char* str = OPS_GetString();
-	 if (strcmp(str, "-beam") == 0)
-		  isBeam = true;
-	 else if (strcmp(str, "-column") != 0)
-	 {
-		  opserr << "ConfinedConcrete:: Error reading type string; either -beam or -column is expected; tag = " << tag << endln;
-		  return 0;
-	 }
-	 if (isBeam)
-	 {
-		  double fac = 1;
-			numData = 1;
-			if (OPS_GetDouble(&numData, &fac) != 0)
-		  {
-				opserr << "ConfinedConcrete::Invalid Stress To GPa conversion factor for material with tag:" << tag << "\n";
-				return 0;
-		  }
-		  //Kent and Park:
-		  double e50u = (3.0 + epsc0 * fc0 * fac) / (fc0 * fac - 1000);
-		  double e50h = 0.75 * 0.03 * sqrt(500. / 75.);
-		  double ecu = (e50u - e50h - epsc0) * 8. / 5.;
-		  if (ft > 0.001)
-			  theMaterial = new Concrete02(tag, fc0, epsc0, fcu, ecu, rat, ft, Ets);
-		  else
-			  theMaterial = new Concrete01(tag, fc0, epsc0, fcu, ecu);
-		  if (theMaterial == 0)
-		  {
-				opserr << "WARNING ran out of memory while creating uniaxialMaterial of type ConfinedConcrete; tag = " << tag << "\n";
-				return 0;
-		  }
-		  if (LOG_COMMANDS)
-		  {
-			  if (ft > 0.001)
-				  CmdLogStream << "#uniaxialMaterial Concrete02 " << tag << " " << fc0 << " " << epsc0 << " " << fcu << " " << ecu << " " << rat << " " << ft << " " << Ets << "; #code generated for beam by ConfinedConcrete\n";
-			  else
-				  CmdLogStream << "#uniaxialMaterial Concrete01 " << tag << " " << fc0 << " " << epsc0 << " " << fcu << " " << ecu << "; #code generated for beam by ConfinedConcrete\n";
-		  }
-		  return theMaterial;
-	 }
-	 //column
-	 double dData[14];
-	 numData = 14;
-	 if (OPS_GetDoubleInput(&numData, dData) != 0)
-	 {
-		  opserr << "ConfinedConcrete:: Invalid -column props. tag = " << tag << "; wants:\n";
-		  opserr << "-column B H cover fyh nBarTop dBarTop nBarBot dBarBot nBarInt dBarInt nBarTransH\n \
-					  nBarTransB dBarTrans sStirrup [wrapArea wrapFy wrapSpacing]\n";
-		  return 0;
-	 }
-	 double wrpData[3] = { 0, 0, 0};
-	 numData = OPS_GetNumRemainingInputArgs();
-	 if (numData != 0)
-		 numData = 3;
-	 if (OPS_GetDoubleInput(&numData, wrpData) != 0)
+		return 0;
+	}
+	int i = 0;
+	double& fc0 = concData[i++];
+	double& epsc0 = concData[i++];
+	double& fcu = concData[i++];
+	double& rat = concData[i++];
+	double& ft = concData[i++];
+	double& Ets = concData[i++];
+	i = 0;
+	bool isBeam = false;
+	const char* str = OPS_GetString();
+	if (strcmp(str, "-beam") == 0)
+		isBeam = true;
+	else if (strcmp(str, "-column") != 0)
+	{
+		opserr << "ConfinedConcrete:: Error reading type string; either -beam or -column is expected; tag = " << tag << endln;
+		return 0;
+	}
+	if (isBeam)
+	{
+		double fac = 1;
+		numData = 1;
+		if (OPS_GetDouble(&numData, &fac) != 0)
 		{
-		   opserr << "ConfinedConcrete:: Invalid wrap data. tag = " << tag << "; wants:wrapArea wrapFy wrapSpacing\n";
-		   return 0;
+			opserr << "ConfinedConcrete::Invalid Stress To GPa conversion factor for material with tag:" << tag << "\n";
+			return 0;
 		}
-	 //section props (to compute Mander's coeff.s):
-	 i = 0;
-	 double& B = dData[i++];
-	 double& H = dData[i++];
-	 double& cover = dData[i++];
-	 double& fyh = dData[i++];
+		//Kent and Park:
+		double e50u = (3.0 + epsc0 * fc0 * fac) / (fc0 * fac - 1000);
+		double e50h = 0.75 * 0.03 * sqrt(500. / 75.);
+		double ecu = (e50u - e50h - epsc0) * 8. / 5.;
+		if (ft > 0.001)
+			theMaterial = new Concrete02(tag, fc0, epsc0, fcu, ecu, rat, ft, Ets);
+		else
+			theMaterial = new Concrete01(tag, fc0, epsc0, fcu, ecu);
+		if (theMaterial == 0)
+		{
+			opserr << "WARNING ran out of memory while creating uniaxialMaterial of type ConfinedConcrete; tag = " << tag << "\n";
+			return 0;
+		}
+#ifdef OPS_CC_CMD_LOG
+		if (LOG_COMMANDS)
+		{
+			if (ft > 0.001)
+				CmdLogStream << "#uniaxialMaterial Concrete02 " << tag << " " << fc0 << " " << epsc0 << " " << fcu << " " << ecu << " " << rat << " " << ft << " " << Ets << "; #code generated for beam by ConfinedConcrete\n";
+			else
+				CmdLogStream << "#uniaxialMaterial Concrete01 " << tag << " " << fc0 << " " << epsc0 << " " << fcu << " " << ecu << "; #code generated for beam by ConfinedConcrete\n";
+		}
+#endif
+		return theMaterial;
+	}
+	//column
+	double dData[14];
+	numData = 14;
+	if (OPS_GetDoubleInput(&numData, dData) != 0)
+	{
+		opserr << "ConfinedConcrete:: Invalid -column props. tag = " << tag << "; wants:\n";
+		opserr << "-column B H cover fyh nBarTop dBarTop nBarBot dBarBot nBarInt dBarInt nBarTransH\n \
+					  nBarTransB dBarTrans sStirrup [wrapArea wrapFy wrapSpacing]\n";
+		return 0;
+	}
+	double wrpData[3] = { 0, 0, 0 };
+	numData = OPS_GetNumRemainingInputArgs();
+	if (numData != 0)
+		numData = 3;
+	if (OPS_GetDoubleInput(&numData, wrpData) != 0)
+	{
+		opserr << "ConfinedConcrete:: Invalid wrap data. tag = " << tag << "; wants:wrapArea wrapFy wrapSpacing\n";
+		return 0;
+	}
+	//section props (to compute Mander's coeff.s):
+	i = 0;
+	double& B = dData[i++];
+	double& H = dData[i++];
+	double& cover = dData[i++];
+	double& fyh = dData[i++];
 
-	 double& nBarTop = dData[i++];
-	 double& dBarTop = dData[i++];
-	 double& nBarBot = dData[i++];
-	 double& dBarBot = dData[i++];
-	 double& nBarInt = dData[i++];
-	 double& dBarInt = dData[i++];
-	 double& nBarTH = dData[i++];
-	 double& nBarTB = dData[i++];
-	 double& dBarT = dData[i++];
-	 double& sStirrup = dData[i++];
-	 double& wrpA = wrpData[0];
-	 double& wrpFy = wrpData[1];
-	 double& wrpS = wrpData[2];
+	double& nBarTop = dData[i++];
+	double& dBarTop = dData[i++];
+	double& nBarBot = dData[i++];
+	double& dBarBot = dData[i++];
+	double& nBarInt = dData[i++];
+	double& dBarInt = dData[i++];
+	double& nBarTH = dData[i++];
+	double& nBarTB = dData[i++];
+	double& dBarT = dData[i++];
+	double& sStirrup = dData[i++];
+	double& wrpA = wrpData[0];
+	double& wrpFy = wrpData[1];
+	double& wrpS = wrpData[2];
 
-	 // calculate total plan area of ineffectually confined core(area of all parabolas)
-	 double dc = B - 2 * cover - dBarT;
-	 double bc = H - 2 * cover - dBarT;
+	// calculate total plan area of ineffectually confined core(area of all parabolas)
+	double dc = B - 2 * cover - dBarT;
+	double bc = H - 2 * cover - dBarT;
+	if (dc <= 0.0 || bc <= 0.0) {
+		opserr << "ConfinedConcrete:: invalid core size (check B, H, cover, dBarTrans); tag = " << tag << endln;
+		return 0;
+	}
+	if (nBarTop < 2.0 || nBarBot < 2.0) {
+		opserr << "ConfinedConcrete:: nBarTop and nBarBot must be >= 2; tag = " << tag << endln;
+		return 0;
+	}
+	if (sStirrup <= 0.0) {
+		opserr << "ConfinedConcrete:: sStirrup must be > 0; tag = " << tag << endln;
+		return 0;
+	}
+	if (fc0 == 0.0) {
+		opserr << "ConfinedConcrete:: fc0 must be non-zero; tag = " << tag << endln;
+		return 0;
+	}
 
-	 double wiTop = (dc - dBarT - nBarTop * dBarTop) / (nBarTop - 1);
-	 double wiBot = (dc - dBarT - nBarBot * dBarBot) / (nBarBot - 1);
+	double wiTop = (dc - dBarT - nBarTop * dBarTop) / (nBarTop - 1);
+	double wiBot = (dc - dBarT - nBarBot * dBarBot) / (nBarBot - 1);
 
-	 // number of longitudinal bars in H direction is 2 more than
-	 // nBarInt because thete are top and bot bars
-	 double nBarLH = nBarInt + 2;
-	 double wiInt = (bc - dBarT - dBarBot - dBarTop - nBarInt * dBarInt) / (nBarLH - 1);
-	 double zigmaWi2 = (nBarTop - 1) * pow(wiTop, 2) + (nBarBot - 1) * pow(wiBot, 2) + 2 * (nBarLH - 1) * pow(wiInt, 2);
+	// number of longitudinal bars in H direction is 2 more than
+	// nBarInt because there are top and bot bars
+	double nBarLH = nBarInt + 2;
+	if (nBarLH < 2.0) {
+		opserr << "ConfinedConcrete:: invalid nBarInt; tag = " << tag << endln;
+		return 0;
+	}
+	double wiInt = (bc - dBarT - dBarBot - dBarTop - nBarInt * dBarInt) / (nBarLH - 1);
+	double zigmaWi2 = (nBarTop - 1) * pow(wiTop, 2) + (nBarBot - 1) * pow(wiBot, 2) + 2 * (nBarLH - 1) * pow(wiInt, 2);
 
-	 double ABarTop = 3.1415 * pow(dBarTop, 2) / 4.;
-	 double ABarBot = 3.1415 * pow(dBarBot, 2) / 4.;
-	 double ABarInt = 3.1415 * pow(dBarInt, 2) / 4.;
-	 double ABarLTot = nBarTop * ABarTop + nBarBot * ABarBot + 2 * nBarInt * ABarInt;
-	 double rhoCC = ABarLTot / (bc * dc);
+	double ABarTop = 3.1415 * pow(dBarTop, 2) / 4.;
+	double ABarBot = 3.1415 * pow(dBarBot, 2) / 4.;
+	double ABarInt = 3.1415 * pow(dBarInt, 2) / 4.;
+	double ABarLTot = nBarTop * ABarTop + nBarBot * ABarBot + 2 * nBarInt * ABarInt;
+	double rhoCC = ABarLTot / (bc * dc);
 
-	 double sStirrupPrime = sStirrup - dBarT;
-	 double term1 = 1 - zigmaWi2 / (6. * bc * dc);
-	 double term2 = 1 - sStirrupPrime / (2 * bc);
-	 double term3 = 1 - sStirrupPrime / (2 * dc);
-	 double term4 = 1 - rhoCC;
-	 double ke = term1 * term2 * term3 / term4;
+	double sStirrupPrime = sStirrup - dBarT;
+	double term1 = 1 - zigmaWi2 / (6. * bc * dc);
+	double term2 = 1 - sStirrupPrime / (2 * bc);
+	double term3 = 1 - sStirrupPrime / (2 * dc);
+	double term4 = 1 - rhoCC;
+	if (term4 == 0.0) {
+		opserr << "ConfinedConcrete:: rhoCC == 1 (no concrete core); tag = " << tag << endln;
+		return 0;
+	}
+	double ke = term1 * term2 * term3 / term4;
 
-	 double ABarT = 3.1415 * pow(dBarT, 2) / 4.;
-	 double Asx = nBarTH * ABarT;
-	 double Asy = nBarTB * ABarT;
+	double ABarT = 3.1415 * pow(dBarT, 2) / 4.;
+	double Asx = nBarTH * ABarT;
+	double Asy = nBarTB * ABarT;
 
-	 double fTransX = Asx * fyh / (sStirrup * dc);
-	 double fTransY = Asy * fyh / (sStirrup * bc);
-	 if (wrpA != 0)
-	 {
+	double fTransX = Asx * fyh / (sStirrup * dc);
+	double fTransY = Asy * fyh / (sStirrup * bc);
+	if (wrpA != 0)
+	{
 		if (wrpS == 0)
 		{
-		   opserr << "Warning::invalid frp spacing for ConfinedConcrete material with tag:" << tag << endln;
-		   return 0;
+			opserr << "Warning::invalid frp spacing for ConfinedConcrete material with tag:" << tag << endln;
+			return 0;
 		}
-		fTransX += 2*wrpA * wrpFy / (wrpS * H);		//for two legs
-		fTransY += 2*wrpA * wrpFy / (wrpS * B);
-	 }
-	 double f_lx = ke * fTransX;
-	 double f_ly = ke * fTransY;
+		fTransX += 2 * wrpA * wrpFy / (wrpS * H);		//for two legs
+		fTransY += 2 * wrpA * wrpFy / (wrpS * B);
+	}
+	double f_lx = ke * fTransX;
+	double f_ly = ke * fTransY;
 
-	 // calculate KMander
-	 //rat1 > rat2
-	 double rat1 = f_lx > f_ly ? f_lx : f_ly;
-	 double rat2 = f_lx > f_ly ? f_ly : f_lx;
-	 rat1 /= -fc0;
-	 rat2 /= -fc0;
+	// calculate KMander — rat1 >= rat2 (fl/|fc|); table rats[] is descending 0.3 … 0
+	// facs[][] is lower-triangular: valid entries only at facs[iHigh][iLow] with iHigh >= iLow
+	// (larger index = smaller ratio). Always read facs[max][min].
+	double rat1 = f_lx > f_ly ? f_lx : f_ly;
+	double rat2 = f_lx > f_ly ? f_ly : f_lx;
+	rat1 /= -fc0;
+	rat2 /= -fc0;
+	if (rat1 < 0.0) rat1 = 0.0;
+	if (rat2 < 0.0) rat2 = 0.0;
+	if (rat1 > rats[0]) rat1 = rats[0];
+	if (rat2 > rats[0]) rat2 = rats[0];
 
-	 //interpolate factor
-	 int i2, j2, i1, j1;
-	 for (i2 = 0; i2 < 16; i2++)
-		  if (rat1 > rats[i2])
-				break;
-	 for (j2 = 0; j2 < 16; j2++)
-		  if (rat2 > rats[j2])
-				break;
-	 i1 = i2 - 1;
-	 j1 = j2 - 1;
-	 double a = (rat1 - rats[i1]) / (rats[i2] - rats[i1]);
-	 double b = (rat2 - rats[j1]) / (rats[j2] - rats[j1]);
-	 double f1, f2;
-	 if (i2 > j1)
-		  f1 = facs[i1][j1] + a * (facs[i2][j1] - facs[i1][j1]);
-	 else
-		  f1 = facs[i1][j1] + a * (facs[j1][i2] - facs[i1][j1]);
-	 if (i1 > j2)
-		  f2 = facs[i1][j2] + a * (facs[i2][j2] - facs[i1][j2]);
-	 else
-		  f2 = facs[j2][i1] + a * (facs[i2][j2] - facs[j2][i1]);
-	 double k1 = f1 + b * (f2 - f1);
-	 double fcc = fc0 * k1;
-	 double ecc = (1 + 5 * (k1 - 1)) * epsc0; ;	//Mander's Eq.
-	 double ec85 = 260 * 0.015 * ecc + 0.0038; 	//Mander's Eq.
-	 double epscu = (ec85 - ecc) * (0.85 / fcu * fc0) + ecc; //Mander's Eq.
-	 fcu *= fcc / fc0;
-	 if (ft > 0.001)
-		 theMaterial = new Concrete02(tag, fcc, ecc, fcu, epscu, rat, ft, Ets);
-	 else
-		 theMaterial = new Concrete01(tag, fcc, ecc, fcu, epscu);
-	 if (theMaterial == 0)
-	 {
-		  opserr << "WARNING ran out of memory while creating uniaxialMaterial of type ConfinedConcrete; tag = " << tag << "\n";
-		  return 0;
-	 }
-	 if (LOG_COMMANDS)
-	 {
-		 if (ft > 0.001)
-			 CmdLogStream << "#uniaxialMaterial Concrete02 " << tag << " " << fcc << " " << ecc << " " << fcu << " " << epscu << " " << rat << " " << ft << " " << Ets << "; #code generated for column by ConfinedConcrete\n";
-		 else
-			 CmdLogStream << "#uniaxialMaterial Concrete01 " << tag << " " << fcc << " " << ecc << " " << fcu << " " << epscu << "; #code generated for column by ConfinedConcrete\n";
-	 }
+	int i1, i2, j1, j2;
+	confinedBracketRat(rat1, i1, i2);
+	confinedBracketRat(rat2, j1, j2);
 
-	 return theMaterial;
+	const double dRatI = rats[i2] - rats[i1];
+	const double dRatJ = rats[j2] - rats[j1];
+	const double a = (dRatI == 0.0) ? 0.0 : (rat1 - rats[i1]) / dRatI;
+	const double b = (dRatJ == 0.0) ? 0.0 : (rat2 - rats[j1]) / dRatJ;
+
+	const double c11 = confinedFacAt(i1, j1);
+	const double c21 = confinedFacAt(i2, j1);
+	const double c12 = confinedFacAt(i1, j2);
+	const double c22 = confinedFacAt(i2, j2);
+	const double f1 = c11 + a * (c21 - c11);
+	const double f2 = c12 + a * (c22 - c12);
+	double k1 = f1 + b * (f2 - f1);
+	double fcc = fc0 * k1;
+	double ecc = (1 + 5 * (k1 - 1)) * epsc0;	//Mander's Eq.
+	double ec85 = 260 * 0.015 * ecc + 0.0038; 	//Mander's Eq.
+	double epscu = (ec85 - ecc) * (0.85 / fcu * fc0) + ecc; //Mander's Eq.
+	fcu *= fcc / fc0;
+	if (ft > 0.001)
+		theMaterial = new Concrete02(tag, fcc, ecc, fcu, epscu, rat, ft, Ets);
+	else
+		theMaterial = new Concrete01(tag, fcc, ecc, fcu, epscu);
+	if (theMaterial == 0)
+	{
+		opserr << "WARNING ran out of memory while creating uniaxialMaterial of type ConfinedConcrete; tag = " << tag << "\n";
+		return 0;
+	}
+#ifdef OPS_CC_CMD_LOG
+	if (LOG_COMMANDS)
+	{
+		if (ft > 0.001)
+			CmdLogStream << "#uniaxialMaterial Concrete02 " << tag << " " << fcc << " " << ecc << " " << fcu << " " << epscu << " " << rat << " " << ft << " " << Ets << "; #code generated for column by ConfinedConcrete\n";
+		else
+			CmdLogStream << "#uniaxialMaterial Concrete01 " << tag << " " << fcc << " " << ecc << " " << fcu << " " << epscu << "; #code generated for column by ConfinedConcrete\n";
+	}
+#endif
+
+	return theMaterial;
 }
