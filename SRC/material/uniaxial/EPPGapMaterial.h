@@ -50,6 +50,7 @@
 #ifndef EPPGapMaterial_h
 #define EPPGapMaterial_h
 
+#include <cmath>
 #include <UniaxialMaterial.h>
 
 class EPPGapMaterial : public UniaxialMaterial
@@ -92,7 +93,7 @@ class EPPGapMaterial : public UniaxialMaterial
 	//by SAJalali
 	virtual double getEnergy() { return EnergyP; }
 #ifdef _CSS
-	virtual double getInitYieldStrain() { return fabs(fy / E + gap); } //SAJalali
+	virtual double getInitYieldStrain() { return std::fabs(fy / E + gap); } //SAJalali
    virtual void resetEnergy(void) { EnergyP = 0; }
 #endif // _CSS
 

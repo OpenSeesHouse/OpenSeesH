@@ -6,6 +6,7 @@
 #ifndef Concrete02Thermal_h
 #define Concrete02Thermal_h
 
+#include <cmath>
 #include <UniaxialMaterial.h>
 
 class Concrete02Thermal : public UniaxialMaterial
@@ -47,7 +48,7 @@ class Concrete02Thermal : public UniaxialMaterial
 
     double EnergyP;
     double getEnergy() { return EnergyP; }
-    double getInitYieldStrain() { return fabs(epsc0 / 2); }
+    double getInitYieldStrain() { return std::fabs(epsc0 / 2); }
     virtual void resetEnergy(void) { EnergyP = 0; }
 
  protected:

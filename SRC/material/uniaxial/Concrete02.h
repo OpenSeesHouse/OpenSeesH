@@ -40,6 +40,7 @@
 #ifndef Concrete02_h
 #define Concrete02_h
 
+#include <cmath>
 #include <UniaxialMaterial.h>
 
 class Concrete02 : public UniaxialMaterial
@@ -78,7 +79,7 @@ class Concrete02 : public UniaxialMaterial
     //by SAJalali
     double EnergyP;
     double getEnergy() { return EnergyP; }
-    double getInitYieldStrain() { return fabs(epsc0/2); }
+    double getInitYieldStrain() { return std::fabs(epsc0/2); }
     virtual void resetEnergy(void) { EnergyP = 0; }
 #endif // _CSS
 

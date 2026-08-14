@@ -26,6 +26,8 @@
 #ifndef Concrete01_h
 #define Concrete01_h
 
+#include <cmath>
+
 // Written: MHS 
 // Created: 06/99
 // Revision: A
@@ -82,7 +84,7 @@ class Concrete01 : public UniaxialMaterial
   double getEnergy() { return EnergyP; }
 #ifdef _CSS
   //by SAJalali
-  double getInitYieldStrain() { return fabs(epsc0/2); }
+  double getInitYieldStrain() { return std::fabs(epsc0/2); }
   virtual void resetEnergy(void) { EnergyP = 0; }
 #endif // _CSS
 
