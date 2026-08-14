@@ -1,8 +1,19 @@
 include ../../../../Makefile.def
 
-OBJS =
-
-
+# Win64 material.vcxproj PY allowlist (no TclPyTzQzMaterialCommand)
+OBJS       = PySimple1.o \
+	QzSimple1.o \
+	TzSimple1.o \
+	PySimple2.o \
+	PySimple3.o \
+	QzSimple2.o \
+	TzSimple2.o \
+	ShallowFoundationGen.o \
+	PyLiq1.o \
+	TzLiq1.o \
+	QzLiq1.o \
+	PySimple1Gen.o \
+	TzSimple1Gen.o
 
 all:         $(OBJS)
 

@@ -1,23 +1,23 @@
 include ../../../../Makefile.def
 
-OBJS       = stressDensity.o
+# Win64 links sdmuc.lib (Fortran SDM-UC.f). Linux must build/archive the same TU.
+OBJS       = stressDensity.o SDM-UC.o
 
 
-all: $(OBJS) 
+all: $(OBJS)
 
-# fortran functions for 3D material model
+# Optional newer 2D/3D Fortran models (not in Win64 OpenSeesPy ClCompile / sdmuc.lib)
 sdm3d.o: SDM3D.f90 module_all_interfaces_3d.mod
-	$(FC) -fPIC -c SDM3D.f90
+	$(FC) $(FFLAGS) -c SDM3D.f90 -o $@
 
-module_all_interfaces_3d.mod: MODULE_ALL_INTERFACES_3D.f90 
-	$(FC) -fPIC -c MODULE_ALL_INTERFACES_3D.f90
+module_all_interfaces_3d.mod: MODULE_ALL_INTERFACES_3D.f90
+	$(FC) $(FFLAGS) -c MODULE_ALL_INTERFACES_3D.f90
 
-# fortran functions for 2D material model
 sdm2d.o: SDM2D.f90 module_all_interfaces_2d.mod
-	$(FC) -fPIC -c SDM2D.f90
+	$(FC) $(FFLAGS) -c SDM2D.f90 -o $@
 
-module_all_interfaces_2d.mod: MODULE_ALL_INTERFACES_2D.f90 
-	$(FC) -fPIC -c MODULE_ALL_INTERFACES_2D.f90
+module_all_interfaces_2d.mod: MODULE_ALL_INTERFACES_2D.f90
+	$(FC) $(FFLAGS) -c MODULE_ALL_INTERFACES_2D.f90
 
 # Miscellaneous
 

@@ -117,7 +117,8 @@ PY_VER_FLAG =
 endif
 
 # _CSS enables Resid/Conditional recorders via OpsRecorderCommands
-C++FLAGS         = -Wall -D_LINUX -D_UNIX -D_PYTHON3 -D_CSS $(PY_VER_FLAG) \
+C++FLAGS         = -Wall -std=c++17 -Wno-overloaded-virtual \
+	-D_LINUX -D_UNIX -D_PYTHON3 -D_CSS -D_NO_NEW_RESTREPO $(PY_VER_FLAG) \
 	$(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) \
 	$(PROGRAMMING_FLAG) -O3 -ffloat-store -fPIC
 CFLAGS          = -Wall -O2 -fPIC

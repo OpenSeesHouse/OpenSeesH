@@ -5,6 +5,7 @@ OBJS       = FourNodeQuadUP.o \
 	Nine_Four_Node_QuadUP.o \
 	Twenty_Eight_Node_BrickUP.o \
 	BBarBrickUP.o \
+	BBarFourNodeQuadUP.o \
 	shp3dv.o
 
 

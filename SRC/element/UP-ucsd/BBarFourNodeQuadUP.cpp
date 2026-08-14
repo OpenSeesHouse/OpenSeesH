@@ -1092,30 +1092,34 @@ BBarFourNodeQuadUP::displaySelf(Renderer &theViewer, int displayMode, float fact
 
 
 Response*
-BBarFourNodeQuadUP::setResponse(const char **argv, int argc, OPS_Stream &output)
+BBarFourNodeQuadUP::setResponse(const char **argv, int argc, OPS_Stream *output)
 {
   Response *theResponse = 0;
 
   char outputData[32];
 
-  output.tag("ElementOutput");
-  output.attr("eleType","BBarFourNodeQuadUP");
-  output.attr("eleTag",this->getTag());
-  output.attr("node1",nd1Ptr->getTag());
-  output.attr("node2",nd2Ptr->getTag());
-  output.attr("node3",nd3Ptr->getTag());
-  output.attr("node4",nd4Ptr->getTag());
+  if (output != 0)
+  {
+    output->tag("ElementOutput");
+    output->attr("eleType","BBarFourNodeQuadUP");
+    output->attr("eleTag",this->getTag());
+    output->attr("node1",nd1Ptr->getTag());
+    output->attr("node2",nd2Ptr->getTag());
+    output->attr("node3",nd3Ptr->getTag());
+    output->attr("node4",nd4Ptr->getTag());
+  }
 
   if (strcmp(argv[0],"force") == 0 || strcmp(argv[0],"forces") == 0) {
 
-    for (int i=1; i<=4; i++) {
-      sprintf(outputData,"P1_%d",i);
-      output.tag("ResponseType",outputData);
-      sprintf(outputData,"P2_%d",i);
-      output.tag("ResponseType",outputData);
-      sprintf(outputData,"Pp_%d",i);
-      output.tag("ResponseType",outputData);
-    }
+    if (output != 0)
+      for (int i=1; i<=4; i++) {
+        sprintf(outputData,"P1_%d",i);
+        output->tag("ResponseType",outputData);
+        sprintf(outputData,"P2_%d",i);
+        output->tag("ResponseType",outputData);
+        sprintf(outputData,"Pp_%d",i);
+        output->tag("ResponseType",outputData);
+      }
 
     theResponse = new ElementResponse(this, 1, P);
 
@@ -1126,16 +1130,21 @@ BBarFourNodeQuadUP::setResponse(const char **argv, int argc, OPS_Stream &output)
     int pointNum = atoi(argv[1]);
     if (pointNum > 0 && pointNum <= 4) {
 
-      output.tag("GaussPoint");
-      output.attr("number",pointNum);
+      if (output != 0)
+      {
+        output->tag("GaussPoint");
+        output->attr("number",pointNum);
+      }
 
       theResponse =  theMaterial[pointNum-1]->setResponse(&argv[2], argc-2, output);
 
-      output.endTag(); // GaussPoint
+      if (output != 0)
+        output->endTag(); // GaussPoint
     }
   }
 
-  output.endTag(); // ElementOutput
+  if (output != 0)
+    output->endTag(); // ElementOutput
   return theResponse;
 }
 

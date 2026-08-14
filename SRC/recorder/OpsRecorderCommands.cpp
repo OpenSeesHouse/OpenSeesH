@@ -64,7 +64,9 @@
 #include <ConditionalNodeRecorder.h>		
 #include <ConditionalDriftRecorder.h>		
 #include <ConditionalElementRecorder.h>		
+#ifndef _NOGRAPHICS
 #include <../tcl/FeViewer.h>
+#endif
 #endif // _CSS
 
 #include <EnvelopeDriftRecorder.h>
@@ -128,7 +130,12 @@ typedef struct externalRecorderCommand {
 } ExternalRecorderCommand;
 
 static ExternalRecorderCommand* theExternalRecorderCommands = NULL;
+#ifdef _CSS
+#ifndef _NOGRAPHICS
 static FeViewer* theFeViewr = 0;
+#endif
+#endif
+
 
 #ifdef _CSS
 enum outputMode { No_Output, STANDARD_STREAM, DATA_STREAM, XML_STREAM, DATABASE_STREAM, BINARY_STREAM, DATA_STREAM_CSV, TCP_STREAM, DATA_STREAM_ADD };
@@ -974,6 +981,10 @@ theOutputStream = new DatabaseStream(theDatabase, tableName);
 
 void* OPS_DisplayRecorder(const char* type = "")
 {
+#ifdef _NOGRAPHICS
+	opserr << "WARNING recorder display is unavailable in this build (_NOGRAPHICS)\n";
+	return 0;
+#else
 	int xLoc, yLoc, width, height;
 	int pos = 7;
 	int wipeFlag = 0;
@@ -1027,10 +1038,15 @@ void* OPS_DisplayRecorder(const char* type = "")
 		theRecorder = new FeViewer(title, xLoc, yLoc, width, height, fileName, *theDomain, dT, rTolDt);
 	theFeViewr = (FeViewer*)theRecorder;
 	return theRecorder;
-
+#endif
 }
 
+class FeViewer;
 FeViewer* OPS_GetFeViewer()
 {
+#ifdef _NOGRAPHICS
+	return 0;
+#else
 	return theFeViewr;
+#endif
 }

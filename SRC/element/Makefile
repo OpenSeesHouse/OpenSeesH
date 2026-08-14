@@ -19,6 +19,7 @@ all:         $(OBJS)
 	@$(CD) $(FE)/element/mvlem; $(MAKE);
 	@$(CD) $(FE)/element/nonlinearBeamColumn; $(MAKE);
 	@$(CD) $(FE)/element/shell; $(MAKE);
+	@$(CD) $(FE)/element/surfaceLoad; $(MAKE);
 	@$(CD) $(FE)/element/truss; $(MAKE);
 	@$(CD) $(FE)/element/twoNodeLink; $(MAKE);
 	@$(CD) $(FE)/element/zeroLength; $(MAKE);
@@ -45,6 +46,7 @@ spotless: clean
 	@$(CD) $(FE)/element/mvlem; $(MAKE) wipe;
 	@$(CD) $(FE)/element/nonlinearBeamColumn; $(MAKE) wipe;
 	@$(CD) $(FE)/element/shell; $(MAKE) wipe;
+	@$(CD) $(FE)/element/surfaceLoad; $(MAKE) wipe;
 	@$(CD) $(FE)/element/truss; $(MAKE) wipe;
 	@$(CD) $(FE)/element/twoNodeLink; $(MAKE) wipe;
 	@$(CD) $(FE)/element/zeroLength; $(MAKE) wipe;

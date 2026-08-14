@@ -6,8 +6,8 @@ OBJS       = Damping.o \
 	SecStifDamping.o \
 	UniformDamping.o \
 	URDDamping.o \
-	URDDampingbeta.o \
-	TclDampingCommand.o
+	URDDampingbeta.o
+# TclDampingCommand.o — Tcl-only (built via TCL_COMMAND_LIBS when INTERPRETER_LANGUAGE=TCL)
 
 # Compilation control
 

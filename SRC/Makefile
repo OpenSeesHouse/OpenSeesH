@@ -60,6 +60,7 @@ endif
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(REMO_LIBS)
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(GLF_LIBS)
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(ZHY_LIBS)
+	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(DAMPING_LIBS)
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(ERRORHANDLER_LIBS)
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(DRAIN_LIBS)
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(SNAP_LIBS)
@@ -123,6 +124,7 @@ endif
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(REMO_LIBS)
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(GLF_LIBS)
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(ZHY_LIBS)
+	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(DAMPING_LIBS)
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(ERRORHANDLER_LIBS)
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(DRAIN_LIBS)
 	@$(AR) $(ARFLAGS) $(FE_LIBRARY) $(SNAP_LIBS)
@@ -305,6 +307,13 @@ PY_SJB_RWB_BJ_LIBS = $(FE)/material/uniaxial/PY/PySimple1.o \
 	$(FE)/material/uniaxial/PY/PySimple1Gen.o \
 	$(FE)/material/uniaxial/PY/TzSimple1Gen.o
 
+# Win64 element.vcxproj damping sources (TclDampingCommand is Tcl-only)
+DAMPING_LIBS = $(FE)/damping/Damping.o \
+	$(FE)/damping/SecStifDamping.o \
+	$(FE)/damping/UniformDamping.o \
+	$(FE)/damping/URDDamping.o \
+	$(FE)/damping/URDDampingbeta.o
+
 ZHY_LIBS = $(FE)/material/nD/soil/FluidSolidPorousMaterial.o \
 	$(FE)/material/nD/soil/MultiYieldSurface.o \
 	$(FE)/material/nD/soil/MultiYieldSurfaceClay.o \
@@ -353,7 +362,8 @@ endif
 
 ifeq ($(GRAPHICS), NONE)
 
-RENDERER_LIBS = $(FE)/renderer/PlainMap.o
+RENDERER_LIBS = $(FE)/renderer/PlainMap.o \
+	$(FE)/renderer/Renderer.o
 
 endif
 
@@ -415,6 +425,7 @@ ELE_LIBS = $(FE)/element/Element.o \
 	$(FE)/element/Information.o \
 	$(FE)/element/ElementalLoad.o \
 	$(FE)/element/UP-ucsd/BBarBrickUP.o \
+	$(FE)/element/UP-ucsd/BBarFourNodeQuadUP.o \
 	$(FE)/element/UP-ucsd/BrickUP.o \
 	$(FE)/element/UP-ucsd/FourNodeQuadUP.o \
 	$(FE)/element/UP-ucsd/Nine_Four_Node_QuadUP.o \
@@ -507,6 +518,8 @@ ELE_LIBS = $(FE)/element/Element.o \
 	$(FE)/element/shell/ShellNLDKGQThermal.o \
 	$(FE)/element/shell/ShellNLDKGT.o \
 	$(FE)/element/shell/ShellNLDKGTThermal.o \
+	$(FE)/element/surfaceLoad/SurfaceLoad.o \
+	$(FE)/element/surfaceLoad/TriSurfaceLoad.o \
 	$(FE)/element/truss/CorotTruss.o \
 	$(FE)/element/truss/CorotTrussSection.o \
 	$(FE)/element/truss/Truss.o \
@@ -605,6 +618,7 @@ MATERIAL_LIBS = $(FE)/material/Material.o \
 	$(FE)/material/nD/soil/PressureIndependMultiYield.o \
 	$(FE)/material/nD/soil/T2Vector.o \
 	$(FE)/material/nD/stressDensityModel/stressDensity.o \
+	$(FE)/material/nD/stressDensityModel/SDM-UC.o \
 	$(FE)/material/uniaxial/AxialSp.o \
 	$(FE)/material/uniaxial/AxialSpHD.o \
 	$(FE)/material/uniaxial/BarSlipMaterial.o \
@@ -659,9 +673,6 @@ MATERIAL_LIBS = $(FE)/material/Material.o \
 	$(FE)/material/uniaxial/PathIndependentMaterial.o \
 	$(FE)/material/uniaxial/PenaltyMaterial.o \
 	$(FE)/material/uniaxial/Pinching4Material.o \
-	$(FE)/material/uniaxial/Py/PySimple1.o \
-	$(FE)/material/uniaxial/Py/QzSimple1.o \
-	$(FE)/material/uniaxial/Py/TzSimple1.o \
 	$(FE)/material/uniaxial/QbSandCPT.o \
 	$(FE)/material/uniaxial/RambergOsgoodSteel.o \
 	$(FE)/material/uniaxial/ReinforcingSteel.o \

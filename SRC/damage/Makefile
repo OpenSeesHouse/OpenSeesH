@@ -6,8 +6,8 @@ OBJS       = DamageModel.o \
 	Mehanny.o \
 	ParkAng.o \
 	NormalizedPeak.o \
-	DamageResponse.o \
-	TclModelBuilderDamageModelCommand.o
+	DamageResponse.o
+# TclModelBuilderDamageModelCommand.o — Tcl-only
 
 # Compilation control
 
