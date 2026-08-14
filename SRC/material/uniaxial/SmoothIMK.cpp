@@ -24,6 +24,7 @@
 // Adding Cyclic and in-cycle deterioration modes to steel02 UniaxialMaterial
 
 #include <math.h>
+#include <algorithm>
 
 #include <stdlib.h>
 #include <SmoothIMK.h>
