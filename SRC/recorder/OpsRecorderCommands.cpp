@@ -41,6 +41,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef _WIN32
+#define OPS_STRICMP _stricmp
+#else
+#include <strings.h>
+#define OPS_STRICMP strcasecmp
+#endif
 #include <Domain.h>
 #include <EquiSolnAlgo.h>
 
@@ -370,7 +376,7 @@ void* OPS_NodeRecorder(const char* type)
 				method = 4;
 			else if (strcmp(procType, "minAbs") == 0)
 				method = 5;
-			else if (_stricmp(procType, "SRSS") == 0)
+			else if (OPS_STRICMP(procType, "SRSS") == 0)
 				method = 6;
 			else
 			{
@@ -653,7 +659,7 @@ void* OPS_ElementRecorder(const char* type)
 				method = 4;
 			else if (strcmp(procType, "minAbs") == 0)
 				method = 5;
-			else if (_stricmp(procType, "SRSS") == 0)
+			else if (OPS_STRICMP(procType, "SRSS") == 0)
 				method = 6;
 			else {
 				opserr << "unrecognized element result process method: " << procType << endln;
@@ -793,7 +799,7 @@ void* OPS_DriftRecorder(const char* type)
 				method = 4;
 			else if (strcmp(procType, "minAbs") == 0)
 				method = 5;
-			else if (_stricmp(procType, "SRSS") == 0)
+			else if (OPS_STRICMP(procType, "SRSS") == 0)
 				method = 6;
 			else {
 				opserr << "unrecognized element result process method: " << procType << endln;

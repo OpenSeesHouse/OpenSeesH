@@ -7,7 +7,7 @@ OBJS       = ModelBuilder.o PlaneFrame.o
 # Compilation control
 
 all:    $(OBJS)
-	@$(CD) $(FE)/modelbuilder/tcl; $(MAKE) all;
+	@$(CD) $(FE)/modelbuilder/tcl; $(MAKE) blocks;
 
 # Miscellaneous
 tidy:	

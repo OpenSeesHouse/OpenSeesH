@@ -5,7 +5,6 @@ include ../../Makefile.def
 
 OBJS       = FE_Datastore.o \
 	FileDatastore.o \
-	TclDatabaseCommands.o \
 	NEESData.o
 
 # Compilation control

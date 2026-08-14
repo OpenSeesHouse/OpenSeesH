@@ -5,9 +5,14 @@ include ../../../Makefile.def
 OBJS       = TclModelBuilder.o myCommands.o TclUniaxialMaterialTester.o \
 	Block2D.o Block3D.o TclSectionTester.o TclPlaneStressMaterialTester.o
 
+# Non-Tcl helpers used by both interpreters (Win64 modelbuilder.vcxproj)
+BLOCK_OBJS = Block2D.o Block3D.o
+
 # Compilation control
 
-all: $(OBJS) 
+all: $(OBJS)
+
+blocks: $(BLOCK_OBJS) 
 
 tcl: $(OBJS) 
 	@$(CD) $(FE)/tcl; $(MAKE) tcl;

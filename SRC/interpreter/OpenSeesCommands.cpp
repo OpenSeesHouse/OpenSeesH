@@ -41,6 +41,7 @@ UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 //
 #include <filesystem>
 #include <iostream>
+#include <cmath>
 #include "OpenSeesCommands.h"
 #include <OPS_Globals.h>
 #include <elementAPI.h>
@@ -3559,8 +3560,8 @@ int OPS_defaultUnits()
 	sprintf(string, "mm4 = %.18e", mm * mm * mm * mm);   theInter->runCommand(string);
 	sprintf(string, "cm4 = %.18e", cm * cm * cm * cm);   theInter->runCommand(string);
 	sprintf(string, "m4 = %.18e", m * m * m * m);   theInter->runCommand(string);
-	sprintf(string, "pi = %.18e", 2.0 * asin(1.0));   theInter->runCommand(string);
-	sprintf(string, "PI = %.18e", 2.0 * asin(1.0));   theInter->runCommand(string);
+	sprintf(string, "pi = %.18e", 2.0 * std::asin(1.0));   theInter->runCommand(string);
+	sprintf(string, "PI = %.18e", 2.0 * std::asin(1.0));   theInter->runCommand(string);
 
 	SimulationInformation* simulationInfo = cmds->getSimulationInformation();
 	if (simulationInfo == 0) return -1;
