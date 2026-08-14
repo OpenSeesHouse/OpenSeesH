@@ -10,14 +10,17 @@
 
 
 
-find_package(TCL REQUIRED)
-find_package(MySQL REQUIRED)
+find_package(MySQL)
 
 #
 #sudo apt-get install libhdf5-serial-dev
 #  - installed version 1.10
 #  - we need version 1.12
 #  - hdf5-1.12.1-linux-centos7-x86_64-gcc485-static.tar.gz
+
+if(OPS_WITH_TCL)
+  find_package(TCL REQUIRED)
+endif()
 
 set (HDF5_USE_STATIC_LIBRARIES ON)
 find_package(HDF5)

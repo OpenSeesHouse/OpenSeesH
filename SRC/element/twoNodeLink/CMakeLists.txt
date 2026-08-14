@@ -6,13 +6,9 @@
 #==============================================================================
 target_sources(OPS_Element
     PRIVATE
-    Inerter.cpp
-    LinearElasticSpring.cpp
     TwoNodeLink.cpp
     TwoNodeLinkSection.cpp
     PUBLIC
-    Inerter.h
-    LinearElasticSpring.h
     TwoNodeLink.h
     TwoNodeLinkSection.h
 )

@@ -15,8 +15,6 @@ target_sources(coordTransformation
     PDeltaCrdTransf3d.cpp
     CorotCrdTransf2d.cpp
     CorotCrdTransf3d.cpp
-    CorotCrdTransfWarping2d.cpp
-    CorotCrdTransfWarping3d.cpp    
     PUBLIC
     CrdTransf.h
     LinearCrdTransf2d.h
@@ -25,8 +23,6 @@ target_sources(coordTransformation
     PDeltaCrdTransf3d.h
     CorotCrdTransf2d.h
     CorotCrdTransf3d.h
-    CorotCrdTransfWarping2d.h
-    CorotCrdTransfWarping3d.h        
 )
 
 target_include_directories(coordTransformation PUBLIC ${CMAKE_CURRENT_LIST_DIR})

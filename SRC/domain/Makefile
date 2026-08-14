@@ -14,9 +14,9 @@ all:
 	@$(CD) $(FE)/domain/constraints; $(MAKE);
 	@$(CD) $(FE)/domain/pattern; $(MAKE);
 	@$(CD) $(FE)/domain/groundMotion; $(MAKE);
-	@$(CD) $(FE)/domain/partitioner; $(MAKE);
+#	@$(CD) $(FE)/domain/partitioner; $(MAKE);
 	@$(CD) $(FE)/domain/region; $(MAKE);
-	@$(CD) $(FE)/domain/IGA; $(MAKE);
+#	@$(CD) $(FE)/domain/IGA; $(MAKE);
 
 # Miscellaneous
 tidy:	
@@ -33,12 +33,12 @@ wipe: spotless
 	@$(CD) $(FE)/domain/subdomain; $(MAKE) wipe;
 	@$(CD) $(FE)/domain/node; $(MAKE) wipe;
 	@$(CD) $(FE)/domain/constraints; $(MAKE) wipe;
-	@$(CD) $(FE)/domain/partitioner; $(MAKE) wipe;
-	@$(CD) $(FE)/domain/loadBalancer; $(MAKE) wipe;
+#	@$(CD) $(FE)/domain/partitioner; $(MAKE) wipe;
+#	@$(CD) $(FE)/domain/loadBalancer; $(MAKE) wipe;
 	@$(CD) $(FE)/domain/pattern; $(MAKE) wipe;
 	@$(CD) $(FE)/domain/groundMotion; $(MAKE) wipe;
-	@$(CD) $(FE)/domain/partitioner; $(MAKE) wipe;
+#	@$(CD) $(FE)/domain/partitioner; $(MAKE) wipe;
 	@$(CD) $(FE)/domain/region; $(MAKE) wipe;
-	@$(CD) $(FE)/domain/IGA; $(MAKE) wipe;
+#	@$(CD) $(FE)/domain/IGA; $(MAKE) wipe;
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.

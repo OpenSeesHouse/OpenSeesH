@@ -1,6 +1,8 @@
 include ../../../Makefile.def
 
-OBJS       = Node.o NodalLoad.o 
+OBJS       = Node.o \
+	NodalLoad.o
+
 
 # Compilation control
 

@@ -1,6 +1,7 @@
 include ../../../Makefile.def
 
-OBJS       = MeshRegion.o  TclRegionCommands.o
+OBJS       = MeshRegion.o
+
 
 # Compilation control
 

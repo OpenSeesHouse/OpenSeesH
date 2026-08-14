@@ -20,7 +20,6 @@ target_sources(OPS_Domain
     BrickSelfWeight.cpp
     SurfaceLoader.cpp
     SelfWeight.cpp
-    LysmerVelocityLoader.cpp
     PUBLIC
     Load.h
     #ElementalLoad.h
@@ -35,7 +34,6 @@ target_sources(OPS_Domain
     BrickSelfWeight.h
     SurfaceLoader.h
     SelfWeight.h
-    LysmerVelocityLoader.h
 )
 
 target_sources(OPS_Thermal

@@ -8,19 +8,15 @@ class OpenSeesDependencies(ConanFile):
     license = "BSD 3-Clause"
     author = "fmk fmckenna@berkeley.edu"
     settings = {"os": None, "build_type": None, "compiler": None, "arch": ["x86_64"]}
-    options = {"shared": [True, False]}
-    default_options = {"mkl-static:threaded": False, "ipp-static:simcenter_backend": True}    
+    options = {"shared": [True, False], "with_tcl": [True, False]}
+    default_options = {"mkl-static:threaded": False, "ipp-static:simcenter_backend": True, "with_tcl": True}
     generators = "cmake", "cmake_find_package"
     build_policy = "missing"
-    requires = "hdf5/1.14.0", \
-        "tcl/8.6.11", \
-        "zlib/1.2.13", \
-        "eigen/3.4.0"
     # Custom attributes for Bincrafters recipe conventions
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
     # Set short paths for Windows
-    short_paths = True    
+    short_paths = True
     scm = {
         "type": "git",  # Use "type": "svn", if local repo is managed using SVN
         "subfolder": _source_subfolder,
@@ -28,6 +24,13 @@ class OpenSeesDependencies(ConanFile):
         "revision": "auto"
     }
 
+
+    def requirements(self):
+        self.requires("hdf5/1.14.0")
+        self.requires("zlib/1.2.13")
+        self.requires("eigen/3.4.0")
+        if self.options.with_tcl:
+            self.requires("tcl/8.6.11")
 
     def configure(self):
         self.options.shared = False

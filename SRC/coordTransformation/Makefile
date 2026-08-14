@@ -1,18 +1,12 @@
 include ../../Makefile.def
 
-
-
 OBJS       = CrdTransf.o \
 	LinearCrdTransf2d.o \
 	LinearCrdTransf3d.o \
 	PDeltaCrdTransf2d.o \
 	PDeltaCrdTransf3d.o \
-	ModerateDispCrdTransf2d.o \
 	CorotCrdTransf2d.o \
-	CorotCrdTransf3d.o \
-	CorotCrdTransfWarping2d.o \
-	CorotCrdTransfWarping3d.o \
-	TclGeomTransfCommand.o
+	CorotCrdTransf3d.o
 
 # Compilation control
 

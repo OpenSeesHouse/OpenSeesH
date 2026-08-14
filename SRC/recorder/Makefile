@@ -1,29 +1,19 @@
 include ../../Makefile.def
 
 ifeq ($(GRAPHICS), NONE)
-GRAPHIC_OBJECTS = 
+GRAPHIC_OBJECTS =
 else
-GRAPHIC_OBJECTS = FilePlotter.o AlgorithmIncrements.o 
+GRAPHIC_OBJECTS = FilePlotter.o
 endif
 
 OBJS       = Recorder.o \
-	DatastoreRecorder.o \
 	ElementRecorder.o \
-	ElementRecorderRMS.o \
 	NodeRecorder.o \
-	NodeRecorderRMS.o \
 	EnvelopeElementRecorder.o \
-	NormElementRecorder.o \
-	NormEnvelopeElementRecorder.o \
 	EnvelopeNodeRecorder.o \
-	TclRecorderCommands.o \
 	DriftRecorder.o \
 	EnvelopeDriftRecorder.o \
-	PatternRecorder.o \
-	RemoveRecorder.o \
-	DamageRecorder.o $(GRAPHIC_OBJECTS) \
-	PVDRecorder.o MPCORecorder.o GmshRecorder.o \
-	VTK_Recorder.o \
+	$(GRAPHIC_OBJECTS) \
 	ResidElementRecorder.o \
 	ResidNodeRecorder.o \
 	ResidDriftRecorder.o \

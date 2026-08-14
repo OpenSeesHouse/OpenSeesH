@@ -19,33 +19,18 @@ endif
 #	PlasticDamageConcretePlaneStress.o \
 
 OBJS       = NDMaterial.o \
-	$(DAMAGE_2P) $(PLAINCONCRETE) BeamFiberMaterial.o \
+	BeamFiberMaterial.o \
 	PlasticDamageConcretePlaneStress.o \
 	BeamFiberMaterial2d.o \
 	BeamFiberMaterial2dPS.o \
-	PlasticDamageConcrete3d.o \
-	LinearCap.o \
-	eig3.o \
-	Faria1998.o \
-	Faria1998PlaneStrain.o \
-	Faria1998PlaneStress.o \
-	Faria1998PlaneStress2d.o \
-	Faria1998ThreeDimensional.o \
 	FSAM.o \
-	AcousticMedium.o \
-	ElasticIsotropicAxiSymm.o\
-	ElasticIsotropicBeamFiber2d.o \
-	ElasticIsotropicBeamFiber.o \
 	ElasticIsotropicMaterial.o \
 	ElasticIsotropicPlaneStrain2D.o \
 	ElasticIsotropicPlaneStress2D.o \
 	ElasticIsotropicPlateFiber.o \
-	ElasticIsotropicThreeDimensional.o \
-	IncrementalElasticIsotropicThreeDimensional.o \
 	ElasticOrthotropicMaterial.o \
 	ElasticOrthotropicThreeDimensional.o \
 	PressureDependentElastic3D.o \
-	FeapMaterial.o \
 	J2AxiSymm.o \
 	J2PlaneStrain.o \
 	J2PlaneStress.o \
@@ -60,31 +45,11 @@ OBJS       = NDMaterial.o \
 	Parallel3DMaterial.o \
 	PlaneStrainMaterial.o \
 	PlaneStressMaterial.o \
-	PlaneStressUserMaterial.o \
 	PlateFiberMaterial.o \
 	PlateFromPlaneStressMaterial.o \
 	PlaneStressLayeredMaterial.o \
 	PlateRebarMaterial.o \
 	PlaneStressRebarMaterial.o \
-	CycLiqCP.o \
-	CycLiqCP3D.o \
-	CycLiqCPPlaneStrain.o \
-	CycLiqCPSP.o \
-	CycLiqCPSP3D.o \
-	CycLiqCPSPPlaneStrain.o \
-	TclModelBuilderNDMaterialCommand.o \
-	WrapperNDMaterial.o \
-	InitStressNDMaterial.o \
-	InitStrainNDMaterial.o \
-	MinMaxNDMaterial.o \
-	ConcreteMcftNonLinear5.o \
-	ConcreteMcftNonLinear7.o \
-	CapPlasticity.o \
-	ConcreteS.o \
-	SimplifiedJ2.o \
-	LinearCap.o \
-	AcousticMedium.o \
-	PlaneStressSimplifiedJ2.o \
 	DruckerPrager3DThermal.o \
 	DruckerPragerThermal.o \
 	ElasticIsotropic3DThermal.o \
@@ -93,27 +58,24 @@ OBJS       = NDMaterial.o \
 	J2ThreeDimensionalThermal.o \
 	PlateFiberMaterialThermal.o \
 	PlateFromPlaneStressMaterialThermal.o \
-	UVCmultiaxial.o	\
-	UVCplanestress.o \
 	PlateRebarMaterialThermal.o \
 	ElasticPlaneStress.o \
-	ElasticOrthotropicPlaneStress.o \
-	VonPapaDamage.o \
-	ASDConcrete3DMaterial.o
+	ElasticOrthotropicPlaneStress.o
+
 
 
 all: $(OBJS) 
 	@$(CD) $(FE)/material/nD/soil; $(MAKE);
-	@$(CD) $(FE)/material/nD/feap; $(MAKE);
-	@$(CD) $(FE)/material/nD/cyclicSoil; $(MAKE);
+#	@$(CD) $(FE)/material/nD/feap; $(MAKE);  # pruned (Win64)
+#	@$(CD) $(FE)/material/nD/cyclicSoil; $(MAKE);  # pruned (Win64)
 	@$(CD) $(FE)/material/nD/reinforcedConcretePlaneStress; $(MAKE); 
 	@$(CD) $(FE)/material/nD/UWmaterials; $(MAKE);
 	@$(CD) $(FE)/material/nD/matCMM; $(MAKE);
 	@$(CD) $(FE)/material/nD/stressDensityModel; $(MAKE);
-	@$(CD) $(FE)/material/nD/UANDESmaterials; $(MAKE);
+#	@$(CD) $(FE)/material/nD/UANDESmaterials; $(MAKE);  # pruned (Win64)
 	@$(CD) $(FE)/material/nD/OrthotropicRotatingAngleConcreteT2DMaterial01; $(MAKE);
 	@$(CD) $(FE)/material/nD/SmearedSteelDoubleLayerT2DMaterial01; $(MAKE);
-	@$(CD) $(FE)/material/nD/ASDPlasticMaterial3D; $(MAKE);
+#	@$(CD) $(FE)/material/nD/ASDPlasticMaterial3D; $(MAKE);  # pruned (Win64)
 
 test: $(OBJS) main.o
 	$(LINKER) $(LINKFLAGS) main.o ../../../SRC/api/elementAPI_Dummy.o $(FE_LIBRARY) \
@@ -133,16 +95,16 @@ clean: tidy
 
 spotless: clean
 	@$(CD) $(FE)/material/nD/soil; $(MAKE) wipe;
-	@$(CD) $(FE)/material/nD/feap; $(MAKE) wipe;
-	@$(CD) $(FE)/material/nD/cyclicSoil; $(MAKE) wipe;
+#	@$(CD) $(FE)/material/nD/feap; $(MAKE) wipe;
+#	@$(CD) $(FE)/material/nD/cyclicSoil; $(MAKE) wipe;
 	@$(CD) $(FE)/material/nD/reinforcedConcretePlaneStress; $(MAKE) wipe; 
 	@$(CD) $(FE)/material/nD/UWmaterials; $(MAKE) wipe;
 	@$(CD) $(FE)/material/nD/matCMM; $(MAKE) wipe;
 	@$(CD) $(FE)/material/nD/stressDensityModel; $(MAKE) wipe;
-	@$(CD) $(FE)/material/nD/UANDESmaterials; $(MAKE) wipe;
+#	@$(CD) $(FE)/material/nD/UANDESmaterials; $(MAKE) wipe;
 	@$(CD) $(FE)/material/nD/OrthotropicRotatingAngleConcreteT2DMaterial01; $(MAKE) wipe;
 	@$(CD) $(FE)/material/nD/SmearedSteelDoubleLayerT2DMaterial01; $(MAKE) wipe;
-	@$(CD) $(FE)/material/nD/ASDPlasticMaterial3D; $(MAKE) wipe;
+#	@$(CD) $(FE)/material/nD/ASDPlasticMaterial3D; $(MAKE) wipe;
 	
 
 wipe: spotless

@@ -1,12 +1,13 @@
 
 include ../../Makefile.def
 
-OBJS  = DL_Interpreter.o OpenSeesCommands.o OpenSeesUniaxialMaterialCommands.o OpenSeesElementCommands.o OpenSeesTimeSeriesCommands.o OpenSeesPatternCommands.o OpenSeesSectionCommands.o OpenSeesOutputCommands.o OpenSeesCrdTransfCommands.o OpenSeesDampingCommands.o OpenSeesBeamIntegrationCommands.o OpenSeesNDMaterialCommands.o OpenSeesMiscCommands.o OpenSeesParameterCommands.o OpenSeesFrictionModelCommands.o OpenSeesReliabilityCommands.o OpenSeesNDTestCommands.o OpenSeesIGACommands.o 
+OBJS  = DL_Interpreter.o OpenSeesCommands.o OpenSeesUniaxialMaterialCommands.o OpenSeesElementCommands.o OpenSeesTimeSeriesCommands.o OpenSeesPatternCommands.o OpenSeesSectionCommands.o OpenSeesOutputCommands.o OpenSeesCrdTransfCommands.o OpenSeesDampingCommands.o OpenSeesBeamIntegrationCommands.o OpenSeesNDMaterialCommands.o OpenSeesMiscCommands.o OpenSeesParameterCommands.o OpenSeesFrictionModelCommands.o OpenSeesNDTestCommands.o
 
-PythonOtherFiles = ../reliability/domain/functionEvaluator/PythonEvaluator.o
+# OpsRecorderCommands lives under recorder/ but links into OpenSeesPy (Win64 parity).
+PythonOtherFiles = $(FE)/recorder/OpsRecorderCommands.o
 
 TclOBJS =  tclMain.o TclInterpreter.o TclWrapper.o $(OBJS)
-PythonOBJS = pythonMain.o PythonModule.o PythonWrapper.o PythonStream.o $(OBJS)
+PythonOBJS = pythonMain.o PythonModule.o PythonWrapper.o PythonStream.o $(PythonOtherFiles) $(OBJS)
 PythonModuleOBJS = PythonModule.o PythonWrapper.o PythonStream.o $(PythonOtherFiles) $(OBJS)
 
 # Compilation control
@@ -42,6 +43,8 @@ pythonmodule: $(PythonModuleOBJS)
 	$(MACHINE_NUMERICAL_LIBS) $(MACHINE_SPECIFIC_LIBS) $(PARALLEL_LIB) \
 	 -o opensees.so
 
+$(FE)/recorder/OpsRecorderCommands.o: $(FE)/recorder/OpsRecorderCommands.cpp
+	$(CC++) $(C++FLAGS) $(INCLUDES) -c $(FE)/recorder/OpsRecorderCommands.cpp -o $@
 
 INTERPRETER_LIBS_MPI_PARAMETERS =
 

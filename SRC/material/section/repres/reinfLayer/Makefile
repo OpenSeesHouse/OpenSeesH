@@ -1,6 +1,9 @@
 include ../../../../../Makefile.def
 
-OBJS       = ReinfLayer.o StraightReinfLayer.o CircReinfLayer.o
+OBJS       = ReinfLayer.o \
+	StraightReinfLayer.o \
+	CircReinfLayer.o
+
 
 # Compilation control
 

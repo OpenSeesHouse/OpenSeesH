@@ -7,8 +7,6 @@
 
 target_sources(OPS_Element
     PRIVATE
-        ASDShellQ4.cpp
-        ASDShellT3.cpp
         R3vectors.cpp
         ShellDKGQ.cpp
         ShellDKGT.cpp
@@ -20,16 +18,6 @@ target_sources(OPS_Element
         ShellNLDKGT.cpp
         ShellNLDKGTThermal.cpp
     PUBLIC
-        ASDEICR.h
-        ASDMath.h
-        ASDShellQ4CorotationalTransformation.h
-        ASDShellQ4.h
-        ASDShellQ4LocalCoordinateSystem.h
-        ASDShellQ4Transformation.h
-        ASDShellT3CorotationalTransformation.h
-        ASDShellT3.h
-        ASDShellT3LocalCoordinateSystem.h
-        ASDShellT3Transformation.h
         R3vectors.h
         ShellDKGQ.h
         ShellDKGT.h

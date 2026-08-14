@@ -11,7 +11,8 @@ OBJS       = ConcreteL01.o \
 	PrestressedConcretePlaneStress.o \
 	FAPrestressedConcretePlaneStress.o \
 	FAFourSteelPCPlaneStress.o \
-	RAFourSteelPCPlaneStress.o 
+	RAFourSteelPCPlaneStress.o
+
 
 # Compilation control
 

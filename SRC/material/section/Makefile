@@ -1,41 +1,24 @@
 include ../../../Makefile.def
 
 OBJS       = SectionForceDeformation.o \
-	FiberSection.o \
-	ElasticSection2d.o ElasticSection3d.o \
-	ElasticShearSection2d.o ElasticShearSection3d.o \
-	ElasticBDShearSection2d.o \
-	ElasticWarpingShearSection2d.o \
-	ElasticTubeSection3d.o \
-	GenericSection1d.o \
+	ElasticSection2d.o \
+	ElasticSection3d.o \
 	SectionAggregator.o \
-	ParallelSection.o \
-	PipeSection.o \
 	ElasticPlateSection.o \
 	ElasticMembranePlateSection.o \
 	MembranePlateFiberSection.o \
 	DoubleMembranePlateFiberSection.o \
-	TclModelBuilderSectionCommand.o \
 	FiberSection2d.o \
 	NDFiberSection2d.o \
 	NDFiberSection3d.o \
-	NDFiberSectionWarping2d.o \
 	FiberSection2dThermal.o \
 	FiberSection3d.o \
-	FiberSectionWarping3d.o \
-	FiberSectionAsym3d.o \
-	Bidirectional.o \
-	Elliptical.o \
-	Elliptical2.o \
-	Isolator2spring.o \
-	BiaxialHysteretic.o \
-	McftSection2dfiber.o \
-	ASDCoupledHinge3D.o \
 	LayeredShellFiberSection.o \
 	LayeredShellFiberSectionThermal.o \
 	FiberSection3dThermal.o \
 	MembranePlateFiberSectionThermal.o \
 	FiberSectionGJThermal.o
+
 
 all:         $(OBJS)
 	@$(CD) $(FE)/material/section/repres; $(MAKE);

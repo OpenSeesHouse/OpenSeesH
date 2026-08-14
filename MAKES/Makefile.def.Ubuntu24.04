@@ -1,0 +1,189 @@
+############################################################################
+#
+#  Program:  OpenSees
+#
+#  Purpose:  Ubuntu 24.04 Makefile.def — Python-only (no Tcl) build for
+#            OpenSeesPy / opensees.so on Python 3.12, 3.13, or 3.14.
+#
+#  Usage:
+#    sudo apt-get update
+#    sudo apt-get install -y build-essential gfortran make \
+#      liblapack-dev libblas-dev \
+#      python3.12-dev   # and/or python3.13-dev python3.14-dev
+#    mkdir -p ~/lib ~/bin
+#    cd OpenSeesH
+#    cp ./MAKES/Makefile.def.Ubuntu24.04 ./Makefile.def
+#    # Set PYTHON_VERSION below (3.12 | 3.13 | 3.14), then:
+#    make python
+#    # Artifact: SRC/interpreter/opensees.so (or as linked by interpreter Makefile)
+#
+############################################################################
+
+# Select one: 3.12, 3.13, or 3.14
+PYTHON_VERSION = 3.12
+
+INTERPRETER_LANGUAGE = PYTHON
+# Tcl interpreter is intentionally not selected for this Ubuntu 24 prep.
+
+OpenSees_PROGRAM = $(HOME)/bin/OpenSees
+
+OPERATING_SYSTEM = LINUX
+GRAPHICS = NONE
+GRAPHIC_FLAG = -D_NOGRAPHICS
+PROGRAMMING_MODE = SEQUENTIAL
+DEBUG_MODE = NO_DEBUG
+RELIABILITY = NO_RELIABILITY
+RELIABILITY_FLAG =
+
+# %---------------------------------%
+# | SECTION 2: PATHS               |
+# %---------------------------------%
+
+BASE		= /usr/local
+FE		= $(HOME)/OpenSees/SRC
+
+AMDdir       = $(HOME)/OpenSees/OTHER/AMD
+BLASdir      = $(HOME)/OpenSees/OTHER/BLAS
+CBLASdir     = $(HOME)/OpenSees/OTHER/CBLAS
+LAPACKdir    = $(HOME)/OpenSees/OTHER/LAPACK
+SUPERLUdir   = $(HOME)/OpenSees/OTHER/SuperLU_5.1.1/SRC
+ARPACKdir    = $(HOME)/OpenSees/OTHER/ARPACK
+UMFPACKdir   = $(HOME)/OpenSees/OTHER/UMFPACK
+METISdir     = $(HOME)/OpenSees/OTHER/METIS
+CSPARSEdir   = $(HOME)/OpenSees/OTHER/CSPARSE
+SRCdir       = $(HOME)/OpenSees/SRC
+
+DIRS        = $(BLASdir) $(CBLASdir) $(LAPACKdir) $(AMDdir) $(CSPARSEdir) \
+	$(SUPERLUdir) $(ARPACKdir) $(UMFPACKdir) $(SRCdir) $(METISdir)
+
+# %-------------------------------------------------------%
+# | SECTION 3: LIBRARIES                                  |
+# %-------------------------------------------------------%
+
+FE_LIBRARY      = $(HOME)/lib/libOpenSees.a
+NDARRAY_LIBRARY = $(HOME)/lib/libndarray.a
+MATMOD_LIBRARY  = $(HOME)/lib/libmatmod.a
+BJMISC_LIBRARY  = $(HOME)/lib/libBJmisc.a
+LAPACK_LIBRARY  = $(HOME)/lib/libLapack.a
+BLAS_LIBRARY    = $(HOME)/lib/libBlas.a
+SUPERLU_LIBRARY = $(HOME)/lib/libSuperLU.a
+CBLAS_LIBRARY   = $(HOME)/lib/libCBlas.a
+ARPACK_LIBRARY  = $(HOME)/lib/libArpack.a
+AMD_LIBRARY  = $(HOME)/lib/libAMD.a
+UMFPACK_LIBRARY = $(HOME)/lib/libUmfpack.a
+METIS_LIBRARY   = $(HOME)/lib/libMetis.a
+CSPARSE_LIBRARY   = $(HOME)/lib/libCSparse.a
+RELIABILITY_LIBRARY = $(HOME)/lib/libReliability.a
+
+# No Tcl for this Python-only profile
+TCL_LIBRARY =
+
+BLITZ_LIBRARY =
+GRAPHIC_LIBRARY     =
+
+WIPE_LIBS	= $(FE_LIBRARY) \
+		$(LAPACK_LIBRARY) \
+		$(BLAS_LIBRARY) \
+		$(CBLAS_LIBRARY) \
+		$(SUPERLU_LIBRARY) \
+		$(ARPACK_LIBRARY) \
+		$(UMFPACK_LIBRARY) \
+		$(CSPARSE_LIBRARY) \
+	        $(METIS_LIBRARY) \
+		$(RELIABILITY_LIBRARY)
+
+# %---------------------------------------------------------%
+# | SECTION 4: COMPILERS                                    |
+# %---------------------------------------------------------%
+
+CC++	= /usr/bin/g++
+CC      = /usr/bin/gcc
+FC	= /usr/bin/gfortran
+
+AR		= ar
+ARFLAGS		= cqls
+RANLIB		= ranlib
+RANLIBFLAGS     =
+
+# Map PYTHON_VERSION → Py31X macro (Win64 OpenSeesPy parity)
+ifeq ($(PYTHON_VERSION),3.12)
+PY_VER_FLAG = -DPy312
+else ifeq ($(PYTHON_VERSION),3.13)
+PY_VER_FLAG = -DPy313
+else ifeq ($(PYTHON_VERSION),3.14)
+PY_VER_FLAG = -DPy314
+else
+PY_VER_FLAG =
+endif
+
+# _CSS enables Resid/Conditional recorders via OpsRecorderCommands
+C++FLAGS         = -Wall -D_LINUX -D_UNIX -D_PYTHON3 -D_CSS $(PY_VER_FLAG) \
+	$(GRAPHIC_FLAG) $(RELIABILITY_FLAG) $(DEBUG_FLAG) \
+	$(PROGRAMMING_FLAG) -O3 -ffloat-store -fPIC
+CFLAGS          = -Wall -O2 -fPIC
+FFLAGS          = -Wall -O -fallow-argument-mismatch -fPIC
+
+LINKER          = $(CC++)
+LINKFLAGS       = -rdynamic
+
+MAKE		= make
+CD              = cd
+ECHO            = echo
+RM              = rm
+RMFLAGS         = -f
+SHELL           = /bin/sh
+
+# %---------------------------------------------------------%
+# | SECTION 5: COMPILATION                                  |
+# %---------------------------------------------------------%
+
+.SUFFIXES:
+.SUFFIXES:	.C .c .f .f90 .cpp .o .cpp
+
+.DEFAULT:
+	@$(ECHO) "Unknown target $@, try:  make help"
+
+.cpp.o:
+	@$(ECHO) Making $@ from $<
+	$(CC++) $(C++FLAGS) $(INCLUDES) -c $< -o $@
+
+.C.o:
+	@$(ECHO) Making $@ from $<
+	$(CC++) $(C++FLAGS) $(INCLUDES) -c $< -o $@
+.c.o:
+	@$(ECHO) Making $@ from $<
+	$(CC) $(CFLAGS) -c $< -o $@
+.f.o:
+	@$(ECHO) Making $@ from $<
+	$(FC) $(FFLAGS) -c $< -o $@
+
+# %---------------------------------------------------------%
+# | SECTION 6: OTHER LIBRARIES                              |
+# %---------------------------------------------------------%
+MACHINE_LINKLIBS  = -L$(BASE)/lib \
+		-L$(HOME)/lib
+
+MACHINE_NUMERICAL_LIBS  = -lm \
+		$(ARPACK_LIBRARY) \
+		$(SUPERLU_LIBRARY) \
+		$(UMFPACK_LIBRARY) $(CSPARSE_LIBRARY) \
+	        $(LAPACK_LIBRARY) $(BLAS_LIBRARY) $(CBLAS_LIBRARY) \
+		$(AMD_LIBRARY) $(GRAPHIC_LIBRARY)\
+		-ldl -lgfortran
+
+MACHINE_SPECIFIC_LIBS =
+
+# %---------------------------------------------------------%
+# | SECTION 7: INCLUDE FILES                                |
+# %---------------------------------------------------------%
+MACHINE_INCLUDES        = -I/usr/include \
+			  -I$(BASE)/include \
+			  -I$(HOME)/include
+
+include $(FE)/Makefile.incl
+
+TCL_INCLUDES =
+PYTHON_INCLUDES = -I/usr/include/python$(PYTHON_VERSION)
+PYTHON_LIBRARY = -lpython$(PYTHON_VERSION)
+
+INCLUDES = $(FE_INCLUDES) $(MACHINE_INCLUDES) $(PYTHON_INCLUDES)

@@ -1,6 +1,9 @@
 include ../../../../../Makefile.def
 
-OBJS       = Patch.o QuadPatch.o CircPatch.o
+OBJS       = Patch.o \
+	QuadPatch.o \
+	CircPatch.o
+
 
 # Compilation control
 

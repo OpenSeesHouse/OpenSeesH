@@ -10,7 +10,6 @@
 target_sources(OPS_Element
     PRIVATE
         BBarBrickUP.cpp
-        BBarFourNodeQuadUP.cpp
         BrickUP.cpp
         FourNodeQuadUP.cpp
         Nine_Four_Node_QuadUP.cpp
@@ -20,7 +19,6 @@ target_sources(OPS_Element
         Twenty_Eight_Node_BrickUP.cpp
     PUBLIC
         BBarBrickUP.h
-        BBarFourNodeQuadUP.h
         BrickUP.h
         FourNodeQuadUP.h
         Nine_Four_Node_QuadUP.h

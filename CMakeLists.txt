@@ -101,8 +101,10 @@ if(EXISTS "${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
    set(USING_CONAN TRUE)
    set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR} ${CMAKE_MODULE_PATH})
    set(CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR} ${CMAKE_PREFIX_PATH})
-   set(TCL_LIBRARIES ${TCL_LIBRARY})
-   include_directories(${TCL_INCLUDE_PATH})
+   if(OPS_WITH_TCL)
+     set(TCL_LIBRARIES ${TCL_LIBRARY})
+     include_directories(${TCL_INCLUDE_PATH})
+   endif()
 
 else()
 
@@ -111,11 +113,13 @@ else()
   set(NOT_USING_CONAN TRUE)
   set (CONAN_LIBS )
   find_package(HDF5 REQUIRED)
-  find_package(TCL REQUIRED)
+  if(OPS_WITH_TCL)
+    find_package(TCL REQUIRED)
+    include_directories(${TCL_INCLUDE_DIR})
+    set(TCL_INCLUDE_PATH ${TCL_INCLUDE_DIR})
+    set(TCL_LIBRARY ${TCL_LIBRARIES})
+  endif()
   find_package(Eigen3 REQUIRED)
-  include_directories(${TCL_INCLUDE_DIR})
-  set(TCL_INCLUDE_PATH ${TCL_INCLUDE_DIR})
-  set(TCL_LIBRARY ${TCL_LIBRARIES})
 
 endif()
 
@@ -130,7 +134,10 @@ set_property(CACHE OPS_FINAL_TARGET PROPERTY STRINGS
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-  add_compile_definitions(_LINUX _UNIX _TCL85)
+  add_compile_definitions(_LINUX _UNIX)
+  if(OPS_WITH_TCL)
+    add_compile_definitions(_TCL85)
+  endif()
   if (NOT_USING_CONAN)
     include(OpenSeesDependenciesUnix)
   endif()
@@ -139,7 +146,10 @@ endif()
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
   set(OPS_Use_Graphics_Option None)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-  add_compile_definitions(_LINUX _UNIX _TCL85)
+  add_compile_definitions(_LINUX _UNIX)
+  if(OPS_WITH_TCL)
+    add_compile_definitions(_TCL85)
+  endif()
   if (NOT_USING_CONAN)
     include(OpenSeesDependenciesUnix)
   endif()  
@@ -147,7 +157,10 @@ endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     target_link_libraries(OPS_OS_Specific_libs INTERFACE wsock32 ws2_32)
-    add_compile_definitions(_WIN32 _TCL85)
+    add_compile_definitions(_WIN32)
+    if(OPS_WITH_TCL)
+      add_compile_definitions(_TCL85)
+    endif()
   if (NOT_USING_CONAN)
     include(OpenSeesDependenciesWin)
   endif()      
@@ -409,7 +422,9 @@ target_link_libraries(OPS_Numerics INTERFACE
        ${EIGENAPI_LIBRARIES}
 )
 
-set(TCL_LIBRARIES ${TCL_LIBRARY})
+if(OPS_WITH_TCL)
+  set(TCL_LIBRARIES ${TCL_LIBRARY})
+endif()
 
 
 #
@@ -457,12 +472,14 @@ add_library(OPS_PFEM               OBJECT EXCLUDE_FROM_ALL)
 # Tcl Interpreter Library & special include and link directives
 #
 
-add_library(OPS_InterpTcl          STATIC)
+if(OPS_WITH_TCL)
+  add_library(OPS_InterpTcl          STATIC)
 
-target_compile_definitions(OPS_InterpTcl PUBLIC _TCL85)
-if(NOT EXISTS "${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
-  target_include_directories(OPS_InterpTcl PUBLIC ${TCL_INCLUDE_PATH})
-  target_link_libraries(OPS_InterpTcl PRIVATE ${TCL_LIBRARIES})
+  target_compile_definitions(OPS_InterpTcl PUBLIC _TCL85)
+  if(NOT EXISTS "${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
+    target_include_directories(OPS_InterpTcl PUBLIC ${TCL_INCLUDE_PATH})
+    target_link_libraries(OPS_InterpTcl PRIVATE ${TCL_LIBRARIES})
+  endif()
 endif()
 
 #
@@ -545,7 +562,7 @@ target_link_libraries(OpenSeesLIB
 # OpenSees Tcl Interpreter
 #
 
-
+if(OPS_WITH_TCL)
 
 add_executable(OpenSees EXCLUDE_FROM_ALL 
   ${OPS_SRC_DIR}/tcl/tclAppInit.cpp
@@ -557,9 +574,11 @@ add_executable(OpenSees EXCLUDE_FROM_ALL
 if(NOT EXISTS "${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
   target_include_directories(OpenSees PUBLIC ${TCL_INCLUDE_PATH})
 
-  FILE(COPY ${CONAN_LIB_DIRS_TCL}/tcl8.6
-       DESTINATION ${PROJECT_BINARY_DIR}/lib/tcl8.6
-       FILES_MATCHING PATTERN .tcl)
+  if(DEFINED CONAN_LIB_DIRS_TCL)
+    FILE(COPY ${CONAN_LIB_DIRS_TCL}/tcl8.6
+         DESTINATION ${PROJECT_BINARY_DIR}/lib/tcl8.6
+         FILES_MATCHING PATTERN .tcl)
+  endif()
      
 else ()
      FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib/tcl8.6)
@@ -586,13 +605,15 @@ target_link_libraries(OpenSees
   ${CONAN_LIBS}
 )
 
+endif() # OPS_WITH_TCL
+
 
 #
 # OpenSeesSP Tcl Parallel Interpreter
 #
 
 
-if(MPI_FOUND)
+if(MPI_FOUND AND OPS_WITH_TCL)
 
     add_executable(OpenSeesSP EXCLUDE_FROM_ALL 
       ${OPS_SRC_DIR}/tcl/mpiMain.cpp
@@ -654,7 +675,7 @@ endif()
 # OpenSeesMP Tcl MPI Interpreter
 #
 
-if(MPI_FOUND)
+if(MPI_FOUND AND OPS_WITH_TCL)
 
     add_executable(OpenSeesMP EXCLUDE_FROM_ALL 
       ${OPS_SRC_DIR}/tcl/mpiParameterMain.cpp
@@ -726,6 +747,9 @@ set_target_properties(OpenSeesPy PROPERTIES PREFIX "")
 
 target_include_directories(OpenSeesPy PUBLIC ${Python_INCLUDE_DIRS})
 
+# Resid/Conditional recorders + Win64 OpenSeesPy parity
+target_compile_definitions(OpenSeesPy PRIVATE _CSS _PYTHON3)
+
 target_link_libraries(OpenSeesPy
    OpenSeesLIB 
    OPS_Reliability
@@ -741,12 +765,20 @@ target_link_libraries(OpenSeesPy
 # INSTALL
 #
 
-install (TARGETS OpenSees DESTINATION bin)
-set (TCL_INIT_FILE "${TCL_INCLUDE_PATH}/../lib/tcl8.6/init.tcl")
-install(FILES ${TCL_INIT_FILE} DESTINATION lib/tcl8.6)
+if(OPS_WITH_TCL AND TARGET OpenSees)
+  install (TARGETS OpenSees DESTINATION bin)
+  if(DEFINED TCL_INCLUDE_PATH)
+    set (TCL_INIT_FILE "${TCL_INCLUDE_PATH}/../lib/tcl8.6/init.tcl")
+    if(EXISTS "${TCL_INIT_FILE}")
+      install(FILES ${TCL_INIT_FILE} DESTINATION lib/tcl8.6)
+    endif()
+  endif()
+endif()
 
-# Set selected executable to be built by default
-set_target_properties(${OPS_FINAL_TARGET} PROPERTIES EXCLUDE_FROM_ALL OFF)
+if(TARGET ${OPS_FINAL_TARGET})
+  # Set selected executable to be built by default
+  set_target_properties(${OPS_FINAL_TARGET} PROPERTIES EXCLUDE_FROM_ALL OFF)
+endif()
 
 # Add sources to targets
 add_subdirectory(${OPS_SRC_DIR})

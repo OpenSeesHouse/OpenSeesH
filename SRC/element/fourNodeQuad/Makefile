@@ -1,15 +1,10 @@
 include ../../../Makefile.def
 
 OBJS       = FourNodeQuad.o \
-	TclFourNodeQuadCommand.o \
-	ConstantPressureVolumeQuad.o \
-	EnhancedQuad.o \
 	FourNodeQuad3d.o \
-	NineNodeMixedQuad.o \
 	NineNodeQuad.o \
-	EightNodeQuad.o \
-	SixNodeTri.o \
-	FourNodeQuadWithSensitivity.o
+	EightNodeQuad.o
+
 
 all:         $(OBJS)
 

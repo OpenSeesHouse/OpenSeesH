@@ -2,17 +2,8 @@ include ../../../Makefile.def
 
 OBJS       = ZeroLength.o \
 	ZeroLengthSection.o \
-	ZeroLengthContact2D.o \
-	ZeroLengthContact3D.o \
-	ZeroLengthContactASDimplex.o \
-	ZeroLengthND.o \
-	ZeroLengthContactNTS2D.o \
-	ZeroLengthInterface2D.o \
-	ZeroLengthRocking.o \
-	CoupledZeroLength.o \
-	ZeroLengthImpact3D.o \
-	ZeroLengthVG_HG.o \
-	TclZeroLength.o
+	ZeroLengthND.o
+
 
 
 #

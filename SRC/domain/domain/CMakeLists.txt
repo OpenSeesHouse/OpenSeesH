@@ -11,14 +11,6 @@ target_sources(OPS_Domain
   PUBLIC
     Domain.h
     DomainModalProperties.h
-    ElementIter.h
-    LoadCaseIter.h
-    MP_ConstraintIter.h
-    NodeIter.h
-    ParameterIter.h
-    Pressure_ConstraintIter.h
-    SP_ConstraintIter.h
-    SubdomainIter.h
 )
 
 add_subdirectory(single)

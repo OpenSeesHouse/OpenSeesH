@@ -1,9 +1,8 @@
 
 include ../../../Makefile.def
-OBJS = Inerter.o \
-	LinearElasticSpring.o \
-	TwoNodeLink.o \
+OBJS       = TwoNodeLink.o \
 	TwoNodeLinkSection.o
+
 
 # Compilation control
 

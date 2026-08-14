@@ -11,12 +11,6 @@ target_sources(OPS_Element
         ForceBeamColumn3d.cpp
         ForceBeamColumn2dThermal.cpp
 	ForceBeamColumn3dThermal.cpp
-        ElasticForceBeamColumn2d.cpp
-        ElasticForceBeamColumn3d.cpp
-        ElasticForceBeamColumnWarping2d.cpp
-	ForceBeamColumnCBDI2d.cpp
-        ForceBeamColumnCBDI3d.cpp	
-        ForceBeamColumnWarping2d.cpp
         BeamIntegration.cpp
         LobattoBeamIntegration.cpp
         LegendreBeamIntegration.cpp
@@ -45,12 +39,6 @@ target_sources(OPS_Element
         ForceBeamColumn3d.h
         ForceBeamColumn2dThermal.h
         ForceBeamColumn3dThermal.h
-        ElasticForceBeamColumn2d.h
-        ElasticForceBeamColumn3d.h
-        ElasticForceBeamColumnWarping2d.h
-        ForceBeamColumnCBDI2d.h
-        ForceBeamColumnCBDI3d.h	
-        ForceBeamColumnWarping2d.h
         BeamIntegration.h
         LobattoBeamIntegration.h
         LegendreBeamIntegration.h

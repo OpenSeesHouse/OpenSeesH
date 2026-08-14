@@ -1,7 +1,9 @@
 include ../../../Makefile.def
 
 
-OBJS       = Subdomain.o SubdomainNodIter.o ShadowSubdomain.o ActorSubdomain.o
+OBJS       = Subdomain.o \
+	SubdomainNodIter.o
+
 
 # ShadowSubdomain.o ShadowSubdomainActor.o ActorSubdomain.o
 

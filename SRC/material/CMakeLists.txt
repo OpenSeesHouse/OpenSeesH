@@ -18,5 +18,6 @@ target_include_directories(OPS_Material PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 add_subdirectory(uniaxial)
 add_subdirectory(nD)
 add_subdirectory(section)
+# Keep empty OBJECT target for OpenSeesLIB link; sources pruned (Win64)
 add_subdirectory(yieldSurface)
 

@@ -3,16 +3,13 @@ include ../../../Makefile.def
 OBJS       = DomainComponent.o \
 	Parameter.o \
 	ElementParameter.o \
-	RVParameter.o \
-	DVParameter.o \
 	NodeResponseParameter.o \
 	LoadFactorParameter.o \
-	TclParameterCommands.o \
 	MaterialStageParameter.o \
 	MatParameter.o \
 	InitialStateParameter.o \
-	ElementStateParameter.o \
-	TclUpdateMaterialCommand.o
+	ElementStateParameter.o
+
 
 # Compilation control
 all:         $(OBJS)

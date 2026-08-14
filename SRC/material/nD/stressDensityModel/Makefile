@@ -1,8 +1,7 @@
 include ../../../../Makefile.def
 
-OBJS = stressDensity.o SDM-UC.o \
-	sdm3d.o sdm2d.o MODULE_ALL_INTERFACES_3D.o MODULE_ALL_INTERFACES_2D.o \
-	StressDensityModel.o StressDensityModel2D.o StressDensityModel3D.o
+OBJS       = stressDensity.o
+
 
 all: $(OBJS) 
 

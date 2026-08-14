@@ -17,8 +17,8 @@ OBJS       = Load.o \
 	Beam3dThermalAction.o \
 	ShellThermalAction.o \
 	SurfaceLoader.o \
-	SelfWeight.o \
-	LysmerVelocityLoader.o 
+	SelfWeight.o
+
 
 # Compilation control
 

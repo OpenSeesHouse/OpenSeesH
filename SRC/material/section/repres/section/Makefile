@@ -1,6 +1,8 @@
 include ../../../../../Makefile.def
 
-OBJS       = SectionRepres.o FiberSectionRepr.o
+OBJS       = SectionRepres.o \
+	FiberSectionRepr.o
+
 
 # Compilation control
 

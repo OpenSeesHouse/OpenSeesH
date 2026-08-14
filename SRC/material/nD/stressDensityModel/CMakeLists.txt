@@ -9,13 +9,9 @@ target_sources(OPS_Material
   PRIVATE
     stressDensity.cpp
     #StressDensityModel.cpp
-    StressDensityModel2D.cpp 
-    StressDensityModel3D.cpp
   PUBLIC
     stressDensity.h
     #StressDensityModel.h
-    StressDensityModel2D.h
-    StressDensityModel3D.h
 )
 
 #add_library(OPS_MaterialFortran)

@@ -14,6 +14,6 @@ add_subdirectory(constraints)
 add_subdirectory(pattern)
 add_subdirectory(groundMotion)
 add_subdirectory(region)
-add_subdirectory(partitioner)
-add_subdirectory(IGA)
+#add_subdirectory(partitioner)  # pruned (Win64)
+#add_subdirectory(IGA)  # pruned (Win64)
 

@@ -7,15 +7,9 @@ OBJS       = FlatSliderSimple2d.o \
 	FPBearingPTV.o \
 	TFP_Bearing.o \
 	TFP_Bearing2d.o \
-	TPB1D.o \
 	TripleFrictionPendulum.o \
-	TripleFrictionPendulumX.o \
-	MultiFP2d.o \
-	RJWatsonEQS2d.o \
-	RJWatsonEQS3d.o \
-	TclFlatSliderCommand.o \
-	TclRJWatsonEQSCommand.o \
-	TclSingleFPCommand.o
+	TripleFrictionPendulumX.o
+
 
 # Compilation control
 

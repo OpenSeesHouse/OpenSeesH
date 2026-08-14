@@ -13,8 +13,10 @@
 #==============================================================================
 #                           Select Default Executable
 #==============================================================================
-set(OPS_FINAL_TARGET "OpenSees" CACHE STRING "OpenSees final target")
+set(OPS_FINAL_TARGET "OpenSeesPy" CACHE STRING "OpenSees final target")
 
+# When OFF, skip Tcl find/link/install and Tcl interpreter targets (Python-only).
+option(OPS_WITH_TCL "Build with Tcl interpreter support" OFF)
 
 #==============================================================================
 #                            Basic Switches

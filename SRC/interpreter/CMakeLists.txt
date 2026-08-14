@@ -16,9 +16,7 @@ target_sources(OPS_INTERPRETER
     OpenSeesMiscCommands.cpp
     OpenSeesParameterCommands.cpp
     OpenSeesFrictionModelCommands.cpp
-    OpenSeesReliabilityCommands.cpp
     OpenSeesNDTestCommands.cpp
-    OpenSeesIGACommands.cpp
 )
 
 
@@ -27,4 +25,5 @@ target_sources(OpenSeesPy
      PythonModule.cpp
      PythonWrapper.cpp
      PythonStream.cpp
+     ../recorder/OpsRecorderCommands.cpp
 )

@@ -1,18 +1,9 @@
 include ../../../Makefile.def
 
-ifeq ($(RELIABILITY), YES_RELIABILITY)
-
-RELIABILITY_OBJS = DiscretizedRandomProcessSeries.o \
-	SimulatedRandomProcessSeries.o
-
-else
-
+# Random-process series pruned (Win64); keep empty even if RELIABILITY=YES
 RELIABILITY_OBJS =
 
-endif
-
-OBJS       = $(RELIABILITY_OBJS) \
-	EarthquakePattern.o \
+OBJS       = EarthquakePattern.o \
 	LinearSeries.o \
 	LoadPattern.o \
 	FireLoadPattern.o \
@@ -22,7 +13,6 @@ OBJS       = $(RELIABILITY_OBJS) \
 	PathTimeSeriesThermal.o \
 	RectangularSeries.o \
 	TimeSeries.o \
-	TclPatternCommand.o \
 	TrigSeries.o \
 	RampSeries.o \
 	ConstantSeries.o \
@@ -32,17 +22,16 @@ OBJS       = $(RELIABILITY_OBJS) \
 	TrapezoidalTimeSeriesIntegrator.o \
 	SimpsonTimeSeriesIntegrator.o \
 	MultiSupportPattern.o \
-	TclSeriesCommand.o \
 	PulseSeries.o \
 	TriangleSeries.o \
-	TclSeriesIntegratorCommand.o \
 	PeerMotion.o \
 	PeerNGAMotion.o
+
 
 # Compilation control
 
 all:         $(OBJS)
-	@$(CD) $(FE)/domain/pattern/drm; $(MAKE);
+#	@$(CD) $(FE)/domain/pattern/drm; $(MAKE);  # pruned (Win64)
 
 
 # Miscellaneous
@@ -55,7 +44,7 @@ clean: tidy
 spotless: clean
 
 wipe: spotless
-	@$(CD) $(FE)/domain/pattern/drm; $(MAKE) wipe;
+#	@$(CD) $(FE)/domain/pattern/drm; $(MAKE) wipe;
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
