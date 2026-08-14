@@ -17,13 +17,15 @@ OBJS       = SectionForceDeformation.o \
 	LayeredShellFiberSectionThermal.o \
 	FiberSection3dThermal.o \
 	MembranePlateFiberSectionThermal.o \
-	FiberSectionGJThermal.o
+	FiberSectionGJThermal.o \
+	FiberSectionGJ.o \
+	TimoshenkoSection3d.o
 
 
 all:         $(OBJS)
 	@$(CD) $(FE)/material/section/repres; $(MAKE);
 	@$(CD) $(FE)/material/section/fiber; $(MAKE);
-	@$(CD) $(FE)/material/section/yieldSurface; $(MAKE);
+#	@$(CD) $(FE)/material/section/yieldSurface; $(MAKE);  # pruned (Win64)
 	@$(CD) $(FE)/material/section/integration; $(MAKE);
 	@$(CD) $(FE)/material/section/LayeredMembraneSection; $(MAKE);
 
@@ -46,7 +48,7 @@ spotless: clean
 wipe: spotless
 	@$(CD) $(FE)/material/section/repres; $(MAKE) wipe;
 	@$(CD) $(FE)/material/section/fiber; $(MAKE) wipe;
-	@$(CD) $(FE)/material/section/yieldSurface; $(MAKE) wipe;
+#	@$(CD) $(FE)/material/section/yieldSurface; $(MAKE) wipe;
 	@$(CD) $(FE)/material/section/integration; $(MAKE) wipe;
 	@$(CD) $(FE)/material/section/LayeredMembraneSection; $(MAKE) wipe;
 
